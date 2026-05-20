@@ -1,0 +1,28 @@
+---
+description: Communication module — SMS, WhatsApp, email providers and templates
+globs: "**/modules/communication/**/*.java"
+alwaysApply: false
+---
+
+# School ERP — Communication Module
+
+## Layout
+
+```
+modules/communication/
+├── controller/ service/ provider/ template/
+├── dto/ entity/ scheduler/
+└── (standard: dto/request, dto/response, mapper, validator, enums as needed)
+```
+
+## Channels
+
+SMS, WhatsApp, Email — implement via `provider/` abstractions; templates in `template/`.
+
+## Processing
+
+- Use `scheduler/` for batched/async notification delivery
+- Reuse constants for template keys and provider config
+- Do not log credentials or message secrets
+
+Only add controllers/services when explicitly requested.
