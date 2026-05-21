@@ -1,4 +1,4 @@
-package com.school.auth.common.entity;
+package com.infiniteVision.schoolProject.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

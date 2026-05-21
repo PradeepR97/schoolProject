@@ -1,4 +1,4 @@
-package com.school.auth.config;
+package com.infiniteVision.schoolProject.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -11,5 +11,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  */
 @Configuration
 @EnableJpaAuditing
-public class JpaConfig {
+public class JpaAuditingConfig {
 }

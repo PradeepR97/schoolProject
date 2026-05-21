@@ -1,8 +1,8 @@
-package com.school.auth.entity;
+package com.infiniteVision.schoolProject.modules.auth.entity;
 
-import com.school.auth.common.entity.BaseEntity;
-import com.school.auth.enums.UserRole;
-import com.school.auth.enums.UserStatus;
+import com.infiniteVision.schoolProject.common.entity.BaseEntity;
+import com.infiniteVision.schoolProject.modules.auth.enums.UserRole;
+import com.infiniteVision.schoolProject.modules.auth.enums.UserStatus;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;

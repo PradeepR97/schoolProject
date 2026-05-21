@@ -1,4 +1,4 @@
-package com.school.auth.enums;
+package com.infiniteVision.schoolProject.modules.auth.enums;
 
 /**
  * Application roles used for authorization and user profile classification.
