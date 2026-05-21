@@ -73,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
                 .sessionId(sessionId)
                 .userId(user.getId())
                 .sessionStarts(sessionStarts)
+                .deleted(Boolean.FALSE)
                 .build());
 
         String token = jwtService.generateSessionToken();

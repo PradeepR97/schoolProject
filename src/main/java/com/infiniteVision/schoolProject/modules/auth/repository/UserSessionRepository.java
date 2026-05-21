@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * Persistence for {@link UserSession} login/logout lifecycle.
  */
-public interface UserSessionRepository extends JpaRepository<UserSession, UUID> {
+public interface UserSessionRepository extends JpaRepository<UserSession, Long> {
 
     Optional<UserSession> findBySessionId(UUID sessionId);
 
@@ -23,18 +23,22 @@ public interface UserSessionRepository extends JpaRepository<UserSession, UUID> 
     @Query("""
             UPDATE UserSession s
             SET s.sessionEnds = :ends
-            WHERE s.userId = :userId AND s.sessionEnds IS NULL
+            WHERE s.userId = :userId
+              AND s.sessionEnds IS NULL
+              AND s.deleted = false
             """)
     int endAllActiveSessionsForUser(@Param("userId") Long userId, @Param("ends") LocalDateTime ends);
 
     /**
-     * Ends one session by id (used on logout).
+     * Ends one session by business session id (used on logout).
      */
     @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE UserSession s
             SET s.sessionEnds = :ends
-            WHERE s.sessionId = :sessionId AND s.sessionEnds IS NULL
+            WHERE s.sessionId = :sessionId
+              AND s.sessionEnds IS NULL
+              AND s.deleted = false
             """)
     int endSession(@Param("sessionId") UUID sessionId, @Param("ends") LocalDateTime ends);
 }

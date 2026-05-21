@@ -1,44 +1,51 @@
 package com.infiniteVision.schoolProject.modules.auth.entity;
 
+import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Persistent login session for audit and history.
  * <p>
- * Maps to {@code user_sessions}. Active sessions have {@code session_ends = null}.
+ * Maps to {@code user_sessions}. Inherits audit and soft-delete fields from {@link BaseEntity}.
+ * Active sessions have {@code session_ends = null}. Bearer token references {@code session_id} (UUID).
  */
 @Entity
 @Table(
         name = "user_sessions",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_sessions_session_id", columnNames = "session_id")
+        },
         indexes = {
                 @Index(name = "idx_user_sessions_user_id", columnList = "user_id"),
-                @Index(name = "idx_user_sessions_active", columnList = "user_id, session_ends")
+                @Index(name = "idx_user_sessions_active", columnList = "user_id, session_ends"),
+                @Index(name = "idx_user_sessions_deleted", columnList = "deleted")
         })
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSession {
+@EqualsAndHashCode(callSuper = true)
+public class UserSession extends BaseEntity {
 
-    @Id
     @NotNull
-    @Column(name = "session_id", nullable = false, updatable = false)
+    @Column(name = "session_id", nullable = false, updatable = false, length = 36)
     private UUID sessionId;
 
     @NotNull
