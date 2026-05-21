@@ -43,7 +43,7 @@ public class UserSession {
 
     @NotNull
     @Column(name = "user_id", nullable = false, updatable = false)
-    private UUID userId;
+    private Long userId;
 
     @NotNull
     @Column(name = "session_starts", nullable = false, updatable = false)

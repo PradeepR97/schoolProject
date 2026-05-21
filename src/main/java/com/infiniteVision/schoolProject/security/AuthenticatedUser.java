@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 public class AuthenticatedUser implements UserDetails {
 
-    private final UUID userId;
+    private final Long userId;
     private final String username;
     private final UserRole role;
     private final UUID sessionId;
@@ -26,7 +26,7 @@ public class AuthenticatedUser implements UserDetails {
     private final String sessionToken;
 
     public AuthenticatedUser(
-            UUID userId, String username, UserRole role, UUID sessionId, String sessionToken) {
+            Long userId, String username, UserRole role, UUID sessionId, String sessionToken) {
         this.userId = userId;
         this.username = username;
         this.role = role;

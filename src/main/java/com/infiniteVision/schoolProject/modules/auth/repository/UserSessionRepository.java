@@ -25,7 +25,7 @@ public interface UserSessionRepository extends JpaRepository<UserSession, UUID> 
             SET s.sessionEnds = :ends
             WHERE s.userId = :userId AND s.sessionEnds IS NULL
             """)
-    int endAllActiveSessionsForUser(@Param("userId") UUID userId, @Param("ends") LocalDateTime ends);
+    int endAllActiveSessionsForUser(@Param("userId") Long userId, @Param("ends") LocalDateTime ends);
 
     /**
      * Ends one session by id (used on logout).

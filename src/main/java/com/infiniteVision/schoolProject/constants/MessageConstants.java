@@ -16,6 +16,12 @@ public final class MessageConstants {
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
     public static final String LOGIN_SUCCESS = "Login successful";
     public static final String LOGOUT_SUCCESS = "Logout successful";
+    public static final String USER_CREATED_SUCCESS = "User created successfully";
+    public static final String USER_CREATION_FORBIDDEN = "You are not allowed to create users";
+    public static final String ROLE_ASSIGNMENT_FORBIDDEN = "You are not allowed to assign this role";
+    public static final String USERNAME_ALREADY_EXISTS = "Username is already taken";
+    public static final String EMAIL_ALREADY_EXISTS = "Email is already registered";
+    public static final String PHONE_ALREADY_EXISTS = "Phone number is already registered";
     public static final String BUSINESS_ERROR = "Request could not be processed";
     public static final String DATA_INTEGRITY_VIOLATION = "Data conflict or constraint violation";
     public static final String DATABASE_ERROR = "Database operation failed";

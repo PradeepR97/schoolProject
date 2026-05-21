@@ -2,6 +2,7 @@ package com.infiniteVision.schoolProject.exception;
 
 import com.infiniteVision.schoolProject.common.dto.response.ErrorResponse;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import com.infiniteVision.schoolProject.modules.auth.util.UserDuplicateConstraintResolver;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -104,6 +105,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        var userDuplicate = UserDuplicateConstraintResolver.toValidationException(exception);
+        if (userDuplicate.isPresent()) {
+            ValidationException validationException = userDuplicate.get();
+            log.warn("Data integrity violation (user duplicate): {}", validationException.getErrors());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponse.of(validationException.getMessage(), validationException.getErrors()));
+        }
         log.error("Data integrity violation", exception);
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.of(MessageConstants.DATA_INTEGRITY_VIOLATION));

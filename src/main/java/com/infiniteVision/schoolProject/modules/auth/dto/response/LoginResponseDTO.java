@@ -2,7 +2,6 @@ package com.infiniteVision.schoolProject.modules.auth.dto.response;
 
 import com.infiniteVision.schoolProject.modules.auth.enums.UserRole;
 import com.infiniteVision.schoolProject.modules.auth.enums.UserStatus;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +26,7 @@ public class LoginResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserProfile {
-        private UUID id;
+        private Long id;
         private String username;
         private String fullName;
         private String email;

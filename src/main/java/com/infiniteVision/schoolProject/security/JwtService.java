@@ -31,7 +31,7 @@ public class JwtService {
     private final StringRedisTemplate stringRedisTemplate;
 
     /** Resolved session from Redis after Bearer token lookup. */
-    public record TokenClaims(UUID userId, String token, UserRole role, UUID sessionId) {
+    public record TokenClaims(Long userId, String token, UserRole role, UUID sessionId) {
     }
 
     /**
@@ -67,7 +67,7 @@ public class JwtService {
     /**
      * Registers an active session; TTL matches {@code jwt.expiration-ms}.
      */
-    public void storeSession(UUID userId, String token, UserRole role, UUID sessionId) {
+    public void storeSession(Long userId, String token, UserRole role, UUID sessionId) {
         Duration ttl = Duration.ofMillis(jwtProperties.getExpirationMs());
         String sessionValue = userId + SESSION_VALUE_SEPARATOR + role.name() + SESSION_VALUE_SEPARATOR + sessionId;
         stringRedisTemplate.opsForValue().set(tokenKey(token), sessionValue, ttl);
@@ -75,13 +75,13 @@ public class JwtService {
     }
 
     /** Called on logout — removes token from allow-list. */
-    public void removeSession(UUID userId, String token) {
+    public void removeSession(Long userId, String token) {
         stringRedisTemplate.delete(tokenKey(token));
         stringRedisTemplate.delete(userSessionKey(userId));
     }
 
     /** Called on login — enforces one active session per user. */
-    public void revokeAllSessions(UUID userId) {
+    public void revokeAllSessions(Long userId) {
         String activeToken = stringRedisTemplate.opsForValue().get(userSessionKey(userId));
         if (activeToken != null && !activeToken.isBlank()) {
             stringRedisTemplate.delete(tokenKey(activeToken));
@@ -95,7 +95,7 @@ public class JwtService {
             throw new UnauthorizedException("Invalid token");
         }
         try {
-            UUID userId = UUID.fromString(parts[0]);
+            Long userId = Long.parseLong(parts[0]);
             UserRole role = UserRole.valueOf(parts[1]);
             UUID sessionId = UUID.fromString(parts[2]);
             return new TokenClaims(userId, token, role, sessionId);
@@ -115,7 +115,7 @@ public class JwtService {
         return jwtProperties.getRedisPrefix() + "token:" + token;
     }
 
-    private String userSessionKey(UUID userId) {
+    private String userSessionKey(Long userId) {
         return jwtProperties.getRedisPrefix() + "user:" + userId;
     }
 }

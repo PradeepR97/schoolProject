@@ -1,7 +1,7 @@
 package com.infiniteVision.schoolProject.modules.auth.controller;
 
 import com.infiniteVision.schoolProject.common.dto.response.ApiResponse;
-import com.infiniteVision.schoolProject.constants.ApiConstants;
+import com.infiniteVision.schoolProject.modules.auth.constants.AuthApiConstants;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Login is public; logout requires Bearer token (validated by JWT filter).
  */
 @RestController
-@RequestMapping(value = ApiConstants.API_V1_PREFIX + "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = AuthApiConstants.AUTH_BASE, produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class AuthController {
 
