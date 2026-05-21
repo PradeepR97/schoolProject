@@ -1,4 +1,7 @@
-HELP.md
+# Markdown and Cursor rule files
+*.md
+*.mdc
+
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

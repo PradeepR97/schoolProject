@@ -14,6 +14,8 @@ public final class MessageConstants {
     public static final String UNAUTHORIZED = "Unauthorized";
     public static final String ACCESS_DENIED = "Access denied";
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
+    public static final String LOGIN_SUCCESS = "Login successful";
+    public static final String LOGOUT_SUCCESS = "Logout successful";
     public static final String BUSINESS_ERROR = "Request could not be processed";
     public static final String DATA_INTEGRITY_VIOLATION = "Data conflict or constraint violation";
     public static final String DATABASE_ERROR = "Database operation failed";
