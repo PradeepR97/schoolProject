@@ -75,6 +75,10 @@ public class StudentParent extends BaseEntity {
     @Column(name = "father_annual_income", precision = 10, scale = 2)
     private BigDecimal fatherAnnualIncome;
 
+    @Size(max = 150, message = "Father qualification must not exceed 150 characters")
+    @Column(name = "father_qualification", length = 150)
+    private String fatherQualification;
+
     @Size(max = 150, message = "Mother name must not exceed 150 characters")
     @Column(name = "mother_name", length = 150)
     private String motherName;
@@ -95,6 +99,10 @@ public class StudentParent extends BaseEntity {
     @Column(name = "mother_annual_income", precision = 10, scale = 2)
     private BigDecimal motherAnnualIncome;
 
+    @Size(max = 150, message = "Mother qualification must not exceed 150 characters")
+    @Column(name = "mother_qualification", length = 150)
+    private String motherQualification;
+
     @Size(max = 150, message = "Guardian name must not exceed 150 characters")
     @Column(name = "guardian_name", length = 150)
     private String guardianName;
@@ -111,6 +119,10 @@ public class StudentParent extends BaseEntity {
     @Size(max = 100, message = "Guardian occupation must not exceed 100 characters")
     @Column(name = "guardian_occupation", length = 100)
     private String guardianOccupation;
+
+    @Size(max = 150, message = "Guardian qualification must not exceed 150 characters")
+    @Column(name = "guardian_qualification", length = 150)
+    private String guardianQualification;
 
     @Size(max = 50, message = "Guardian relationship must not exceed 50 characters")
     @Column(name = "guardian_relationship", length = 50)

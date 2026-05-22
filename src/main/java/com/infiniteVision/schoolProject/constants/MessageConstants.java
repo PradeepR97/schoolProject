@@ -41,4 +41,17 @@ public final class MessageConstants {
     public static final String DATABASE_ERROR = "Database operation failed";
     public static final String REDIS_UNAVAILABLE = "Cache service temporarily unavailable";
     public static final String INTERNAL_SERVER_ERROR = "An unexpected error occurred";
+    public static final String STUDENT_ADMITTED_SUCCESS = "Student admitted successfully";
+    public static final String ADMISSION_NO_ALREADY_EXISTS = "Admission number already exists";
+    public static final String STUDENT_AADHAR_ALREADY_EXISTS = "Student Aadhar number is already registered";
+    public static final String DOCUMENT_AADHAR_ALREADY_EXISTS = "Document Aadhar number is already registered";
+    public static final String AADHAR_MISMATCH = "Student Aadhar and document Aadhar must match";
+    public static final String CLASS_NOT_FOUND = "Class not found";
+    public static final String ACADEMIC_YEAR_NOT_FOUND = "Academic year not found";
+    public static final String CLASS_ACADEMIC_YEAR_MISMATCH =
+            "Class does not belong to the specified academic year";
+    public static final String GUARDIAN_DETAILS_REQUIRED =
+            "Guardian name and phone are required when primary contact is guardian";
+    public static final String PARENT_CONTACT_REQUIRED =
+            "At least one of father, mother, or guardian name is required";
 }

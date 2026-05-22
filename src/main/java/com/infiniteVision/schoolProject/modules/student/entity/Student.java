@@ -5,6 +5,7 @@ import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
 import com.infiniteVision.schoolProject.modules.student.enums.Community;
 import com.infiniteVision.schoolProject.modules.student.enums.Gender;
 import com.infiniteVision.schoolProject.modules.student.enums.Religion;
+import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -18,7 +19,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -44,13 +44,15 @@ import lombok.experimental.SuperBuilder;
         name = "students",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_students_admission_no", columnNames = "admission_no"),
+                @UniqueConstraint(name = "uk_students_application_no", columnNames = "application_no"),
                 @UniqueConstraint(name = "uk_students_aadhar_number", columnNames = "aadhar_number"),
                 @UniqueConstraint(name = "uk_students_id_card_no", columnNames = "student_id_card_no")
         },
         indexes = {
                 @Index(name = "idx_students_class_year", columnList = "class_id, academic_year_id"),
                 @Index(name = "idx_students_status", columnList = "status"),
-                @Index(name = "idx_students_admission_no", columnList = "admission_no")
+                @Index(name = "idx_students_admission_no", columnList = "admission_no"),
+                @Index(name = "idx_students_fees_payment_status", columnList = "fees_payment_status")
         })
 @AttributeOverrides({
         @AttributeOverride(name = "id", column = @Column(name = "student_id", updatable = false, nullable = false)),
@@ -75,6 +77,10 @@ public class Student extends BaseEntity {
     @Column(name = "admission_no", nullable = false, length = 20)
     private String admissionNo;
 
+    @Size(max = 30, message = "Application number must not exceed 30 characters")
+    @Column(name = "application_no", length = 30)
+    private String applicationNumber;
+
     /** Number printed on the physical student ID card (not the database primary key). */
     @Size(max = 20, message = "Student ID card number must not exceed 20 characters")
     @Column(name = "student_id_card_no", length = 20)
@@ -83,6 +89,14 @@ public class Student extends BaseEntity {
     @Pattern(regexp = "^\\d{12}$", message = "Aadhar number must be exactly 12 digits")
     @Column(name = "aadhar_number", length = 12)
     private String aadharNumber;
+
+    @Size(max = 30, message = "EMIS number must not exceed 30 characters")
+    @Column(name = "emis_number", length = 30)
+    private String emisNumber;
+
+    @Size(max = 30, message = "Ration card number must not exceed 30 characters")
+    @Column(name = "ration_card_number", length = 30)
+    private String rationCardNumber;
 
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name must not exceed 50 characters")
@@ -104,6 +118,18 @@ public class Student extends BaseEntity {
     @Column(name = "nationality", length = 50)
     private String nationality;
 
+    @Size(max = 50, message = "Mother tongue must not exceed 50 characters")
+    @Column(name = "mother_tongue", length = 50)
+    private String motherTongue;
+
+    @Size(max = 30, message = "Study group must not exceed 30 characters")
+    @Column(name = "study_group", length = 30)
+    private String studyGroup;
+
+    /** Class 10 / SSLC mark (percentage or score as stored). */
+    @Column(name = "tenth_mark", precision = 6, scale = 2)
+    private BigDecimal tenthMark;
+
     @Size(max = 255, message = "Identification mark 1 must not exceed 255 characters")
     @Column(name = "identification_mark_1", length = 255)
     private String identificationMark1;
@@ -111,15 +137,6 @@ public class Student extends BaseEntity {
     @Size(max = 255, message = "Identification mark 2 must not exceed 255 characters")
     @Column(name = "identification_mark_2", length = 255)
     private String identificationMark2;
-
-    @Email(message = "Email must be a valid address")
-    @Size(max = 100, message = "Email must not exceed 100 characters")
-    @Column(name = "email", length = 100)
-    private String email;
-
-    @Size(max = 15, message = "Phone must not exceed 15 characters")
-    @Column(name = "phone", length = 15)
-    private String phone;
 
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
@@ -160,4 +177,9 @@ public class Student extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private StudentStatus status = StudentStatus.ACTIVE;
+
+    @NotNull(message = "Fees payment status is required")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "fees_payment_status", nullable = false, length = 20)
+    private FeesPaymentStatus feesPaymentStatus = FeesPaymentStatus.PENDING;
 }
