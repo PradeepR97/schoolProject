@@ -61,11 +61,14 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = "parents")
+@EqualsAndHashCode(callSuper = true, exclude = {"parents", "documents"})
 public class Student extends BaseEntity {
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private StudentParent parents;
+
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private StudentDocument documents;
 
     @NotBlank(message = "Admission number is required")
     @Size(max = 20, message = "Admission number must not exceed 20 characters")
