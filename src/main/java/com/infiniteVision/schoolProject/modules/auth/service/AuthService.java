@@ -1,5 +1,6 @@
 package com.infiniteVision.schoolProject.modules.auth.service;
 
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ChangePasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
 
@@ -30,4 +31,20 @@ public interface AuthService {
      * validated by {@link com.infiniteVision.schoolProject.security.JwtAuthenticationFilter}.
      */
     void logout();
+
+    /**
+     * Change password for the currently authenticated user.
+     * <p>
+     * Verifies {@code currentPassword}, persists BCrypt hash for {@code newPassword},
+     * and revokes all active sessions (client must log in again).
+     *
+     * @param request current, new, and confirmation passwords
+     * @throws com.infiniteVision.schoolProject.exception.ValidationException
+     *         if confirmation mismatch or new password equals current
+     * @throws com.infiniteVision.schoolProject.exception.UnauthorizedException
+     *         if not authenticated or current password is wrong
+     * @throws com.infiniteVision.schoolProject.exception.ResourceNotFoundException
+     *         if the authenticated user record is missing or soft-deleted
+     */
+    void changePassword(ChangePasswordRequestDTO request);
 }

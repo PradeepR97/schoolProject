@@ -11,6 +11,9 @@ public final class ApiLogBodyMasker {
 
     private static final Set<String> SENSITIVE_JSON_FIELDS = Set.of(
             "password",
+            "currentpassword",
+            "newpassword",
+            "confirmnewpassword",
             "token",
             "sessiontoken",
             "accesstoken",

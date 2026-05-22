@@ -18,4 +18,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsByAadharNumberAndDeletedFalse(String aadharNumber);
 
     boolean existsByStudentIdCardNoAndDeletedFalse(String studentIdCardNo);
+
+    Optional<Student> findByIdAndDeletedFalse(Long id);
 }

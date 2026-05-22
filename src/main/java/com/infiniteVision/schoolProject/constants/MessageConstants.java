@@ -16,6 +16,10 @@ public final class MessageConstants {
     public static final String AUTHENTICATION_FAILED = "Authentication failed";
     public static final String LOGIN_SUCCESS = "Login successful";
     public static final String LOGOUT_SUCCESS = "Logout successful";
+    public static final String PASSWORD_CHANGED_SUCCESS = "Password changed successfully";
+    public static final String CURRENT_PASSWORD_INCORRECT = "Current password is incorrect";
+    public static final String NEW_PASSWORD_MISMATCH = "New password and confirmation do not match";
+    public static final String NEW_PASSWORD_SAME_AS_CURRENT = "New password must be different from current password";
     public static final String USER_CREATED_SUCCESS = "User created successfully";
     public static final String USERS_LISTED_SUCCESS = "Users retrieved successfully";
     public static final String USER_RETRIEVED_SUCCESS = "User retrieved successfully";

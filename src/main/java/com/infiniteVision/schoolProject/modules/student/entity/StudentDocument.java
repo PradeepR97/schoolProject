@@ -39,8 +39,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(
         name = "student_documents",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_student_documents_student", columnNames = "student_id"),
-                @UniqueConstraint(name = "uk_student_documents_aadhar_no", columnNames = "aadhar_no")
+                @UniqueConstraint(name = "uq_doc_student", columnNames = "student_id"),
+                @UniqueConstraint(name = "uq_aadhar_no", columnNames = "aadhar_no")
         })
 @AttributeOverrides({
         @AttributeOverride(name = "id", column = @Column(name = "doc_id", updatable = false, nullable = false)),
@@ -56,7 +56,11 @@ public class StudentDocument extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "student_id", nullable = false, unique = true)
+    @JoinColumn(
+            name = "student_id",
+            nullable = false,
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_doc_student"))
     private Student student;
 
     @Size(max = 500, message = "Profile photo URL must not exceed 500 characters")
@@ -123,8 +127,8 @@ public class StudentDocument extends BaseEntity {
     private String specialChildCertNo;
 
     @Size(max = 500, message = "Special child certificate URL must not exceed 500 characters")
-    @Column(name = "special_child_certificate_url", length = 500)
-    private String specialChildCertificateUrl;
+    @Column(name = "special_child_cert_url", length = 500)
+    private String specialChildCertUrl;
 
     @Size(max = 30, message = "TC number must not exceed 30 characters")
     @Column(name = "tc_number", length = 30)
@@ -158,15 +162,17 @@ public class StudentDocument extends BaseEntity {
     private String remarks;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(
             name = "uploaded_by",
-            foreignKey = @ForeignKey(name = "fk_student_documents_uploaded_by"))
+            foreignKey = @ForeignKey(name = "fk_doc_uploaded_by"))
     private User uploadedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(
             name = "verified_by",
-            foreignKey = @ForeignKey(name = "fk_student_documents_verified_by"))
+            foreignKey = @ForeignKey(name = "fk_doc_verified_by"))
     private User verifiedBy;
 
     @Column(name = "verified_at")

@@ -3,6 +3,7 @@ package com.infiniteVision.schoolProject.modules.auth.controller;
 import com.infiniteVision.schoolProject.common.dto.response.ApiResponse;
 import com.infiniteVision.schoolProject.modules.auth.constants.AuthApiConstants;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ChangePasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
 import com.infiniteVision.schoolProject.modules.auth.service.AuthService;
@@ -38,5 +39,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> logout() {
         authService.logout();
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.LOGOUT_SUCCESS));
+    }
+
+    /** POST /api/v1/auth/change-password — updates password and revokes all sessions. */
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequestDTO request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok(ApiResponse.success(MessageConstants.PASSWORD_CHANGED_SUCCESS));
     }
 }

@@ -54,13 +54,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<CreateUserResponseDTO> listUsers() {
-        AuthenticatedUser caller = currentUser();
-        validateCallerMayManageUsers(caller.getRole());
+        AuthenticatedUser currentUser = currentUser();
+        validateCallerMayManageUsers(currentUser.getRole());
 
         List<CreateUserResponseDTO> users = userRepository.findAllByDeletedFalseOrderByIdAsc().stream()
                 .map(this::toResponse)
                 .toList();
-        log.info("Users listed count={} by caller id={}", users.size(), caller.getUserId());
+        log.info("Users listed count={} by caller id={}", users.size(), currentUser.getUserId());
         return users;
     }
 
@@ -70,11 +70,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public CreateUserResponseDTO getUserById(Long id) {
-        AuthenticatedUser caller = currentUser();
-        validateCallerMayManageUsers(caller.getRole());
+        AuthenticatedUser currentUser = currentUser();
+        validateCallerMayManageUsers(currentUser.getRole());
 
         User user = findActiveUserOrThrow(id);
-        log.info("User retrieved id={} by caller id={}", id, caller.getUserId());
+        log.info("User retrieved id={} by caller id={}", id, currentUser.getUserId());
         return toResponse(user);
     }
 

@@ -16,4 +16,6 @@ public interface StudentDocumentRepository extends JpaRepository<StudentDocument
     boolean existsByStudent_IdAndDeletedFalse(Long studentId);
 
     boolean existsByAadharNoAndDeletedFalse(String aadharNo);
+
+    boolean existsByAadharNoAndIdNotAndDeletedFalse(String aadharNo, Long docId);
 }

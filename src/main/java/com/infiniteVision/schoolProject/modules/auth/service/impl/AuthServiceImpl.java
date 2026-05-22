@@ -1,8 +1,10 @@
 package com.infiniteVision.schoolProject.modules.auth.service.impl;
 
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ChangePasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
@@ -31,6 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
  * → insert {@code user_sessions} row → store Redis → update {@code last_login} → response.
  * <p>
  * <b>Logout flow:</b> set {@code session_ends} in MySQL → remove Redis session keys.
+ * <p>
+ * <b>Change password flow:</b> validate confirmation → verify current BCrypt → save new hash
+ * → revoke all DB/Redis sessions (re-login required).
  */
 @Slf4j
 @Service
@@ -103,6 +108,43 @@ public class AuthServiceImpl implements AuthService {
         userSessionRepository.endSession(principal.getSessionId(), sessionEnds);
         jwtService.removeSession(principal.getUserId(), principal.getSessionToken());
         log.info("Logout successful for user id={}, sessionId={}", principal.getUserId(), principal.getSessionId());
+    }
+
+    /**
+     * Change password for the authenticated user: verify current password, persist new BCrypt hash,
+     * end all active sessions in MySQL and Redis so existing Bearer tokens are invalidated.
+     */
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequestDTO request) {
+        AuthenticatedUser principal = currentUser();
+
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.NEW_PASSWORD_MISMATCH));
+        }
+
+        User user = userRepository.findByIdAndDeletedFalse(principal.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            log.warn("Change password failed for user id={}", user.getId());
+            throw new UnauthorizedException(MessageConstants.CURRENT_PASSWORD_INCORRECT);
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.NEW_PASSWORD_SAME_AS_CURRENT));
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        LocalDateTime sessionEnds = LocalDateTime.now();
+        jwtService.revokeAllSessions(user.getId());
+        userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionEnds);
+
+        log.info("Password changed for user id={}", user.getId());
     }
 
     private void validateLoginIdentifiers(LoginRequestDTO request) {
