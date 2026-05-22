@@ -33,5 +33,6 @@ public class LoginResponseDTO {
         private String phone;
         private UserRole role;
         private UserStatus status;
+        private Boolean otpVerified;
     }
 }

@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * {@code spring.jpa.hibernate.ddl-auto} — no manual SQL migration scripts required.
  */
 @Configuration
-@EnableJpaAuditing
+@EnableJpaAuditing(auditorAwareRef = "securityAuditorAware")
 public class JpaAuditingConfig {
 }

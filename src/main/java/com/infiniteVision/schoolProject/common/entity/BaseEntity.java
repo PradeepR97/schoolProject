@@ -21,10 +21,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Shared audit and soft-delete fields for all authentication-domain entities.
+ * Reusable audit and soft-delete fields for all domain entities (users, students, sessions, etc.).
  * <p>
- * Requires {@code @EnableJpaAuditing} on the application configuration for
- * {@link CreatedBy} / {@link LastModifiedBy} to be populated automatically.
+ * {@link CreatedBy} / {@link LastModifiedBy} store the authenticated user's numeric ID as a string,
+ * populated via {@code SecurityAuditorAware} when {@code @EnableJpaAuditing} is active.
+ * {@link #deletedBy} is set explicitly on soft delete via {@link #markDeleted(Long)}.
  */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -45,6 +46,7 @@ public abstract class BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /** Authenticated user ID who created the row (string form of Long). */
     @CreatedBy
     @Column(name = "created_by", length = 100)
     private String createdBy;
@@ -54,6 +56,7 @@ public abstract class BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    /** Authenticated user ID who last updated the row (string form of Long). */
     @LastModifiedBy
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
@@ -65,6 +68,18 @@ public abstract class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    /** Authenticated user ID who soft-deleted the row (string form of Long). */
     @Column(name = "deleted_by", length = 100)
     private String deletedBy;
+
+    /**
+     * Soft-deletes this entity: sets {@code deleted}, {@code deletedAt}, and {@code deletedBy}.
+     *
+     * @param deletedByUserId ID of the authenticated user performing the delete
+     */
+    public void markDeleted(Long deletedByUserId) {
+        this.deleted = Boolean.TRUE;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedByUserId != null ? String.valueOf(deletedByUserId) : null;
+    }
 }

@@ -131,6 +131,7 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getPhone())
                 .role(user.getRole())
                 .status(user.getStatus())
+                .otpVerified(user.getOtpVerified())
                 .build();
     }
 

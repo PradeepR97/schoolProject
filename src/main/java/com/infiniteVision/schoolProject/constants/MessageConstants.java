@@ -17,6 +17,16 @@ public final class MessageConstants {
     public static final String LOGIN_SUCCESS = "Login successful";
     public static final String LOGOUT_SUCCESS = "Logout successful";
     public static final String USER_CREATED_SUCCESS = "User created successfully";
+    public static final String USERS_LISTED_SUCCESS = "Users retrieved successfully";
+    public static final String USER_RETRIEVED_SUCCESS = "User retrieved successfully";
+    public static final String USER_UPDATED_SUCCESS = "User updated successfully";
+    public static final String USER_DELETED_SUCCESS = "User deleted successfully";
+    public static final String USER_NOT_FOUND = "User not found";
+    public static final String USER_UPDATE_EMPTY = "At least one field must be provided to update";
+    public static final String USER_DELETE_SELF_FORBIDDEN = "You cannot delete your own account";
+    public static final String LAST_ADMIN_CANNOT_DELETE = "Cannot delete the last active administrator";
+    public static final String USER_LIST_FORBIDDEN = "You are not allowed to list users";
+    public static final String USER_MANAGEMENT_FORBIDDEN = "You are not allowed to manage users";
     public static final String USER_CREATION_FORBIDDEN = "You are not allowed to create users";
     public static final String ROLE_ASSIGNMENT_FORBIDDEN = "You are not allowed to assign this role";
     public static final String USERNAME_ALREADY_EXISTS = "Username is already taken";

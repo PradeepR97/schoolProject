@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -94,4 +95,26 @@ public class User extends BaseEntity {
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    @NotNull(message = "OTP verified flag is required")
+    @Column(name = "otp_verified", nullable = false)
+    private Boolean otpVerified = Boolean.FALSE;
+
+    /**
+     * Soft-deletes this user and sets {@link UserStatus#INACTIVE} automatically.
+     *
+     * @param deletedByUserId ID of the authenticated user performing the delete
+     */
+    public void softDelete(Long deletedByUserId) {
+        markDeleted(deletedByUserId);
+        this.status = UserStatus.INACTIVE;
+    }
+
+    /** Ensures deleted users are always INACTIVE, even if {@code deleted} is set outside {@link #softDelete}. */
+    @PreUpdate
+    private void enforceInactiveWhenDeleted() {
+        if (Boolean.TRUE.equals(getDeleted())) {
+            this.status = UserStatus.INACTIVE;
+        }
+    }
 }
