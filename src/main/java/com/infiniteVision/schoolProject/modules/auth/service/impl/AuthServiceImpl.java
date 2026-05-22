@@ -85,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
         jwtService.storeSession(user.getId(), token, user.getRole(), sessionId);
 
         user.setLastLogin(sessionStarts);
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
         log.info("Login successful for user id={}, sessionId={}", user.getId(), sessionId);
 
         return LoginResponseDTO.builder()
@@ -138,7 +138,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
+        // Flush before session bulk-update: endAllActiveSessionsForUser uses clearAutomatically=true
+        // and would otherwise discard this password change from the persistence context.
+        userRepository.saveAndFlush(user);
 
         LocalDateTime sessionEnds = LocalDateTime.now();
         jwtService.revokeAllSessions(user.getId());
