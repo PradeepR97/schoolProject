@@ -41,6 +41,7 @@ public final class MessageConstants {
     public static final String DATABASE_ERROR = "Database operation failed";
     public static final String REDIS_UNAVAILABLE = "Cache service temporarily unavailable";
     public static final String INTERNAL_SERVER_ERROR = "An unexpected error occurred";
+    public static final String STUDENTS_LISTED_SUCCESS = "Students retrieved successfully";
     public static final String STUDENT_ADMITTED_SUCCESS = "Student admitted successfully";
     public static final String ADMISSION_NO_ALREADY_EXISTS = "Admission number already exists";
     public static final String STUDENT_AADHAR_ALREADY_EXISTS = "Student Aadhar number is already registered";

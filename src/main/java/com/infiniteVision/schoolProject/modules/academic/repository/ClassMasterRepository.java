@@ -1,6 +1,7 @@
 package com.infiniteVision.schoolProject.modules.academic.repository;
 
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Repository;
 public interface ClassMasterRepository extends JpaRepository<ClassMaster, Long> {
 
     Optional<ClassMaster> findByIdAndDeletedFalse(Long id);
+
+    List<ClassMaster> findAllByIdInAndDeletedFalse(Collection<Long> ids);
 
     List<ClassMaster> findAllByDeletedFalseOrderByClassNameAscSectionAsc();
 
