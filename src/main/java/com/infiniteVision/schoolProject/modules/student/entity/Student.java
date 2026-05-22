@@ -1,0 +1,160 @@
+package com.infiniteVision.schoolProject.modules.student.entity;
+
+import com.infiniteVision.schoolProject.common.entity.BaseEntity;
+import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
+import com.infiniteVision.schoolProject.modules.student.enums.Community;
+import com.infiniteVision.schoolProject.modules.student.enums.Gender;
+import com.infiniteVision.schoolProject.modules.student.enums.Religion;
+import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * Master student profile. Maps to {@code students}.
+ * <p>
+ * Primary key and audit fields are inherited from {@link BaseEntity}.
+ * {@code class_id} and {@code academic_year_id} reference academic tables when present;
+ * FK constraints can be added after {@code class_master} and {@code academic_year} exist.
+ */
+@Entity
+@Table(
+        name = "students",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_students_admission_no", columnNames = "admission_no"),
+                @UniqueConstraint(name = "uk_students_aadhar_number", columnNames = "aadhar_number"),
+                @UniqueConstraint(name = "uk_students_id_card_no", columnNames = "student_id_card_no")
+        },
+        indexes = {
+                @Index(name = "idx_students_class_year", columnList = "class_id, academic_year_id"),
+                @Index(name = "idx_students_status", columnList = "status"),
+                @Index(name = "idx_students_admission_no", columnList = "admission_no")
+        })
+@AttributeOverrides({
+        @AttributeOverride(name = "id", column = @Column(name = "student_id", updatable = false, nullable = false)),
+        @AttributeOverride(name = "createdAt", column = @Column(name = "created_at", updatable = false, nullable = false))
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true, exclude = "parents")
+public class Student extends BaseEntity {
+
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private StudentParent parents;
+
+    @NotBlank(message = "Admission number is required")
+    @Size(max = 20, message = "Admission number must not exceed 20 characters")
+    @Column(name = "admission_no", nullable = false, length = 20)
+    private String admissionNo;
+
+    /** Number printed on the physical student ID card (not the database primary key). */
+    @Size(max = 20, message = "Student ID card number must not exceed 20 characters")
+    @Column(name = "student_id_card_no", length = 20)
+    private String studentIdCardNo;
+
+    @Pattern(regexp = "^\\d{12}$", message = "Aadhar number must be exactly 12 digits")
+    @Column(name = "aadhar_number", length = 12)
+    private String aadharNumber;
+
+    @NotBlank(message = "First name is required")
+    @Size(max = 50, message = "First name must not exceed 50 characters")
+    @Column(name = "first_name", nullable = false, length = 50)
+    private String firstName;
+
+    @Size(max = 50, message = "Last name must not exceed 50 characters")
+    @Column(name = "last_name", length = 50)
+    private String lastName;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", length = 20)
+    private Gender gender;
+
+    @Size(max = 50, message = "Nationality must not exceed 50 characters")
+    @Column(name = "nationality", length = 50)
+    private String nationality;
+
+    @Size(max = 255, message = "Identification mark 1 must not exceed 255 characters")
+    @Column(name = "identification_mark_1", length = 255)
+    private String identificationMark1;
+
+    @Size(max = 255, message = "Identification mark 2 must not exceed 255 characters")
+    @Column(name = "identification_mark_2", length = 255)
+    private String identificationMark2;
+
+    @Email(message = "Email must be a valid address")
+    @Size(max = 100, message = "Email must not exceed 100 characters")
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Size(max = 15, message = "Phone must not exceed 15 characters")
+    @Column(name = "phone", length = 15)
+    private String phone;
+
+    @Column(name = "address", columnDefinition = "TEXT")
+    private String address;
+
+    @Column(name = "class_id")
+    private Long classId;
+
+    @Column(name = "academic_year_id")
+    private Long academicYearId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "blood_group", length = 20)
+    private BloodGroup bloodGroup;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "religion", length = 20)
+    private Religion religion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "community", length = 20)
+    private Community community;
+
+    @Column(name = "annual_income", precision = 12, scale = 2)
+    private BigDecimal annualIncome;
+
+    @NotNull(message = "Differently abled flag is required")
+    @Column(name = "is_differently_abled", nullable = false)
+    private Boolean differentlyAbled = Boolean.FALSE;
+
+    @Size(max = 100, message = "Disability type must not exceed 100 characters")
+    @Column(name = "disability_type", length = 100)
+    private String disabilityType;
+
+    @Column(name = "disability_percentage")
+    private Integer disabilityPercentage;
+
+    @NotNull(message = "Status is required")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private StudentStatus status = StudentStatus.ACTIVE;
+}
