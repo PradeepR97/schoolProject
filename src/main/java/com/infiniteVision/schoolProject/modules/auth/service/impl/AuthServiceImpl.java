@@ -1,6 +1,11 @@
 package com.infiniteVision.schoolProject.modules.auth.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.context.AuditParticipant;
+import com.infiniteVision.schoolProject.common.audit.enums.AuditAction;
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import java.util.Map;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
@@ -48,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserSessionRepository userSessionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuditService auditService;
 
     /**
      * Authenticate user by email or phone, verify BCrypt password, issue opaque Bearer token,
@@ -88,6 +94,18 @@ public class AuthServiceImpl implements AuthService {
         userRepository.saveAndFlush(user);
         log.info("Login successful for user id={}, sessionId={}", user.getId(), sessionId);
 
+        auditService.logAuthEvent(
+                AuditEntityType.USER_SESSION,
+                user.getId(),
+                AuditAction.LOGIN,
+                Map.of(
+                        "userId", user.getId(),
+                        "sessionId", sessionId.toString(),
+                        "username", user.getUsername(),
+                        "role", user.getRole().name()),
+                AuditParticipant.of(user.getId(), sessionId),
+                "User login");
+
         return LoginResponseDTO.builder()
                 .token(token)
                 .tokenType(TOKEN_TYPE)
@@ -107,6 +125,18 @@ public class AuthServiceImpl implements AuthService {
 
         userSessionRepository.endSession(principal.getSessionId(), sessionEnds);
         jwtService.removeSession(principal.getUserId(), principal.getSessionToken());
+
+        auditService.logAuthEvent(
+                AuditEntityType.USER_SESSION,
+                principal.getUserId(),
+                AuditAction.LOGOUT,
+                Map.of(
+                        "userId", principal.getUserId(),
+                        "sessionId", principal.getSessionId().toString(),
+                        "username", principal.getUsername()),
+                AuditParticipant.of(principal.getUserId(), principal.getSessionId()),
+                "User logout");
+
         log.info("Logout successful for user id={}, sessionId={}", principal.getUserId(), principal.getSessionId());
     }
 

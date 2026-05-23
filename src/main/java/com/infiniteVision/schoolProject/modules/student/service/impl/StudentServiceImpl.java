@@ -1,6 +1,9 @@
 package com.infiniteVision.schoolProject.modules.student.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import com.infiniteVision.schoolProject.modules.student.dto.response.StudentDetailResponseDTO;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentRequestDTO;
@@ -33,6 +36,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final StudentDetailMapper studentDetailMapper;
     private final StudentUpdateValidator studentUpdateValidator;
+    private final AuditService auditService;
 
     /**
      * Loads active student with parents and documents and maps to detail DTO.
@@ -52,6 +56,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentDetailResponseDTO updateStudent(Long id, UpdateStudentRequestDTO request) {
         AuthenticatedUser caller = currentUser();
         Student student = findActiveWithRelationsOrThrow(id);
+        StudentDetailResponseDTO beforeSnapshot = studentDetailMapper.toDetail(student);
         StudentParent parents = student.getParents();
         StudentDocument documents = student.getDocuments();
 
@@ -68,8 +73,10 @@ public class StudentServiceImpl implements StudentService {
         }
 
         Student saved = studentRepository.save(student);
+        StudentDetailResponseDTO afterSnapshot = studentDetailMapper.toDetail(saved);
+        auditService.logUpdate(AuditEntityType.STUDENT, id, beforeSnapshot, afterSnapshot);
         log.info("Student updated id={} by user id={}", id, caller.getUserId());
-        return studentDetailMapper.toDetail(saved);
+        return afterSnapshot;
     }
 
     /**
@@ -80,6 +87,7 @@ public class StudentServiceImpl implements StudentService {
     public void deleteStudent(Long id) {
         AuthenticatedUser caller = currentUser();
         Student student = findActiveWithRelationsOrThrow(id);
+        StudentDetailResponseDTO beforeSnapshot = studentDetailMapper.toDetail(student);
 
         student.softDelete(caller.getUserId());
         if (student.getParents() != null) {
@@ -90,6 +98,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         studentRepository.save(student);
+        auditService.logDelete(AuditEntityType.STUDENT, id, beforeSnapshot);
         log.info("Student soft-deleted id={} by user id={}", id, caller.getUserId());
     }
 

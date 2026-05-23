@@ -1,5 +1,7 @@
 package com.infiniteVision.schoolProject.modules.auth.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.BusinessException;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
@@ -47,6 +49,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleAssignmentValidator roleAssignmentValidator;
     private final JwtService jwtService;
+    private final AuditService auditService;
 
     /**
      * Load all non-deleted users ordered by id. CORRESPONDENT callers are rejected.
@@ -113,6 +116,7 @@ public class UserServiceImpl implements UserService {
             throw exception;
         }
         log.info("User created id={} role={} by creator id={}", saved.getId(), saved.getRole(), creator.getUserId());
+        auditService.logCreate(AuditEntityType.USER, saved.getId(), toResponse(saved));
 
         return toResponse(saved);
     }
@@ -128,6 +132,7 @@ public class UserServiceImpl implements UserService {
         validateUpdateRequestHasFields(request);
 
         User user = findActiveUserOrThrow(id);
+        CreateUserResponseDTO beforeSnapshot = toResponse(user);
 
         if (request.getRole() != null) {
             validateRoleAssignment(caller.getRole(), request.getRole());
@@ -158,8 +163,10 @@ public class UserServiceImpl implements UserService {
                     });
             throw exception;
         }
+        CreateUserResponseDTO afterSnapshot = toResponse(saved);
+        auditService.logUpdate(AuditEntityType.USER, id, beforeSnapshot, afterSnapshot);
         log.info("User updated id={} by caller id={}", saved.getId(), caller.getUserId());
-        return toResponse(saved);
+        return afterSnapshot;
     }
 
     /**
@@ -176,6 +183,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = findActiveUserOrThrow(id);
+        CreateUserResponseDTO beforeSnapshot = toResponse(user);
 
         if (UserRole.ADMIN.equals(user.getRole())
                 && userRepository.countByRoleAndDeletedFalse(UserRole.ADMIN) <= 1) {
@@ -188,6 +196,7 @@ public class UserServiceImpl implements UserService {
         userSessionRepository.endAllActiveSessionsForUser(id, now);
         jwtService.revokeAllSessions(id);
         userRepository.save(user);
+        auditService.logDelete(AuditEntityType.USER, id, beforeSnapshot);
 
         log.info("User soft-deleted id={} by caller id={}", id, caller.getUserId());
     }
