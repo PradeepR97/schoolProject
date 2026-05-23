@@ -61,6 +61,8 @@ public final class MessageConstants {
     public static final String PARENT_CONTACT_REQUIRED =
             "At least one of father, mother, or guardian name is required";
 
+    public static final String LOOKUPS_RETRIEVED_SUCCESS = "Lookups retrieved successfully";
+
     public static final String SCHOLARSHIP_CREATED_SUCCESS = "Scholarship created successfully";
     public static final String SCHOLARSHIPS_LISTED_SUCCESS = "Scholarships retrieved successfully";
     public static final String SCHOLARSHIP_RETRIEVED_SUCCESS = "Scholarship retrieved successfully";
@@ -80,7 +82,6 @@ public final class MessageConstants {
     public static final String FEE_STRUCTURE_DELETED_SUCCESS = "Fee structure deleted successfully";
     public static final String FEE_STRUCTURE_NOT_FOUND = "Fee structure not found";
     public static final String FEE_STRUCTURE_UPDATE_EMPTY = "At least one field must be provided to update";
-    public static final String FEE_HEAD_NOT_FOUND = "Fee head not found";
     public static final String FEE_STRUCTURE_ALREADY_EXISTS =
             "Fee structure already exists for this academic year, class, fee head, and term";
 }
