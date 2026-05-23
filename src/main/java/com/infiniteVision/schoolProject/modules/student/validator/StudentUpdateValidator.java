@@ -224,6 +224,7 @@ public class StudentUpdateValidator {
                 || profile.getDateOfBirth() != null
                 || profile.getGender() != null
                 || profile.getNationality() != null
+                || profile.getMedium() != null
                 || profile.getMotherTongue() != null
                 || profile.getStudyGroup() != null
                 || profile.getTenthMark() != null

@@ -4,6 +4,7 @@ import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
 import com.infiniteVision.schoolProject.modules.student.enums.Community;
 import com.infiniteVision.schoolProject.modules.student.enums.Gender;
+import com.infiniteVision.schoolProject.modules.student.enums.Medium;
 import com.infiniteVision.schoolProject.modules.student.enums.Religion;
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
@@ -118,6 +119,10 @@ public class Student extends BaseEntity {
     @Size(max = 50, message = "Nationality must not exceed 50 characters")
     @Column(name = "nationality", length = 50)
     private String nationality;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medium", length = 20)
+    private Medium medium;
 
     @Size(max = 50, message = "Mother tongue must not exceed 50 characters")
     @Column(name = "mother_tongue", length = 50)

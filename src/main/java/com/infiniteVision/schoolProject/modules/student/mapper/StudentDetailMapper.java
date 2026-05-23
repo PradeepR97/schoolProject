@@ -67,6 +67,9 @@ public class StudentDetailMapper {
         if (dto.getNationality() != null) {
             student.setNationality(trimToNull(dto.getNationality()));
         }
+        if (dto.getMedium() != null) {
+            student.setMedium(dto.getMedium());
+        }
         if (dto.getMotherTongue() != null) {
             student.setMotherTongue(trimToNull(dto.getMotherTongue()));
         }
@@ -208,6 +211,7 @@ public class StudentDetailMapper {
                 .dateOfBirth(student.getDateOfBirth())
                 .gender(student.getGender())
                 .nationality(student.getNationality())
+                .medium(student.getMedium())
                 .motherTongue(student.getMotherTongue())
                 .studyGroup(student.getStudyGroup())
                 .tenthMark(student.getTenthMark())
