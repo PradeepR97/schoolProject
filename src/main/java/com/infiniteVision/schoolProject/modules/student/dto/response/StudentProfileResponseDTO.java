@@ -4,6 +4,7 @@ import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
 import com.infiniteVision.schoolProject.modules.student.enums.Community;
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.Gender;
+import com.infiniteVision.schoolProject.modules.student.enums.Medium;
 import com.infiniteVision.schoolProject.modules.student.enums.Religion;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ public class StudentProfileResponseDTO {
     private LocalDate dateOfBirth;
     private Gender gender;
     private String nationality;
+    private Medium medium;
     private String motherTongue;
     private String studyGroup;
     private BigDecimal tenthMark;
