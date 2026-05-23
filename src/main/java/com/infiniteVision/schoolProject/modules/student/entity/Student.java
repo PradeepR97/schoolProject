@@ -4,6 +4,7 @@ import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
 import com.infiniteVision.schoolProject.modules.student.enums.Community;
 import com.infiniteVision.schoolProject.modules.student.enums.Gender;
+import com.infiniteVision.schoolProject.modules.student.enums.Medium;
 import com.infiniteVision.schoolProject.modules.student.enums.Religion;
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
@@ -17,6 +18,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -118,6 +120,10 @@ public class Student extends BaseEntity {
     @Column(name = "nationality", length = 50)
     private String nationality;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medium", length = 20)
+    private Medium medium;
+
     @Size(max = 50, message = "Mother tongue must not exceed 50 characters")
     @Column(name = "mother_tongue", length = 50)
     private String motherTongue;
@@ -182,4 +188,22 @@ public class Student extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "fees_payment_status", nullable = false, length = 20)
     private FeesPaymentStatus feesPaymentStatus = FeesPaymentStatus.PENDING;
+
+    /**
+     * Soft-deletes this student and sets {@link StudentStatus#DISCONTINUED}.
+     *
+     * @param deletedByUserId ID of the authenticated user performing the delete
+     */
+    public void softDelete(Long deletedByUserId) {
+        markDeleted(deletedByUserId);
+        this.status = StudentStatus.DISCONTINUED;
+    }
+
+    /** Ensures deleted students are always DISCONTINUED. */
+    @PreUpdate
+    private void enforceDiscontinuedWhenDeleted() {
+        if (Boolean.TRUE.equals(getDeleted())) {
+            this.status = StudentStatus.DISCONTINUED;
+        }
+    }
 }

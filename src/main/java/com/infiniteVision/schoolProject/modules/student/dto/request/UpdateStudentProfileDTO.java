@@ -2,13 +2,11 @@ package com.infiniteVision.schoolProject.modules.student.dto.request;
 
 import com.infiniteVision.schoolProject.modules.student.enums.BloodGroup;
 import com.infiniteVision.schoolProject.modules.student.enums.Community;
+import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.Gender;
 import com.infiniteVision.schoolProject.modules.student.enums.Medium;
 import com.infiniteVision.schoolProject.modules.student.enums.Religion;
-import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -21,18 +19,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Student profile section of an admission request.
+ * Optional student profile fields for partial update.
  */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentAdmissionStudentDTO {
-
-    @NotBlank(message = "Admission number is required")
-    @Size(max = 20, message = "Admission number must not exceed 20 characters")
-    private String admissionNo;
+public class UpdateStudentProfileDTO {
 
     @Pattern(regexp = "^\\d{12}$", message = "Aadhar number must be exactly 12 digits")
     private String aadharNumber;
@@ -43,7 +37,12 @@ public class StudentAdmissionStudentDTO {
     @Size(max = 30, message = "Ration card number must not exceed 30 characters")
     private String rationCardNumber;
 
-    @NotBlank(message = "First name is required")
+    @Size(max = 30, message = "Application number must not exceed 30 characters")
+    private String applicationNumber;
+
+    @Size(max = 20, message = "Student ID card number must not exceed 20 characters")
+    private String studentIdCardNo;
+
     @Size(max = 50, message = "First name must not exceed 50 characters")
     private String firstName;
 
@@ -58,15 +57,26 @@ public class StudentAdmissionStudentDTO {
     @Size(max = 50, message = "Nationality must not exceed 50 characters")
     private String nationality;
 
-    @NotNull(message = "Medium is required")
     private Medium medium;
+
+    @Size(max = 50, message = "Mother tongue must not exceed 50 characters")
+    private String motherTongue;
+
+    @Size(max = 30, message = "Study group must not exceed 30 characters")
+    private String studyGroup;
+
+    private BigDecimal tenthMark;
+
+    @Size(max = 255, message = "Identification mark 1 must not exceed 255 characters")
+    private String identificationMark1;
+
+    @Size(max = 255, message = "Identification mark 2 must not exceed 255 characters")
+    private String identificationMark2;
 
     private String address;
 
-    @NotNull(message = "Class id is required")
     private Long classId;
 
-    @NotNull(message = "Academic year id is required")
     private Long academicYearId;
 
     private BloodGroup bloodGroup;
@@ -76,6 +86,13 @@ public class StudentAdmissionStudentDTO {
     private Community community;
 
     private BigDecimal annualIncome;
+
+    private Boolean differentlyAbled;
+
+    @Size(max = 100, message = "Disability type must not exceed 100 characters")
+    private String disabilityType;
+
+    private Integer disabilityPercentage;
 
     private StudentStatus status;
 

@@ -1,6 +1,7 @@
 package com.infiniteVision.schoolProject.modules.student.dto.response;
 
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
+import com.infiniteVision.schoolProject.modules.student.enums.Medium;
 import com.infiniteVision.schoolProject.modules.student.enums.StudentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class StudentAdmissionResponseDTO {
     private String admissionNo;
     private String firstName;
     private String lastName;
+    private Medium medium;
     private Long classId;
     private Long academicYearId;
     private StudentStatus status;

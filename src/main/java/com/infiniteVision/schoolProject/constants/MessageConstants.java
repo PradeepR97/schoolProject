@@ -42,6 +42,11 @@ public final class MessageConstants {
     public static final String REDIS_UNAVAILABLE = "Cache service temporarily unavailable";
     public static final String INTERNAL_SERVER_ERROR = "An unexpected error occurred";
     public static final String STUDENTS_LISTED_SUCCESS = "Students retrieved successfully";
+    public static final String STUDENT_RETRIEVED_SUCCESS = "Student retrieved successfully";
+    public static final String STUDENT_UPDATED_SUCCESS = "Student updated successfully";
+    public static final String STUDENT_DELETED_SUCCESS = "Student deleted successfully";
+    public static final String STUDENT_NOT_FOUND = "Student not found";
+    public static final String STUDENT_UPDATE_EMPTY = "At least one field must be provided to update";
     public static final String STUDENT_ADMITTED_SUCCESS = "Student admitted successfully";
     public static final String ADMISSION_NO_ALREADY_EXISTS = "Admission number already exists";
     public static final String STUDENT_AADHAR_ALREADY_EXISTS = "Student Aadhar number is already registered";
@@ -68,4 +73,14 @@ public final class MessageConstants {
             "Fee head is required when applicable to is SPECIFIC_HEAD";
     public static final String DISCOUNT_PERCENTAGE_EXCEEDS_100 =
             "Percentage discount cannot exceed 100";
+    public static final String FEE_STRUCTURES_LISTED_SUCCESS = "Fee structures retrieved successfully";
+    public static final String FEE_STRUCTURE_RETRIEVED_SUCCESS = "Fee structure retrieved successfully";
+    public static final String FEE_STRUCTURE_CREATED_SUCCESS = "Fee structure created successfully";
+    public static final String FEE_STRUCTURE_UPDATED_SUCCESS = "Fee structure updated successfully";
+    public static final String FEE_STRUCTURE_DELETED_SUCCESS = "Fee structure deleted successfully";
+    public static final String FEE_STRUCTURE_NOT_FOUND = "Fee structure not found";
+    public static final String FEE_STRUCTURE_UPDATE_EMPTY = "At least one field must be provided to update";
+    public static final String FEE_HEAD_NOT_FOUND = "Fee head not found";
+    public static final String FEE_STRUCTURE_ALREADY_EXISTS =
+            "Fee structure already exists for this academic year, class, fee head, and term";
 }

@@ -119,4 +119,14 @@ public class FeeStructure extends BaseEntity {
 
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
+
+    /**
+     * Soft-deletes this fee structure and marks it inactive.
+     *
+     * @param deletedByUserId ID of the authenticated user performing the delete
+     */
+    public void softDelete(Long deletedByUserId) {
+        markDeleted(deletedByUserId);
+        this.active = Boolean.FALSE;
+    }
 }
