@@ -55,4 +55,17 @@ public final class MessageConstants {
             "Guardian name and phone are required when primary contact is guardian";
     public static final String PARENT_CONTACT_REQUIRED =
             "At least one of father, mother, or guardian name is required";
+
+    public static final String SCHOLARSHIP_CREATED_SUCCESS = "Scholarship created successfully";
+    public static final String SCHOLARSHIPS_LISTED_SUCCESS = "Scholarships retrieved successfully";
+    public static final String SCHOLARSHIP_RETRIEVED_SUCCESS = "Scholarship retrieved successfully";
+    public static final String SCHOLARSHIP_UPDATED_SUCCESS = "Scholarship updated successfully";
+    public static final String SCHOLARSHIP_DELETED_SUCCESS = "Scholarship deleted successfully";
+    public static final String SCHOLARSHIP_NOT_FOUND = "Scholarship not found";
+    public static final String SCHOLARSHIP_UPDATE_EMPTY = "At least one field must be provided to update";
+    public static final String FEE_HEAD_NOT_FOUND = "Fee head not found";
+    public static final String FEE_HEAD_REQUIRED_FOR_SPECIFIC_HEAD =
+            "Fee head is required when applicable to is SPECIFIC_HEAD";
+    public static final String DISCOUNT_PERCENTAGE_EXCEEDS_100 =
+            "Percentage discount cannot exceed 100";
 }
