@@ -91,7 +91,9 @@ public class StudentQueryServiceImpl implements StudentQueryService {
             return Map.of();
         }
 
-        Map<Long, ClassMaster> classMasterById = classMasterRepository.findAllByIdInAndDeletedFalse(classIds).stream()
+        Map<Long, ClassMaster> classMasterById = classMasterRepository
+                .findAllByIdInAndDeletedFalseWithSection(classIds)
+                .stream()
                 .collect(Collectors.toMap(ClassMaster::getId, classMaster -> classMaster));
 
         return studentListMapper.toClassNameById(classMasterById);

@@ -37,7 +37,9 @@ public class StudentListMapper {
         if (classMaster == null) {
             return null;
         }
-        return classMaster.getClassName() + " - " + classMaster.getSection();
+        String sectionCode =
+                classMaster.getSection() != null ? classMaster.getSection().getSectionCode() : "";
+        return classMaster.getClassName() + " - " + sectionCode;
     }
 
     /**

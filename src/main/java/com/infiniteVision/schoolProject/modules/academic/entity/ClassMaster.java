@@ -24,7 +24,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 /**
- * Class and section for an academic year. Maps to {@code class_master}.
+ * Class grade and section for an academic year. Maps to {@code class_master}.
+ * <p>
+ * Section is normalized via {@link SectionMaster}; display label is e.g. {@code Class 10 - A}.
  */
 @Entity
 @Table(
@@ -32,7 +34,7 @@ import org.hibernate.annotations.OnDeleteAction;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uq_class_section_year",
-                        columnNames = {"class_name", "section", "academic_year_id"})
+                        columnNames = {"class_name", "section_id", "academic_year_id"})
         })
 @AttributeOverrides({
         @AttributeOverride(name = "id", column = @Column(name = "class_id", updatable = false, nullable = false)),
@@ -43,7 +45,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = "academicYear")
+@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "section"})
 public class ClassMaster extends BaseEntity {
 
     @NotBlank(message = "Class name is required")
@@ -51,10 +53,14 @@ public class ClassMaster extends BaseEntity {
     @Column(name = "class_name", nullable = false, length = 20)
     private String className;
 
-    @NotBlank(message = "Section is required")
-    @Size(max = 5, message = "Section must not exceed 5 characters")
-    @Column(name = "section", nullable = false, length = 5)
-    private String section;
+    @NotNull(message = "Section is required")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.RESTRICT)
+    @JoinColumn(
+            name = "section_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_class_section"))
+    private SectionMaster section;
 
     @Size(max = 100, message = "Class teacher name must not exceed 100 characters")
     @Column(name = "class_teacher", length = 100)
