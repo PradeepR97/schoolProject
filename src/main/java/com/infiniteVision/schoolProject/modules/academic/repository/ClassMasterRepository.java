@@ -21,6 +21,14 @@ public interface ClassMasterRepository extends JpaRepository<ClassMaster, Long> 
             """
             SELECT c FROM ClassMaster c
             LEFT JOIN FETCH c.section
+            WHERE c.id = :id AND c.deleted = false
+            """)
+    Optional<ClassMaster> findByIdAndDeletedFalseWithSection(Long id);
+
+    @Query(
+            """
+            SELECT c FROM ClassMaster c
+            LEFT JOIN FETCH c.section
             WHERE c.id IN :ids AND c.deleted = false
             """)
     List<ClassMaster> findAllByIdInAndDeletedFalseWithSection(@Param("ids") Collection<Long> ids);

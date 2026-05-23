@@ -24,7 +24,22 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     boolean existsByStudentIdCardNoAndDeletedFalse(String studentIdCardNo);
 
+    boolean existsByAadharNumberAndIdNotAndDeletedFalse(String aadharNumber, Long studentId);
+
+    boolean existsByApplicationNumberAndIdNotAndDeletedFalse(String applicationNumber, Long studentId);
+
+    boolean existsByStudentIdCardNoAndIdNotAndDeletedFalse(String studentIdCardNo, Long studentId);
+
     Optional<Student> findByIdAndDeletedFalse(Long id);
+
+    @Query(
+            """
+            SELECT s FROM Student s
+            LEFT JOIN FETCH s.parents
+            LEFT JOIN FETCH s.documents
+            WHERE s.id = :id AND s.deleted = false
+            """)
+    Optional<Student> findActiveWithParentsAndDocumentsById(Long id);
 
     /**
      * Active students with parent row eagerly loaded for list screens.

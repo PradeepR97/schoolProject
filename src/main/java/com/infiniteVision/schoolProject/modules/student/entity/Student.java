@@ -17,6 +17,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -182,4 +183,22 @@ public class Student extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "fees_payment_status", nullable = false, length = 20)
     private FeesPaymentStatus feesPaymentStatus = FeesPaymentStatus.PENDING;
+
+    /**
+     * Soft-deletes this student and sets {@link StudentStatus#DISCONTINUED}.
+     *
+     * @param deletedByUserId ID of the authenticated user performing the delete
+     */
+    public void softDelete(Long deletedByUserId) {
+        markDeleted(deletedByUserId);
+        this.status = StudentStatus.DISCONTINUED;
+    }
+
+    /** Ensures deleted students are always DISCONTINUED. */
+    @PreUpdate
+    private void enforceDiscontinuedWhenDeleted() {
+        if (Boolean.TRUE.equals(getDeleted())) {
+            this.status = StudentStatus.DISCONTINUED;
+        }
+    }
 }
