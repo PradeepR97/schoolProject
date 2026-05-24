@@ -37,8 +37,28 @@ public interface ClassMasterRepository extends JpaRepository<ClassMaster, Long> 
 
     List<ClassMaster> findAllByDeletedFalseOrderByClassNameAscSection_DisplayOrderAscSection_SectionCodeAsc();
 
+    @Query(
+            """
+            SELECT c FROM ClassMaster c
+            JOIN FETCH c.section
+            JOIN FETCH c.academicYear
+            WHERE c.deleted = false
+            ORDER BY c.className ASC, c.section.displayOrder ASC, c.section.sectionCode ASC
+            """)
+    List<ClassMaster> findAllWithSectionByDeletedFalseOrderByClassNameAsc();
+
     List<ClassMaster> findAllByAcademicYear_IdAndDeletedFalseOrderByClassNameAscSection_DisplayOrderAscSection_SectionCodeAsc(
             Long academicYearId);
+
+    @Query(
+            """
+            SELECT c FROM ClassMaster c
+            JOIN FETCH c.section
+            WHERE c.deleted = false AND c.academicYear.id = :academicYearId
+            ORDER BY c.className ASC, c.section.displayOrder ASC, c.section.sectionCode ASC
+            """)
+    List<ClassMaster> findAllWithSectionByAcademicYearIdAndDeletedFalseOrderByClassNameAsc(
+            @Param("academicYearId") Long academicYearId);
 
     boolean existsByClassNameAndSection_IdAndAcademicYear_IdAndDeletedFalse(
             String className, Long sectionId, Long academicYearId);
