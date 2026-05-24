@@ -1,6 +1,10 @@
 package com.infiniteVision.schoolProject.modules.student.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
+import com.infiniteVision.schoolProject.modules.student.dto.response.StudentDetailResponseDTO;
+import com.infiniteVision.schoolProject.modules.student.mapper.StudentDetailMapper;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.repository.UserRepository;
@@ -35,6 +39,8 @@ public class StudentAdmissionServiceImpl implements StudentAdmissionService {
     private final UserRepository userRepository;
     private final StudentAdmissionValidator studentAdmissionValidator;
     private final StudentAdmissionMapper studentAdmissionMapper;
+    private final StudentDetailMapper studentDetailMapper;
+    private final AuditService auditService;
 
     /**
      * Validates request, builds entities, links one-to-one children, saves student (cascade).
@@ -59,13 +65,18 @@ public class StudentAdmissionServiceImpl implements StudentAdmissionService {
         student.setDocuments(documents);
 
         Student saved = studentRepository.save(student);
+        Student reloaded = studentRepository
+                .findActiveWithParentsAndDocumentsById(saved.getId())
+                .orElse(saved);
+        StudentDetailResponseDTO afterSnapshot = studentDetailMapper.toDetail(reloaded);
+        auditService.logCreate(AuditEntityType.STUDENT, saved.getId(), afterSnapshot);
         log.info(
                 "Student admitted id={}, admissionNo={}, by user id={}",
                 saved.getId(),
                 saved.getAdmissionNo(),
                 caller.getUserId());
 
-        return studentAdmissionMapper.toResponse(saved);
+        return studentAdmissionMapper.toResponse(reloaded);
     }
 
     private AuthenticatedUser currentUser() {

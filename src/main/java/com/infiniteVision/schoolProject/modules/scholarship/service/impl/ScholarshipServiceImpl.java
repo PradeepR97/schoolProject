@@ -1,5 +1,7 @@
 package com.infiniteVision.schoolProject.modules.scholarship.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
@@ -39,6 +41,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
     private final FeeHeadRepository feeHeadRepository;
     private final ScholarshipMapper scholarshipMapper;
     private final ScholarshipValidator scholarshipValidator;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -64,8 +67,10 @@ public class ScholarshipServiceImpl implements ScholarshipService {
                 .build();
 
         SchoolScheme saved = schoolSchemeRepository.save(scheme);
+        ScholarshipResponseDTO afterSnapshot = scholarshipMapper.toResponse(saved);
+        auditService.logCreate(AuditEntityType.SCHOLARSHIP, saved.getId(), afterSnapshot);
         log.info("Scholarship created id={} name={}", saved.getId(), saved.getSchemeName());
-        return scholarshipMapper.toResponse(saved);
+        return afterSnapshot;
     }
 
     @Override
@@ -94,6 +99,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
         validateUpdateRequestHasFields(request);
 
         SchoolScheme scheme = findSchemeOrThrow(schemeId);
+        ScholarshipResponseDTO beforeSnapshot = scholarshipMapper.toResponse(scheme);
 
         ApplicableTo applicableTo = request.getApplicableTo() != null ? request.getApplicableTo() : scheme.getApplicableTo();
         DiscountType discountType = request.getDiscountType() != null ? request.getDiscountType() : scheme.getDiscountType();
@@ -135,8 +141,10 @@ public class ScholarshipServiceImpl implements ScholarshipService {
         scholarshipValidator.validateDiscountValue(discountType, scheme.getDiscountValue());
 
         SchoolScheme saved = schoolSchemeRepository.save(scheme);
+        ScholarshipResponseDTO afterSnapshot = scholarshipMapper.toResponse(saved);
+        auditService.logUpdate(AuditEntityType.SCHOLARSHIP, schemeId, beforeSnapshot, afterSnapshot);
         log.info("Scholarship updated id={}", schemeId);
-        return scholarshipMapper.toResponse(saved);
+        return afterSnapshot;
     }
 
     /**
@@ -147,6 +155,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
     @Transactional
     public void deactivateScholarship(Long schemeId) {
         SchoolScheme scheme = findSchemeOrThrow(schemeId);
+        ScholarshipResponseDTO beforeSnapshot = scholarshipMapper.toResponse(scheme);
         if (Boolean.FALSE.equals(scheme.getIsActive()) && Boolean.TRUE.equals(scheme.getDeleted())) {
             log.info("Scholarship already deactivated id={}", schemeId);
             return;
@@ -156,6 +165,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
         scheme.setIsActive(Boolean.FALSE);
         scheme.markDeleted(deletedByUserId);
         schoolSchemeRepository.save(scheme);
+        auditService.logDelete(AuditEntityType.SCHOLARSHIP, schemeId, beforeSnapshot);
         log.info("Scholarship deactivated id={} by user id={}", schemeId, deletedByUserId);
     }
 

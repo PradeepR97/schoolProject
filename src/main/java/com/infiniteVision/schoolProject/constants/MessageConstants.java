@@ -84,4 +84,21 @@ public final class MessageConstants {
     public static final String FEE_STRUCTURE_UPDATE_EMPTY = "At least one field must be provided to update";
     public static final String FEE_STRUCTURE_ALREADY_EXISTS =
             "Fee structure already exists for this academic year, class, fee head, and term";
+
+    public static final String FEE_LEDGER_GENERATED_SUCCESS = "Fee ledger generated successfully";
+    public static final String FEE_LEDGER_NOT_FOUND = "Fee ledger not found";
+    public static final String FEE_LEDGER_ALREADY_EXISTS = "Fee ledger already exists for this student, term, and fee structure";
+    public static final String FEE_LEDGER_ALREADY_PAID = "Fee ledger is already fully paid";
+    public static final String INVOICE_GENERATED_SUCCESS = "Invoice generated successfully";
+    public static final String INVOICE_NOT_FOUND = "Invoice not found";
+    public static final String INVOICE_ALREADY_EXISTS = "Invoice already exists for this fee ledger";
+    public static final String PAYMENT_COLLECTED_SUCCESS = "Payment collected successfully";
+    public static final String PAYMENT_NOT_FOUND = "Payment not found";
+    public static final String PAYMENT_RECEIPT_RETRIEVED_SUCCESS = "Payment receipt retrieved successfully";
+    public static final String STUDENT_DUES_RETRIEVED_SUCCESS = "Student fee dues retrieved successfully";
+    public static final String PAYMENT_AMOUNT_INVALID = "Payment amount must be greater than zero";
+    public static final String PAYMENT_AMOUNT_EXCEEDS_BALANCE = "Payment amount exceeds outstanding balance";
+    public static final String STUDENT_LEDGER_MISMATCH = "Fee ledger does not belong to the specified student";
+    public static final String STUDENT_CLASS_NOT_ASSIGNED = "Student must have class and academic year assigned";
+    public static final String NO_FEE_STRUCTURES_FOR_CLASS = "No active fee structures found for student class and academic year";
 }

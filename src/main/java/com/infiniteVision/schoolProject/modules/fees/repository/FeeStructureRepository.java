@@ -62,4 +62,18 @@ public interface FeeStructureRepository extends JpaRepository<FeeStructure, Long
 
     boolean existsByAcademicYear_IdAndClassMaster_IdAndFeeHead_IdAndTermTypeAndIdNotAndDeletedFalse(
             Long academicYearId, Long classId, Long feeHeadId, TermType termType, Long structureId);
+
+    @Query(
+            """
+            SELECT fs FROM FeeStructure fs
+            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.academicYear
+            JOIN FETCH fs.classMaster
+            WHERE fs.deleted = false
+            AND fs.active = true
+            AND fs.classMaster.id = :classId
+            AND fs.academicYear.id = :academicYearId
+            """)
+    java.util.List<FeeStructure> findActiveByClassIdAndAcademicYearId(
+            @Param("classId") Long classId, @Param("academicYearId") Long academicYearId);
 }

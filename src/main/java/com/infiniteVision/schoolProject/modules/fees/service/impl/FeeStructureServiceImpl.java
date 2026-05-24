@@ -1,5 +1,7 @@
 package com.infiniteVision.schoolProject.modules.fees.service.impl;
 
+import com.infiniteVision.schoolProject.common.audit.enums.AuditEntityType;
+import com.infiniteVision.schoolProject.common.audit.service.AuditService;
 import com.infiniteVision.schoolProject.common.dto.response.PagedResponseDTO;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
@@ -42,6 +44,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     private final FeeStructureRepository feeStructureRepository;
     private final FeeStructureMapper feeStructureMapper;
     private final FeeStructureValidator feeStructureValidator;
+    private final AuditService auditService;
 
     /**
      * Load filtered page of non-deleted fee structures; default sort by structure id descending.
@@ -96,10 +99,12 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         feeStructureValidator.validateCreate(request);
 
         FeeStructure saved = feeStructureRepository.save(feeStructureMapper.toEntity(request));
+        FeeStructureResponseDTO afterSnapshot =
+                feeStructureMapper.toResponse(findActiveWithRelationsOrThrow(saved.getId()));
+        auditService.logCreate(AuditEntityType.FEE_STRUCTURE, saved.getId(), afterSnapshot);
         log.info("Fee structure created id={} by user id={}", saved.getId(), caller.getUserId());
 
-        return feeStructureMapper.toResponse(
-                findActiveWithRelationsOrThrow(saved.getId()));
+        return afterSnapshot;
     }
 
     /**
@@ -110,6 +115,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     public FeeStructureResponseDTO updateFeeStructure(Long id, UpdateFeeStructureRequestDTO request) {
         AuthenticatedUser caller = currentUser();
         FeeStructure existing = findActiveWithRelationsOrThrow(id);
+        FeeStructureResponseDTO beforeSnapshot = feeStructureMapper.toResponse(existing);
 
         feeStructureValidator.validateUpdate(id, request, existing);
         feeStructureMapper.applyUpdates(existing, request);
@@ -128,9 +134,11 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     public void deleteFeeStructure(Long id) {
         AuthenticatedUser caller = currentUser();
         FeeStructure structure = findActiveWithRelationsOrThrow(id);
+        FeeStructureResponseDTO beforeSnapshot = feeStructureMapper.toResponse(structure);
 
         structure.softDelete(caller.getUserId());
         feeStructureRepository.save(structure);
+        auditService.logDelete(AuditEntityType.FEE_STRUCTURE, id, beforeSnapshot);
 
         log.info("Fee structure soft-deleted id={} by user id={}", id, caller.getUserId());
     }
