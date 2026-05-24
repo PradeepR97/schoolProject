@@ -41,7 +41,7 @@ public final class ScholarshipDiscountCalculator {
         if (scheme == null || structure == null || structure.getFeeHead() == null) {
             return false;
         }
-        if (!Boolean.TRUE.equals(structure.getScholarshipAllowed())) {
+        if (Boolean.FALSE.equals(structure.getScholarshipAllowed())) {
             return false;
         }
         ApplicableTo applicableTo = scheme.getApplicableTo();
@@ -59,10 +59,15 @@ public final class ScholarshipDiscountCalculator {
     }
 
     private static boolean isTuitionHead(FeeHead feeHead) {
-        if (feeHead.getFeeHeadCode() == null) {
-            return false;
+        if (feeHead.getFeeHeadCode() != null) {
+            String code = feeHead.getFeeHeadCode().toUpperCase();
+            if (code.contains("TUITION") || code.contains("TUIT")) {
+                return true;
+            }
         }
-        String code = feeHead.getFeeHeadCode().toUpperCase();
-        return code.contains("TUITION") || code.contains("TUIT");
+        if (feeHead.getFeeHeadName() != null) {
+            return feeHead.getFeeHeadName().toUpperCase().contains("TUITION");
+        }
+        return false;
     }
 }

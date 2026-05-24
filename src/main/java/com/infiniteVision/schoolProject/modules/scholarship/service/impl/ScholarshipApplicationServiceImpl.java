@@ -91,6 +91,13 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 .findByIdAndIsActiveTrueAndDeletedFalse(request.getSchemeId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.SCHOLARSHIP_NOT_FOUND));
 
+        if (scheme.getAcademicYear() == null
+                || !scheme.getAcademicYear().getId().equals(request.getAcademicYearId())) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED,
+                    List.of(MessageConstants.SCHOLARSHIP_SCHEME_YEAR_MISMATCH));
+        }
+
         if (applicationRepository.existsByStudent_IdAndScheme_IdAndAcademicYear_IdAndDeletedFalse(
                 request.getStudentId(), request.getSchemeId(), request.getAcademicYearId())) {
             throw new BusinessException(MessageConstants.SCHOLARSHIP_APPLICATION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
