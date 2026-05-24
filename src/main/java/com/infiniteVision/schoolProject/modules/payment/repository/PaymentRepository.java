@@ -4,6 +4,8 @@ import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -23,4 +25,17 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findAllByLedger_IdAndDeletedFalseOrderByPaymentDateDesc(Long ledgerId);
 
     boolean existsByReceiptNoAndDeletedFalse(String receiptNo);
+
+    @Query(
+            """
+            SELECT p FROM Payment p
+            JOIN FETCH p.student
+            JOIN FETCH p.ledger
+            JOIN FETCH p.invoice
+            LEFT JOIN FETCH p.collectedByUser
+            WHERE p.id = :id AND p.deleted = false
+            """)
+    Optional<Payment> findActiveWithRelationsById(@Param("id") Long id);
+
+    long countByDeletedFalse();
 }

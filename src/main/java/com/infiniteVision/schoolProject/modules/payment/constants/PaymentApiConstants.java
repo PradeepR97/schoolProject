@@ -11,7 +11,9 @@ public final class PaymentApiConstants {
     }
 
     public static final String PAYMENT_BASE = ApiConstants.API_V1_PREFIX + "/payments";
-    public static final String LEDGERS = PAYMENT_BASE + "/ledgers";
-    public static final String INVOICES = PAYMENT_BASE + "/invoices";
+    public static final String LEDGERS_GENERATE = PAYMENT_BASE + "/ledgers/generate";
+    public static final String INVOICES_GENERATE = PAYMENT_BASE + "/invoices/generate";
+    public static final String COLLECT = PAYMENT_BASE + "/collect";
+    public static final String STUDENT_DUES = PAYMENT_BASE + "/students/{studentId}/dues";
     public static final String RECEIPTS = PAYMENT_BASE + "/receipts";
 }
