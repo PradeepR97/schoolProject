@@ -1,6 +1,7 @@
 package com.infiniteVision.schoolProject.modules.payment.dto.response;
 
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,6 @@ public class StudentFeeDuesResponseDTO {
     private String studentName;
     private Long academicYearId;
     private FeesPaymentStatus feesPaymentStatus;
+    private BigDecimal totalPendingScholarshipDiscount;
     private List<StudentFeeDueItemResponseDTO> ledgers;
 }

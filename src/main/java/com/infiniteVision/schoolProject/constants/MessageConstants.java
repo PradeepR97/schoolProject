@@ -101,4 +101,38 @@ public final class MessageConstants {
     public static final String STUDENT_LEDGER_MISMATCH = "Fee ledger does not belong to the specified student";
     public static final String STUDENT_CLASS_NOT_ASSIGNED = "Student must have class and academic year assigned";
     public static final String NO_FEE_STRUCTURES_FOR_CLASS = "No active fee structures found for student class and academic year";
+    public static final String PAYMENTS_LISTED_SUCCESS = "Payments retrieved successfully";
+    public static final String INVOICES_LISTED_SUCCESS = "Invoices retrieved successfully";
+    public static final String PAYMENT_CANCELLED_SUCCESS = "Payment cancelled successfully";
+    public static final String PAYMENT_REFUNDED_SUCCESS = "Payment refunded successfully";
+    public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
+    public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
+    public static final String PAYMENT_CANNOT_REVERSE = "Only successful payments can be cancelled or refunded";
+    public static final String PAYMENT_IDEMPOTENCY_REPLAY = "Duplicate payment request; returning existing receipt";
+    public static final String FEE_LEDGER_RETRIEVED_SUCCESS = "Fee ledger retrieved successfully";
+    public static final String INVOICE_RETRIEVED_SUCCESS = "Invoice retrieved successfully";
+    public static final String LATE_FEE_ADJUSTED_SUCCESS = "Late fee adjusted successfully";
+    public static final String FEE_LEDGER_REGENERATED_SUCCESS = "Fee ledgers recalculated successfully";
+    public static final String FEE_LEDGER_CANNOT_ADJUST_LATE_FEE = "Late fee cannot be adjusted on a fully paid ledger";
+    public static final String FEE_LEDGER_PAID_EXCEEDS_NET = "Paid amount exceeds recalculated net amount after adjustment";
+    public static final String FEE_STRUCTURE_INACTIVE_OR_MISSING = "Linked fee structure is missing or inactive";
+
+    public static final String SCHOLARSHIP_APPLICATION_CREATED_SUCCESS = "Scholarship application submitted successfully";
+    public static final String SCHOLARSHIP_APPLICATIONS_LISTED_SUCCESS = "Scholarship applications retrieved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_RETRIEVED_SUCCESS = "Scholarship application retrieved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_APPROVED_SUCCESS = "Scholarship application approved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_REJECTED_SUCCESS = "Scholarship application rejected successfully";
+    public static final String SCHOLARSHIP_APPLICATION_BULK_APPROVED_SUCCESS = "Bulk scholarship approval completed";
+    public static final String SCHOLARSHIP_APPLICATION_BULK_REJECTED_SUCCESS = "Bulk scholarship rejection completed";
+    public static final String SCHOLARSHIP_APPLICATION_NOT_FOUND = "Scholarship application not found";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_EXISTS =
+            "An application for this student, scheme, and academic year already exists";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_APPROVED = "Scholarship application is already fully approved";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_REJECTED = "Scholarship application is already rejected";
+    public static final String SCHOLARSHIP_APPLICATION_INVALID_STATE = "Scholarship application is not in a valid state for this action";
+    public static final String SCHOLARSHIP_PRINCIPAL_ALREADY_APPROVED = "Principal has already approved this application";
+    public static final String SCHOLARSHIP_CORRESPONDENT_ALREADY_APPROVED = "Correspondent has already approved this application";
+    public static final String SCHOLARSHIP_AWAITING_PRINCIPAL_APPROVAL = "Application must be approved by Principal first";
+    public static final String SCHOLARSHIP_APPROVAL_ROLE_FORBIDDEN =
+            "Only Principal or Correspondent can approve or reject scholarship applications";
 }

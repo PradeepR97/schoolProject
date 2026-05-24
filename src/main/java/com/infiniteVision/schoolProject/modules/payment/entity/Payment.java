@@ -39,7 +39,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(
         name = "payments",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_receipt_no", columnNames = "receipt_no")
+                @UniqueConstraint(name = "uq_receipt_no", columnNames = "receipt_no"),
+                @UniqueConstraint(name = "uq_payment_idempotency_key", columnNames = "idempotency_key")
         },
         indexes = {
                 @Index(name = "idx_payment_student", columnList = "student_id"),
@@ -125,6 +126,10 @@ public class Payment extends BaseEntity {
 
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
+
+    @Size(max = 64, message = "Idempotency key must not exceed 64 characters")
+    @Column(name = "idempotency_key", length = 64)
+    private String idempotencyKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)

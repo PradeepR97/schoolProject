@@ -1,8 +1,12 @@
 package com.infiniteVision.schoolProject.modules.payment.repository;
 
+import com.infiniteVision.schoolProject.modules.payment.enums.PaymentRecordStatus;
 import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,4 +42,51 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findActiveWithRelationsById(@Param("id") Long id);
 
     long countByDeletedFalse();
+
+    Optional<Payment> findByIdempotencyKeyAndDeletedFalse(String idempotencyKey);
+
+    @Query(
+            """
+            SELECT p FROM Payment p
+            JOIN FETCH p.student
+            JOIN FETCH p.ledger
+            JOIN FETCH p.invoice
+            LEFT JOIN FETCH p.collectedByUser
+            WHERE p.idempotencyKey = :idempotencyKey AND p.deleted = false
+            """)
+    Optional<Payment> findActiveWithRelationsByIdempotencyKey(@Param("idempotencyKey") String idempotencyKey);
+
+    @Query(
+            value = """
+                    SELECT p FROM Payment p
+                    JOIN FETCH p.student s
+                    JOIN FETCH p.ledger
+                    JOIN FETCH p.invoice i
+                    LEFT JOIN FETCH p.collectedByUser
+                    WHERE p.deleted = false
+                    AND (:studentId IS NULL OR s.id = :studentId)
+                    AND (:ledgerId IS NULL OR p.ledger.id = :ledgerId)
+                    AND (:invoiceId IS NULL OR i.id = :invoiceId)
+                    AND (:status IS NULL OR p.status = :status)
+                    AND (:fromDate IS NULL OR p.paymentDate >= :fromDate)
+                    AND (:toDate IS NULL OR p.paymentDate <= :toDate)
+                    """,
+            countQuery = """
+                    SELECT COUNT(p) FROM Payment p
+                    WHERE p.deleted = false
+                    AND (:studentId IS NULL OR p.student.id = :studentId)
+                    AND (:ledgerId IS NULL OR p.ledger.id = :ledgerId)
+                    AND (:invoiceId IS NULL OR p.invoice.id = :invoiceId)
+                    AND (:status IS NULL OR p.status = :status)
+                    AND (:fromDate IS NULL OR p.paymentDate >= :fromDate)
+                    AND (:toDate IS NULL OR p.paymentDate <= :toDate)
+                    """)
+    Page<Payment> findAllFiltered(
+            @Param("studentId") Long studentId,
+            @Param("ledgerId") Long ledgerId,
+            @Param("invoiceId") Long invoiceId,
+            @Param("status") PaymentRecordStatus status,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            Pageable pageable);
 }
