@@ -24,8 +24,16 @@ import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApp
 import com.infiniteVision.schoolProject.modules.scholarship.mapper.ScholarshipApplicationMapper;
 import com.infiniteVision.schoolProject.modules.scholarship.repository.SchoolSchemeRepository;
 import com.infiniteVision.schoolProject.modules.scholarship.repository.StudentScholarshipApplicationRepository;
+import com.infiniteVision.schoolProject.modules.dashboard.enums.DashboardActivityType;
+import com.infiniteVision.schoolProject.modules.dashboard.service.DashboardActivityPublisher;
+import com.infiniteVision.schoolProject.modules.notification.service.ScholarshipNotificationDispatcher;
+import com.infiniteVision.schoolProject.modules.scholarship.dto.response.MeritBandResolveResponseDTO;
+import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApprovalAction;
+import com.infiniteVision.schoolProject.modules.scholarship.service.MeritScholarshipBandService;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApplicationService;
+import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApprovalHistoryService;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipDiscountService;
+import java.math.BigDecimal;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.repository.StudentRepository;
 import com.infiniteVision.schoolProject.security.AuthenticatedUser;
@@ -47,8 +55,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Manages scholarship discount applications: dual approval (Principal then Correspondent),
- * bulk actions, and ledger recalculation on full approval. Full fee payment is never blocked.
+ * Manages scholarship discount applications: single-step approval by Principal or Correspondent,
+ * bulk actions, and ledger recalculation on approval. Full fee payment is never blocked.
  */
 @Slf4j
 @Service
@@ -65,6 +73,10 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
     private final ScholarshipApplicationMapper applicationMapper;
     private final ScholarshipDiscountService scholarshipDiscountService;
     private final AuditService auditService;
+    private final DashboardActivityPublisher dashboardActivityPublisher;
+    private final MeritScholarshipBandService meritScholarshipBandService;
+    private final ScholarshipApprovalHistoryService approvalHistoryService;
+    private final ScholarshipNotificationDispatcher scholarshipNotificationDispatcher;
 
     /**
      * Staff submits a discount application for a student and scheme.
@@ -103,6 +115,18 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             throw new BusinessException(MessageConstants.SCHOLARSHIP_APPLICATION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
 
+        BigDecimal marks = request.getMarksAtApplication() != null
+                ? request.getMarksAtApplication()
+                : student.getTenthMark();
+        BigDecimal requestedPercent = null;
+        if (marks != null) {
+            MeritBandResolveResponseDTO merit =
+                    meritScholarshipBandService.resolveDiscountPercent(request.getAcademicYearId(), marks);
+            if (merit.isMatched()) {
+                requestedPercent = merit.getDiscountPercent();
+            }
+        }
+
         StudentScholarshipApplication application = StudentScholarshipApplication.builder()
                 .student(student)
                 .scheme(scheme)
@@ -110,6 +134,8 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 .status(ScholarshipApplicationStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .applicationRemarks(request.getApplicationRemarks())
+                .marksAtApplication(marks)
+                .requestedDiscountPercent(requestedPercent)
                 .deleted(Boolean.FALSE)
                 .build();
 
@@ -121,6 +147,21 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 saved.getId(),
                 student.getId(),
                 scheme.getId());
+        dashboardActivityPublisher.publish(
+                DashboardActivityType.SCHOLARSHIP_REQUEST,
+                "Scholarship application submitted",
+                student.getFirstName() + " applied for " + scheme.getSchemeName(),
+                saved.getId(),
+                null);
+        approvalHistoryService.record(
+                saved.getId(),
+                ScholarshipApprovalAction.SUBMITTED,
+                String.valueOf(currentUser().getUserId()),
+                request.getApplicationRemarks(),
+                null,
+                ScholarshipApplicationStatus.PENDING);
+        scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                reload(saved.getId()), ScholarshipApprovalAction.SUBMITTED, currentUser().getUsername());
         return response;
     }
 
@@ -176,7 +217,7 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
     }
 
     /**
-     * Principal or Correspondent approves their step; full approval triggers ledger discount recalc.
+     * Principal or Correspondent approves in one step; triggers ledger discount recalculation.
      */
     @Override
     @Transactional
@@ -255,52 +296,50 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             if (ScholarshipApplicationStatus.REJECTED.equals(previous)) {
                 return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPLICATION_ALREADY_REJECTED);
             }
+            if (!ScholarshipApplicationStatus.PENDING.equals(previous)
+                    && !ScholarshipApplicationStatus.PRINCIPAL_APPROVED.equals(previous)) {
+                return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPLICATION_INVALID_STATE);
+            }
 
-            String userId = String.valueOf(caller.getUserId());
-            LocalDateTime now = LocalDateTime.now();
             UserRole role = caller.getRole();
-
-            if (UserRole.PRINCIPAL.equals(role)) {
-                if (application.getPrincipalApprovedAt() != null) {
-                    return skipResult(application, previous, MessageConstants.SCHOLARSHIP_PRINCIPAL_ALREADY_APPROVED);
-                }
-                if (!ScholarshipApplicationStatus.PENDING.equals(previous)) {
-                    return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPLICATION_INVALID_STATE);
-                }
-                application.setPrincipalApprovedBy(userId);
-                application.setPrincipalApprovedAt(now);
-                application.setStatus(ScholarshipApplicationStatus.PRINCIPAL_APPROVED);
-            } else if (UserRole.CORRESPONDENT.equals(role)) {
-                if (application.getCorrespondentApprovedAt() != null) {
-                    return skipResult(
-                            application, previous, MessageConstants.SCHOLARSHIP_CORRESPONDENT_ALREADY_APPROVED);
-                }
-                if (!ScholarshipApplicationStatus.PRINCIPAL_APPROVED.equals(previous)) {
-                    return skipResult(
-                            application, previous, MessageConstants.SCHOLARSHIP_AWAITING_PRINCIPAL_APPROVAL);
-                }
-                application.setCorrespondentApprovedBy(userId);
-                application.setCorrespondentApprovedAt(now);
-                application.setStatus(ScholarshipApplicationStatus.APPROVED);
-            } else {
+            if (!UserRole.PRINCIPAL.equals(role) && !UserRole.CORRESPONDENT.equals(role)) {
                 return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPROVAL_ROLE_FORBIDDEN);
             }
 
-            if (application.getPrincipalApprovedAt() != null && application.getCorrespondentApprovedAt() != null) {
-                application.setStatus(ScholarshipApplicationStatus.APPROVED);
-            }
-
             ScholarshipApplicationResponseDTO before = applicationMapper.toResponse(application);
-            StudentScholarshipApplication saved = applicationRepository.save(application);
-
-            if (ScholarshipApplicationStatus.APPROVED.equals(saved.getStatus())) {
-                scholarshipDiscountService.recalculateUnpaidLedgersForStudent(
-                        saved.getStudent().getId(), saved.getAcademicYear().getId());
+            String userId = String.valueOf(caller.getUserId());
+            LocalDateTime now = LocalDateTime.now();
+            if (UserRole.PRINCIPAL.equals(role)) {
+                application.setPrincipalApprovedBy(userId);
+                application.setPrincipalApprovedAt(now);
+            } else {
+                application.setCorrespondentApprovedBy(userId);
+                application.setCorrespondentApprovedAt(now);
             }
+            application.setStatus(ScholarshipApplicationStatus.APPROVED);
+            application.setApprovedDiscountPercent(
+                    application.getRequestedDiscountPercent() != null
+                            ? application.getRequestedDiscountPercent()
+                            : (application.getScheme() != null
+                                    ? application.getScheme().getDiscountValue()
+                                    : null));
+
+            StudentScholarshipApplication saved = applicationRepository.save(application);
+            scholarshipDiscountService.recalculateUnpaidLedgersForStudent(
+                    saved.getStudent().getId(), saved.getAcademicYear().getId());
 
             ScholarshipApplicationResponseDTO after = applicationMapper.toResponse(reload(saved.getId()));
             auditService.logUpdate(
                     AuditEntityType.SCHOLARSHIP_APPLICATION, saved.getId(), before, after);
+            approvalHistoryService.record(
+                    saved.getId(),
+                    ScholarshipApprovalAction.APPROVED,
+                    userId,
+                    null,
+                    previous,
+                    ScholarshipApplicationStatus.APPROVED);
+            scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                    saved, ScholarshipApprovalAction.APPROVED, caller.getUsername());
 
             return ScholarshipApplicationActionResultDTO.builder()
                     .applicationId(saved.getId())
@@ -347,6 +386,10 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             if (ScholarshipApplicationStatus.REJECTED.equals(previous)) {
                 return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPLICATION_ALREADY_REJECTED);
             }
+            if (!ScholarshipApplicationStatus.PENDING.equals(previous)
+                    && !ScholarshipApplicationStatus.PRINCIPAL_APPROVED.equals(previous)) {
+                return skipResult(application, previous, MessageConstants.SCHOLARSHIP_APPLICATION_INVALID_STATE);
+            }
 
             ScholarshipApplicationResponseDTO before = applicationMapper.toResponse(application);
             application.setStatus(ScholarshipApplicationStatus.REJECTED);
@@ -358,6 +401,15 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             ScholarshipApplicationResponseDTO after = applicationMapper.toResponse(reload(saved.getId()));
             auditService.logUpdate(
                     AuditEntityType.SCHOLARSHIP_APPLICATION, saved.getId(), before, after);
+            approvalHistoryService.record(
+                    saved.getId(),
+                    ScholarshipApprovalAction.REJECTED,
+                    String.valueOf(caller.getUserId()),
+                    rejectionReason,
+                    previous,
+                    ScholarshipApplicationStatus.REJECTED);
+            scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                    saved, ScholarshipApprovalAction.REJECTED, caller.getUsername());
 
             return ScholarshipApplicationActionResultDTO.builder()
                     .applicationId(saved.getId())

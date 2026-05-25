@@ -4,9 +4,12 @@ import com.infiniteVision.schoolProject.common.dto.response.ApiResponse;
 import com.infiniteVision.schoolProject.common.dto.response.PagedResponseDTO;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.modules.fees.constants.FeesApiConstants;
+import com.infiniteVision.schoolProject.modules.fees.dto.request.BulkCreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
+import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureMatrixResponseDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureResponseDTO;
+import java.util.List;
 import com.infiniteVision.schoolProject.modules.fees.service.FeeStructureService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,10 +55,21 @@ public class FeeStructureController {
     }
 
     /**
+     * GET /api/v1/fees/structure/matrix — class-wise fee matrix for an academic year.
+     */
+    @GetMapping("/matrix")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
+    public ResponseEntity<ApiResponse<FeeStructureMatrixResponseDTO>> getFeeStructureMatrix(
+            @RequestParam Long academicYearId, @RequestParam Long classId) {
+        FeeStructureMatrixResponseDTO data = feeStructureService.getFeeStructureMatrix(academicYearId, classId);
+        return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS, data));
+    }
+
+    /**
      * GET /api/v1/fees/structure/{id} — single fee structure detail.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<FeeStructureResponseDTO>> getFeeStructureById(@PathVariable Long id) {
         FeeStructureResponseDTO data = feeStructureService.getFeeStructureById(id);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_STRUCTURE_RETRIEVED_SUCCESS, data));
@@ -65,12 +79,24 @@ public class FeeStructureController {
      * POST /api/v1/fees/structure — create fee structure.
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<FeeStructureResponseDTO>> createFeeStructure(
             @Valid @RequestBody CreateFeeStructureRequestDTO request) {
         FeeStructureResponseDTO data = feeStructureService.createFeeStructure(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(MessageConstants.FEE_STRUCTURE_CREATED_SUCCESS, data));
+    }
+
+    /**
+     * POST /api/v1/fees/structure/bulk — import multiple rows from fee document data.
+     */
+    @PostMapping("/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    public ResponseEntity<ApiResponse<List<FeeStructureResponseDTO>>> bulkCreateFeeStructures(
+            @Valid @RequestBody BulkCreateFeeStructureRequestDTO request) {
+        List<FeeStructureResponseDTO> data = feeStructureService.bulkCreateFeeStructures(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(MessageConstants.FEE_STRUCTURE_BULK_CREATED_SUCCESS, data));
     }
 
     /**

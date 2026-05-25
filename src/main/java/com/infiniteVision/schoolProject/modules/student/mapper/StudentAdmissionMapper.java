@@ -53,6 +53,7 @@ public class StudentAdmissionMapper {
                 .differentlyAbled(Boolean.FALSE)
                 .status(status)
                 .feesPaymentStatus(feesPaymentStatus)
+                .transportRequired(Boolean.TRUE.equals(dto.getTransportRequired()))
                 .deleted(Boolean.FALSE)
                 .build();
     }

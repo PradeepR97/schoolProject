@@ -9,5 +9,6 @@ public enum FeeBillingTerm {
     TERM2,
     TERM3,
     ANNUAL,
-    MONTHLY
+    MONTHLY,
+    SINGLE_PAYMENT
 }

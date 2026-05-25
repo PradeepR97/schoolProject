@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScholarshipDiscountServiceImpl implements ScholarshipDiscountService {
 
     private static final List<ScholarshipApplicationStatus> PENDING_STATUSES =
-            List.of(ScholarshipApplicationStatus.PENDING, ScholarshipApplicationStatus.PRINCIPAL_APPROVED);
+            List.of(ScholarshipApplicationStatus.PENDING);
 
     private final StudentScholarshipApplicationRepository applicationRepository;
     private final StudentFeeLedgerRepository studentFeeLedgerRepository;
@@ -58,19 +58,15 @@ public class ScholarshipDiscountServiceImpl implements ScholarshipDiscountServic
             Long studentId, Long academicYearId, FeeStructure structure) {
         List<StudentScholarshipApplication> pending = applicationRepository.findByStudentAndYearAndStatusIn(
                 studentId, academicYearId, PENDING_STATUSES);
-        ScholarshipApplicationStatus highest = null;
         for (StudentScholarshipApplication application : pending) {
             if (!ScholarshipDiscountCalculator.schemeAppliesToFeeStructure(application.getScheme(), structure)) {
                 continue;
             }
-            if (ScholarshipApplicationStatus.PRINCIPAL_APPROVED.equals(application.getStatus())) {
-                return ScholarshipApplicationStatus.PRINCIPAL_APPROVED;
-            }
             if (ScholarshipApplicationStatus.PENDING.equals(application.getStatus())) {
-                highest = ScholarshipApplicationStatus.PENDING;
+                return ScholarshipApplicationStatus.PENDING;
             }
         }
-        return highest;
+        return null;
     }
 
     private BigDecimal sumDiscountFromApplications(
@@ -82,7 +78,15 @@ public class ScholarshipDiscountServiceImpl implements ScholarshipDiscountServic
             if (!ScholarshipDiscountCalculator.schemeAppliesToFeeStructure(scheme, structure)) {
                 continue;
             }
-            totalDiscount = totalDiscount.add(ScholarshipDiscountCalculator.calculateDiscount(scheme, actual));
+            java.math.BigDecimal effectivePercent = application.getApprovedDiscountPercent() != null
+                    ? application.getApprovedDiscountPercent()
+                    : application.getRequestedDiscountPercent();
+            if (effectivePercent != null && effectivePercent.compareTo(BigDecimal.ZERO) > 0) {
+                totalDiscount = totalDiscount.add(
+                        ScholarshipDiscountCalculator.calculateDiscountFromPercent(actual, effectivePercent));
+            } else {
+                totalDiscount = totalDiscount.add(ScholarshipDiscountCalculator.calculateDiscount(scheme, actual));
+            }
         }
         if (totalDiscount.compareTo(actual) > 0) {
             return actual;

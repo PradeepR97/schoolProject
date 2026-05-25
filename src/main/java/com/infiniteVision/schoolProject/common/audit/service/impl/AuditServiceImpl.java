@@ -63,6 +63,17 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void logUpdate(AuditEntityType entityType, Long entityId, Object beforeSnapshot, Object afterSnapshot) {
+        logUpdate(entityType, entityId, beforeSnapshot, afterSnapshot, null);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void logUpdate(
+            AuditEntityType entityType,
+            Long entityId,
+            Object beforeSnapshot,
+            Object afterSnapshot,
+            String remarks) {
         persist(
                 entityType,
                 entityId,
@@ -70,7 +81,7 @@ public class AuditServiceImpl implements AuditService {
                 beforeSnapshot,
                 afterSnapshot,
                 resolveParticipantOrEmpty(),
-                null);
+                remarks);
     }
 
     @Override

@@ -7,5 +7,6 @@ public enum UserRole {
 
     ADMIN,
     PRINCIPAL,
-    CORRESPONDENT
+    CORRESPONDENT,
+    ACCOUNTANT
 }

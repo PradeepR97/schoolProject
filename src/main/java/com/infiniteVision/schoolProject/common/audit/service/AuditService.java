@@ -35,6 +35,16 @@ public interface AuditService {
     void logUpdate(AuditEntityType entityType, Long entityId, Object beforeSnapshot, Object afterSnapshot);
 
     /**
+     * Records an update with optional remarks (e.g. password change where the DTO diff is empty).
+     */
+    void logUpdate(
+            AuditEntityType entityType,
+            Long entityId,
+            Object beforeSnapshot,
+            Object afterSnapshot,
+            String remarks);
+
+    /**
      * Records a soft delete or removal; stores the last known state in {@code snapshot_before}.
      */
     void logDelete(AuditEntityType entityType, Long entityId, Object beforeSnapshot);

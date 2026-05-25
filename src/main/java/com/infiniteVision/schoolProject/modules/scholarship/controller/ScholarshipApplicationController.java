@@ -10,8 +10,11 @@ import com.infiniteVision.schoolProject.modules.scholarship.dto.request.CreateSc
 import com.infiniteVision.schoolProject.modules.scholarship.dto.request.RejectScholarshipApplicationRequestDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.response.BulkScholarshipApplicationResponseDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.response.ScholarshipApplicationResponseDTO;
+import com.infiniteVision.schoolProject.modules.scholarship.dto.response.ScholarshipApprovalHistoryResponseDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApplicationStatus;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApplicationService;
+import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApprovalHistoryService;
+import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST endpoints for per-student scholarship discount applications and dual approval workflow.
+ * REST endpoints for per-student scholarship discount applications and single-step approval workflow.
  */
 @RestController
 @RequestMapping(
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScholarshipApplicationController {
 
     private final ScholarshipApplicationService scholarshipApplicationService;
+    private final ScholarshipApprovalHistoryService approvalHistoryService;
 
     /** POST /api/v1/scholarship-applications — submit discount application for a student. */
     @PostMapping
@@ -85,6 +89,16 @@ public class ScholarshipApplicationController {
                 scholarshipApplicationService.listByStudent(studentId, page, size);
         return ResponseEntity.ok(
                 ApiResponse.success(MessageConstants.SCHOLARSHIP_APPLICATIONS_LISTED_SUCCESS, applications));
+    }
+
+    /** GET /api/v1/scholarship-applications/{applicationId}/history */
+    @GetMapping("/{applicationId}/history")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    public ResponseEntity<ApiResponse<List<ScholarshipApprovalHistoryResponseDTO>>> listApprovalHistory(
+            @PathVariable Long applicationId) {
+        List<ScholarshipApprovalHistoryResponseDTO> history =
+                approvalHistoryService.listByApplicationId(applicationId);
+        return ResponseEntity.ok(ApiResponse.success(MessageConstants.SCHOLARSHIP_HISTORY_LISTED_SUCCESS, history));
     }
 
     /** POST /api/v1/scholarship-applications/{applicationId}/approve */

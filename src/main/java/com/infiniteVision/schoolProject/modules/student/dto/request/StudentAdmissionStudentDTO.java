@@ -80,4 +80,7 @@ public class StudentAdmissionStudentDTO {
     private StudentStatus status;
 
     private FeesPaymentStatus feesPaymentStatus;
+
+    /** When true, transport fee structure rows are included in ledger generation. */
+    private Boolean transportRequired;
 }

@@ -7,8 +7,12 @@ import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
+import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.fees.dto.request.BulkCreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
+import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureMatrixResponseDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureResponseDTO;
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeStructure;
 import com.infiniteVision.schoolProject.modules.fees.mapper.FeeStructureMapper;
@@ -45,6 +49,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     private final FeeStructureMapper feeStructureMapper;
     private final FeeStructureValidator feeStructureValidator;
     private final AuditService auditService;
+    private final ClassMasterRepository classMasterRepository;
 
     /**
      * Load filtered page of non-deleted fee structures; default sort by structure id descending.
@@ -121,9 +126,12 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         feeStructureMapper.applyUpdates(existing, request);
 
         FeeStructure saved = feeStructureRepository.save(existing);
+        FeeStructureResponseDTO afterSnapshot =
+                feeStructureMapper.toResponse(findActiveWithRelationsOrThrow(saved.getId()));
+        auditService.logUpdate(AuditEntityType.FEE_STRUCTURE, id, beforeSnapshot, afterSnapshot);
         log.info("Fee structure updated id={} by user id={}", id, caller.getUserId());
 
-        return feeStructureMapper.toResponse(findActiveWithRelationsOrThrow(saved.getId()));
+        return afterSnapshot;
     }
 
     /**
@@ -141,6 +149,48 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         auditService.logDelete(AuditEntityType.FEE_STRUCTURE, id, beforeSnapshot);
 
         log.info("Fee structure soft-deleted id={} by user id={}", id, caller.getUserId());
+    }
+
+    /**
+     * Loads active structures for class/year as a matrix payload for the fee document UI.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId) {
+        ClassMaster classMaster = classMasterRepository
+                .findByIdAndDeletedFalseWithSection(classId)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.CLASS_NOT_FOUND));
+
+        List<FeeStructureResponseDTO> structures =
+                feeStructureRepository.findActiveByClassIdAndAcademicYearId(classId, academicYearId).stream()
+                        .map(feeStructureMapper::toResponse)
+                        .toList();
+
+        String className = classMaster.getClassName();
+        if (classMaster.getSection() != null) {
+            className = className + " - " + classMaster.getSection().getSectionCode();
+        }
+
+        return FeeStructureMatrixResponseDTO.builder()
+                .academicYearId(academicYearId)
+                .classId(classId)
+                .className(className)
+                .structures(structures)
+                .build();
+    }
+
+    /**
+     * Persists each structure row; skips none — duplicates raise validation from repository layer.
+     */
+    @Override
+    @Transactional
+    public List<FeeStructureResponseDTO> bulkCreateFeeStructures(BulkCreateFeeStructureRequestDTO request) {
+        List<FeeStructureResponseDTO> created = new java.util.ArrayList<>();
+        for (CreateFeeStructureRequestDTO row : request.getStructures()) {
+            created.add(createFeeStructure(row));
+        }
+        log.info("Bulk fee structures created count={}", created.size());
+        return created;
     }
 
     private FeeStructure findActiveWithRelationsOrThrow(Long id) {

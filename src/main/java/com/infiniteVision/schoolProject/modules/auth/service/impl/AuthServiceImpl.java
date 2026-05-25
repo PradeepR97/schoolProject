@@ -17,6 +17,7 @@ import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginVerifyOtpR
 import com.infiniteVision.schoolProject.modules.auth.dto.request.ResetPasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.enums.OtpPurpose;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.VerifyOtpRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.response.CreateUserResponseDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.VerifyOtpResponseDTO;
 import com.infiniteVision.schoolProject.modules.auth.service.OtpService;
@@ -145,6 +146,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByIdAndDeletedFalse(principal.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.USER_NOT_FOUND));
+        CreateUserResponseDTO beforeSnapshot = CreateUserResponseDTO.fromUser(user);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             log.warn("Change password failed for user id={}", user.getId());
@@ -165,6 +167,12 @@ public class AuthServiceImpl implements AuthService {
         jwtService.revokeAllSessions(user.getId());
         userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionEnds);
 
+        auditService.logUpdate(
+                AuditEntityType.USER,
+                user.getId(),
+                beforeSnapshot,
+                CreateUserResponseDTO.fromUser(user),
+                "Password changed via change-password API");
         log.info("Password changed for user id={}", user.getId());
     }
 
@@ -231,6 +239,7 @@ public class AuthServiceImpl implements AuthService {
                     MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.NEW_PASSWORD_SAME_AS_CURRENT));
         }
 
+        CreateUserResponseDTO beforeSnapshot = CreateUserResponseDTO.fromUser(user);
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.saveAndFlush(user);
 
@@ -239,6 +248,12 @@ public class AuthServiceImpl implements AuthService {
         userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionEnds);
         otpService.consumeResetToken(request.getResetToken());
 
+        auditService.logUpdate(
+                AuditEntityType.USER,
+                user.getId(),
+                beforeSnapshot,
+                CreateUserResponseDTO.fromUser(user),
+                "Password reset via forgot-password flow");
         log.info("Password reset successful for user id={}", user.getId());
     }
 
@@ -281,8 +296,15 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException(MessageConstants.INVALID_OTP);
         }
 
+        CreateUserResponseDTO beforeSnapshot = CreateUserResponseDTO.fromUser(user);
         user.setOtpVerified(Boolean.TRUE);
         userRepository.saveAndFlush(user);
+        auditService.logUpdate(
+                AuditEntityType.USER,
+                user.getId(),
+                beforeSnapshot,
+                CreateUserResponseDTO.fromUser(user),
+                "First-login OTP verified");
 
         log.info("First-login OTP verified for user id={}", user.getId());
         return completeLoginSession(user);

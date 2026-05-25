@@ -152,6 +152,14 @@ public final class MessageConstants {
     public static final String LATE_FEE_ADJUSTED_SUCCESS = "Late fee adjusted successfully";
     public static final String PAYMENT_COLLECTED_SUCCESS = "Payment collected successfully";
     public static final String PAYMENT_RECEIPT_RETRIEVED_SUCCESS = "Payment receipt retrieved successfully";
+    public static final String RECEIPT_DETAILS_RETRIEVED_SUCCESS = "Receipt details retrieved successfully";
+    public static final String RECEIPT_PRINTED_SUCCESS = "Receipt printed successfully";
+    public static final String RECEIPT_REPRINTED_SUCCESS = "Receipt reprinted successfully";
+    public static final String RECEIPT_PRINT_HISTORY_RETRIEVED_SUCCESS = "Receipt print history retrieved successfully";
+    public static final String RECEIPT_REPRINT_REQUIRES_INITIAL_PRINT = "Print the receipt once before reprinting";
+    public static final String RECEIPT_REPRINT_LIMIT_EXCEEDED = "Maximum receipt reprint limit exceeded";
+    public static final String RECEIPT_PRINT_ONLY_SUCCESS_PAYMENTS = "Receipts can only be printed for successful payments";
+    public static final String RECEIPT_PDF_GENERATION_FAILED = "Failed to generate receipt PDF";
     public static final String PAYMENT_CANCELLED_SUCCESS = "Payment cancelled successfully";
     public static final String PAYMENT_REFUNDED_SUCCESS = "Payment refunded successfully";
     public static final String PAYMENT_NOT_FOUND = "Payment not found";
@@ -197,4 +205,14 @@ public final class MessageConstants {
             "Start/end month and year filters are not used for student report";
     public static final String REPORT_INVALID_EXPORT_FORMAT = "Export format must be EXCEL or PDF";
     public static final String REPORT_EXPORT_FAILED = "Failed to generate report export";
+    public static final String DASHBOARD_SUMMARY_RETRIEVED_SUCCESS = "Dashboard data fetched successfully";
+    public static final String FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS = "Fee structure matrix retrieved successfully";
+    public static final String FEE_STRUCTURE_BULK_CREATED_SUCCESS = "Fee structures created successfully";
+    public static final String MERIT_BANDS_LISTED_SUCCESS = "Merit scholarship bands retrieved successfully";
+    public static final String MERIT_BAND_RESOLVED_SUCCESS = "Merit discount resolved successfully";
+    public static final String SCHOLARSHIP_HISTORY_LISTED_SUCCESS = "Scholarship approval history retrieved successfully";
+    public static final String NOTIFICATIONS_LISTED_SUCCESS = "Notifications retrieved successfully";
+    public static final String NOTIFICATION_READ_SUCCESS = "Notification marked as read";
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
+    public static final String NOTIFICATION_UNREAD_COUNT_SUCCESS = "Unread notification count retrieved successfully";
 }

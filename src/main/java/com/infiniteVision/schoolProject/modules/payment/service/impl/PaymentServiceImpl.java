@@ -33,6 +33,8 @@ import com.infiniteVision.schoolProject.modules.payment.service.PaymentService;
 import com.infiniteVision.schoolProject.modules.payment.util.PaymentDocumentNumberGenerator;
 import com.infiniteVision.schoolProject.modules.payment.util.PaymentStatusCalculator;
 import com.infiniteVision.schoolProject.modules.payment.validator.PaymentValidator;
+import com.infiniteVision.schoolProject.modules.dashboard.enums.DashboardActivityType;
+import com.infiniteVision.schoolProject.modules.dashboard.service.DashboardActivityPublisher;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApplicationStatus;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipDiscountService;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
@@ -76,6 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final AuditService auditService;
     private final InvoiceService invoiceService;
     private final ScholarshipDiscountService scholarshipDiscountService;
+    private final DashboardActivityPublisher dashboardActivityPublisher;
 
     /**
      * Record payment, sync ledger and invoice balances, refresh student fees status, write audit rows.
@@ -194,6 +197,14 @@ public class PaymentServiceImpl implements PaymentService {
                 ledger.getId(),
                 request.getAmountPaid(),
                 caller.getUserId());
+
+        String studentLabel = formatStudentName(student);
+        dashboardActivityPublisher.publish(
+                DashboardActivityType.PAYMENT_SUCCESS,
+                "Payment received",
+                studentLabel + " paid " + request.getAmountPaid() + " (receipt " + receiptNo + ")",
+                savedPayment.getId(),
+                caller.getUsername());
 
         return response;
     }
@@ -401,6 +412,15 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ValidationException(
                     MessageConstants.VALIDATION_FAILED, List.of("Page size must be zero or greater"));
         }
+    }
+
+    private static String formatStudentName(Student student) {
+        String first = student.getFirstName() != null ? student.getFirstName().trim() : "";
+        String last = student.getLastName() != null ? student.getLastName().trim() : "";
+        if (last.isEmpty()) {
+            return first;
+        }
+        return first + " " + last;
     }
 
     private AuthenticatedUser currentUser() {
