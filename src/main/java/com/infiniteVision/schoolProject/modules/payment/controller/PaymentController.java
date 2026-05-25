@@ -56,7 +56,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments — paginated payment list. */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PagedResponseDTO<PaymentListItemResponseDTO>>> listPayments(
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Long ledgerId,
@@ -73,7 +73,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments/invoices — paginated invoice list. */
     @GetMapping("/invoices")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PagedResponseDTO<InvoiceListItemResponseDTO>>> listInvoices(
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Long academicYearId,
@@ -87,7 +87,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments/invoices/{invoiceId} */
     @GetMapping("/invoices/{invoiceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<InvoiceDetailResponseDTO>> getInvoiceById(@PathVariable Long invoiceId) {
         InvoiceDetailResponseDTO data = invoiceService.getInvoiceById(invoiceId);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.INVOICE_RETRIEVED_SUCCESS, data));
@@ -95,7 +95,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/ledgers/generate */
     @PostMapping("/ledgers/generate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<GenerateLedgerResponseDTO>> generateLedgers(
             @Valid @RequestBody GenerateLedgerRequestDTO request) {
         GenerateLedgerResponseDTO data = feeLedgerService.generateLedgers(request);
@@ -105,7 +105,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/ledgers/regenerate — recalculate unpaid ledgers from fee structures. */
     @PostMapping("/ledgers/regenerate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<RegenerateLedgerResponseDTO>> regenerateLedgers(
             @Valid @RequestBody RegenerateLedgerRequestDTO request) {
         RegenerateLedgerResponseDTO data = feeLedgerService.regenerateLedgers(request);
@@ -114,7 +114,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments/ledgers/{ledgerId} */
     @GetMapping("/ledgers/{ledgerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<FeeLedgerDetailResponseDTO>> getLedgerById(@PathVariable Long ledgerId) {
         FeeLedgerDetailResponseDTO data = feeLedgerService.getLedgerById(ledgerId);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_LEDGER_RETRIEVED_SUCCESS, data));
@@ -122,7 +122,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/ledgers/{ledgerId}/late-fee — manual late-fee adjustment. */
     @PostMapping("/ledgers/{ledgerId}/late-fee")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<FeeLedgerSummaryResponseDTO>> adjustLateFee(
             @PathVariable Long ledgerId, @Valid @RequestBody AdjustLateFeeRequestDTO request) {
         FeeLedgerSummaryResponseDTO data = feeLedgerService.adjustLateFee(ledgerId, request);
@@ -131,7 +131,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/invoices/generate */
     @PostMapping("/invoices/generate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<InvoiceSummaryResponseDTO>> generateInvoice(
             @Valid @RequestBody GenerateInvoiceRequestDTO request) {
         InvoiceSummaryResponseDTO data = invoiceService.generateInvoice(request);
@@ -141,7 +141,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/collect */
     @PostMapping("/collect")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PaymentReceiptResponseDTO>> collectPayment(
             @Valid @RequestBody CollectPaymentRequestDTO request) {
         PaymentReceiptResponseDTO data = paymentService.collectPayment(request);
@@ -151,7 +151,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments/students/{studentId}/dues */
     @GetMapping("/students/{studentId}/dues")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<StudentFeeDuesResponseDTO>> getStudentDues(
             @PathVariable Long studentId,
             @RequestParam(required = false) Long academicYearId) {
@@ -161,7 +161,7 @@ public class PaymentController {
 
     /** GET /api/v1/payments/receipts/{paymentId} */
     @GetMapping("/receipts/{paymentId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PaymentReceiptResponseDTO>> getReceipt(@PathVariable Long paymentId) {
         PaymentReceiptResponseDTO data = paymentService.getReceiptById(paymentId);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.PAYMENT_RECEIPT_RETRIEVED_SUCCESS, data));
@@ -169,7 +169,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/{paymentId}/cancel */
     @PostMapping("/{paymentId}/cancel")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PaymentReceiptResponseDTO>> cancelPayment(
             @PathVariable Long paymentId, @Valid @RequestBody CancelPaymentRequestDTO request) {
         PaymentReceiptResponseDTO data = paymentService.cancelPayment(paymentId, request);
@@ -178,7 +178,7 @@ public class PaymentController {
 
     /** POST /api/v1/payments/{paymentId}/refund */
     @PostMapping("/{paymentId}/refund")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PaymentReceiptResponseDTO>> refundPayment(
             @PathVariable Long paymentId, @Valid @RequestBody RefundPaymentRequestDTO request) {
         PaymentReceiptResponseDTO data = paymentService.refundPayment(paymentId, request);

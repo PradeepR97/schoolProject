@@ -16,6 +16,19 @@ public final class ScholarshipDiscountCalculator {
     private ScholarshipDiscountCalculator() {
     }
 
+    public static BigDecimal calculateDiscountFromPercent(BigDecimal actualAmount, BigDecimal discountPercent) {
+        if (actualAmount == null
+                || actualAmount.compareTo(BigDecimal.ZERO) <= 0
+                || discountPercent == null
+                || discountPercent.compareTo(BigDecimal.ZERO) <= 0) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal discount = actualAmount
+                .multiply(discountPercent)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        return discount.min(actualAmount);
+    }
+
     public static BigDecimal calculateDiscount(SchoolScheme scheme, BigDecimal actualAmount) {
         if (scheme == null || actualAmount == null || actualAmount.compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
@@ -58,7 +71,19 @@ public final class ScholarshipDiscountCalculator {
         return false;
     }
 
-    private static boolean isTuitionHead(FeeHead feeHead) {
+    public static boolean isTransportHead(FeeHead feeHead) {
+        if (feeHead == null) {
+            return false;
+        }
+        if (feeHead.getFeeHeadCode() != null
+                && "TRANSPORT".equalsIgnoreCase(feeHead.getFeeHeadCode().trim())) {
+            return true;
+        }
+        return feeHead.getFeeCategory() != null
+                && "TRANSPORT".equalsIgnoreCase(feeHead.getFeeCategory().trim());
+    }
+
+    public static boolean isTuitionHead(FeeHead feeHead) {
         if (feeHead.getFeeHeadCode() != null) {
             String code = feeHead.getFeeHeadCode().toUpperCase();
             if (code.contains("TUITION") || code.contains("TUIT")) {

@@ -1,9 +1,12 @@
 package com.infiniteVision.schoolProject.modules.fees.service;
 
 import com.infiniteVision.schoolProject.common.dto.response.PagedResponseDTO;
+import com.infiniteVision.schoolProject.modules.fees.dto.request.BulkCreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
+import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureMatrixResponseDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureResponseDTO;
+import java.util.List;
 
 /**
  * Fee structure CRUD: list (filtered/paginated), get, create, update, soft delete.
@@ -55,4 +58,14 @@ public interface FeeStructureService {
      * @param id structure primary key
      */
     void deleteFeeStructure(Long id);
+
+    /**
+     * Returns all active fee structure rows for a class and academic year (matrix view).
+     */
+    FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId);
+
+    /**
+     * Creates multiple fee structure rows in one transaction.
+     */
+    List<FeeStructureResponseDTO> bulkCreateFeeStructures(BulkCreateFeeStructureRequestDTO request);
 }

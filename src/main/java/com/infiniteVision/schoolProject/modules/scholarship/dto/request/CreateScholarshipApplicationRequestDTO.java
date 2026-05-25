@@ -1,7 +1,10 @@
 package com.infiniteVision.schoolProject.modules.scholarship.dto.request;
 
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,4 +30,9 @@ public class CreateScholarshipApplicationRequestDTO {
 
     @Size(max = 2000, message = "Remarks must not exceed 2000 characters")
     private String applicationRemarks;
+
+    /** Optional exam mark used to resolve merit-band discount percent from DB configuration. */
+    @PositiveOrZero(message = "Marks must be zero or positive")
+    @DecimalMax(value = "999.99", message = "Marks value is too large")
+    private BigDecimal marksAtApplication;
 }

@@ -20,6 +20,18 @@ public final class MessageConstants {
     public static final String CURRENT_PASSWORD_INCORRECT = "Current password is incorrect";
     public static final String NEW_PASSWORD_MISMATCH = "New password and confirmation do not match";
     public static final String NEW_PASSWORD_SAME_AS_CURRENT = "New password must be different from current password";
+    public static final String OTP_SENT_SUCCESS = "If the account exists, an OTP has been sent";
+    public static final String OTP_VERIFIED_SUCCESS = "OTP verified successfully";
+    public static final String OTP_VERIFICATION_FAILED = "OTP verification failed";
+    public static final String INVALID_OTP = "Invalid OTP";
+    public static final String LOGIN_OTP_REQUIRED = "OTP verification required to complete login";
+    public static final String LOGIN_OTP_SENT_SUCCESS = "OTP sent successfully";
+    public static final String FIRST_LOGIN_OTP_VERIFIED_SUCCESS =
+            "OTP verified successfully. Login completed.";
+    public static final String OTP_EXPIRED = "OTP has expired";
+    public static final String OTP_RESEND_TOO_SOON = "Please wait 30 seconds before requesting a new OTP";
+    public static final String RESET_TOKEN_INVALID = "Invalid or expired reset token";
+    public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully";
     public static final String USER_CREATED_SUCCESS = "User created successfully";
     public static final String USERS_LISTED_SUCCESS = "Users retrieved successfully";
     public static final String USER_RETRIEVED_SUCCESS = "User retrieved successfully";
@@ -62,6 +74,7 @@ public final class MessageConstants {
             "At least one of father, mother, or guardian name is required";
 
     public static final String MASTER_DATA_RETRIEVED_SUCCESS = "Master data retrieved successfully";
+    public static final String LOOKUPS_RETRIEVED_SUCCESS = "Lookups retrieved successfully";
 
     public static final String SCHOLARSHIP_CREATED_SUCCESS = "Scholarship created successfully";
     public static final String SCHOLARSHIPS_LISTED_SUCCESS = "Scholarships retrieved successfully";
@@ -149,4 +162,14 @@ public final class MessageConstants {
     public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
     public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
     public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
+    public static final String DASHBOARD_SUMMARY_RETRIEVED_SUCCESS = "Dashboard data fetched successfully";
+    public static final String FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS = "Fee structure matrix retrieved successfully";
+    public static final String FEE_STRUCTURE_BULK_CREATED_SUCCESS = "Fee structures created successfully";
+    public static final String MERIT_BANDS_LISTED_SUCCESS = "Merit scholarship bands retrieved successfully";
+    public static final String MERIT_BAND_RESOLVED_SUCCESS = "Merit discount resolved successfully";
+    public static final String SCHOLARSHIP_HISTORY_LISTED_SUCCESS = "Scholarship approval history retrieved successfully";
+    public static final String NOTIFICATIONS_LISTED_SUCCESS = "Notifications retrieved successfully";
+    public static final String NOTIFICATION_READ_SUCCESS = "Notification marked as read";
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
+    public static final String NOTIFICATION_UNREAD_COUNT_SUCCESS = "Unread notification count retrieved successfully";
 }

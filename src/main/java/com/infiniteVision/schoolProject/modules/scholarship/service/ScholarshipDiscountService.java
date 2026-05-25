@@ -19,8 +19,7 @@ public interface ScholarshipDiscountService {
     BigDecimal resolveApprovedDiscount(Long studentId, Long academicYearId, FeeStructure structure);
 
     /**
-     * Sum of discounts from in-flight applications ({@code PENDING}, {@code PRINCIPAL_APPROVED})
-     * that would apply if fully approved.
+     * Sum of discounts from in-flight {@link ScholarshipApplicationStatus#PENDING} applications.
      */
     BigDecimal resolvePendingDiscount(Long studentId, Long academicYearId, FeeStructure structure);
 

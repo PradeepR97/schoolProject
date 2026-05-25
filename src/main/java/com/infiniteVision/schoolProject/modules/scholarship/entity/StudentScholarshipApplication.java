@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -88,6 +89,15 @@ public class StudentScholarshipApplication extends BaseEntity {
 
     @Column(name = "application_remarks", columnDefinition = "TEXT")
     private String applicationRemarks;
+
+    @Column(name = "marks_at_application", precision = 6, scale = 2)
+    private BigDecimal marksAtApplication;
+
+    @Column(name = "requested_discount_percent", precision = 5, scale = 2)
+    private BigDecimal requestedDiscountPercent;
+
+    @Column(name = "approved_discount_percent", precision = 5, scale = 2)
+    private BigDecimal approvedDiscountPercent;
 
     @Column(name = "principal_approved_by", length = 100)
     private String principalApprovedBy;

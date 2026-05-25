@@ -21,6 +21,7 @@ public final class PaymentTermMapper {
             case TERM_3 -> FeeBillingTerm.TERM3;
             case ANNUAL -> FeeBillingTerm.ANNUAL;
             case MONTHLY -> FeeBillingTerm.MONTHLY;
+            case SINGLE_PAYMENT -> FeeBillingTerm.SINGLE_PAYMENT;
         };
     }
 

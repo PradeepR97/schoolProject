@@ -1,6 +1,7 @@
 package com.infiniteVision.schoolProject.config;
 
 import com.infiniteVision.schoolProject.constants.ApiConstants;
+import com.infiniteVision.schoolProject.modules.auth.constants.AuthApiConstants;
 import com.infiniteVision.schoolProject.modules.health.constants.HealthApiConstants;
 import com.infiniteVision.schoolProject.security.JwtAuthenticationFilter;
 import com.infiniteVision.schoolProject.security.SecurityHandlers;
@@ -22,11 +23,19 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, OtpProperties.class})
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String LOGIN_PATH = ApiConstants.API_V1_PREFIX + "/auth/login";
+    private static final String[] PUBLIC_AUTH_PATHS = {
+        ApiConstants.API_V1_PREFIX + "/auth/login",
+        AuthApiConstants.FORGOT_PASSWORD,
+        AuthApiConstants.VERIFY_OTP,
+        AuthApiConstants.RESET_PASSWORD,
+        AuthApiConstants.LOGIN_SEND_OTP,
+        AuthApiConstants.LOGIN_VERIFY_OTP,
+        AuthApiConstants.LOGIN_RESEND_OTP
+    };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final SecurityHandlers securityHandlers;
@@ -44,7 +53,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e.authenticationEntryPoint(securityHandlers)
                         .accessDeniedHandler(securityHandlers))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HealthApiConstants.BASE_PATH, LOGIN_PATH)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HealthApiConstants.BASE_PATH)
+                        .permitAll()
+                        .requestMatchers(PUBLIC_AUTH_PATHS)
                         .permitAll()
                         .anyRequest()
                         .authenticated())

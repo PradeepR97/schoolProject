@@ -9,5 +9,7 @@ public enum TermType {
     TERM_2,
     TERM_3,
     ANNUAL,
-    MONTHLY
+    MONTHLY,
+    /** One-time full-year or consolidated payment option from fee structure document. */
+    SINGLE_PAYMENT
 }

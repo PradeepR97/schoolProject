@@ -1,6 +1,7 @@
 package com.infiniteVision.schoolProject.modules.scholarship.dto.response;
 
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApplicationStatus;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,9 @@ public class ScholarshipApplicationResponseDTO {
     private ScholarshipApplicationStatus status;
     private LocalDateTime appliedAt;
     private String applicationRemarks;
+    private BigDecimal marksAtApplication;
+    private BigDecimal requestedDiscountPercent;
+    private BigDecimal approvedDiscountPercent;
     private String principalApprovedBy;
     private LocalDateTime principalApprovedAt;
     private String correspondentApprovedBy;
