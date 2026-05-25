@@ -27,6 +27,7 @@ import com.infiniteVision.schoolProject.modules.payment.util.PaymentStatusCalcul
 import com.infiniteVision.schoolProject.modules.payment.util.PaymentTermMapper;
 import com.infiniteVision.schoolProject.modules.payment.validator.PaymentValidator;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipDiscountService;
+import com.infiniteVision.schoolProject.modules.scholarship.util.ScholarshipDiscountCalculator;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.repository.StudentRepository;
 import java.math.BigDecimal;
@@ -89,6 +90,13 @@ public class FeeLedgerServiceImpl implements FeeLedgerService {
         List<FeeLedgerSummaryResponseDTO> summaries = new ArrayList<>();
 
         for (FeeStructure structure : structures) {
+            if (!Boolean.TRUE.equals(student.getTransportRequired())
+                    && structure.getFeeHead() != null
+                    && ScholarshipDiscountCalculator.isTransportHead(structure.getFeeHead())) {
+                skipped++;
+                continue;
+            }
+
             FeeBillingTerm billingTerm = PaymentTermMapper.toBillingTerm(structure.getTermType());
             if (request.getTerm() != null && !request.getTerm().equals(billingTerm)) {
                 continue;

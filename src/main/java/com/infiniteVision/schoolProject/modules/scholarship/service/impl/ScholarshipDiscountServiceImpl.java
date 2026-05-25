@@ -78,7 +78,15 @@ public class ScholarshipDiscountServiceImpl implements ScholarshipDiscountServic
             if (!ScholarshipDiscountCalculator.schemeAppliesToFeeStructure(scheme, structure)) {
                 continue;
             }
-            totalDiscount = totalDiscount.add(ScholarshipDiscountCalculator.calculateDiscount(scheme, actual));
+            java.math.BigDecimal effectivePercent = application.getApprovedDiscountPercent() != null
+                    ? application.getApprovedDiscountPercent()
+                    : application.getRequestedDiscountPercent();
+            if (effectivePercent != null && effectivePercent.compareTo(BigDecimal.ZERO) > 0) {
+                totalDiscount = totalDiscount.add(
+                        ScholarshipDiscountCalculator.calculateDiscountFromPercent(actual, effectivePercent));
+            } else {
+                totalDiscount = totalDiscount.add(ScholarshipDiscountCalculator.calculateDiscount(scheme, actual));
+            }
         }
         if (totalDiscount.compareTo(actual) > 0) {
             return actual;

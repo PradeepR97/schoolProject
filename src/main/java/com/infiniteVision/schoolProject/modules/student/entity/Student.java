@@ -189,6 +189,11 @@ public class Student extends BaseEntity {
     @Column(name = "fees_payment_status", nullable = false, length = 20)
     private FeesPaymentStatus feesPaymentStatus = FeesPaymentStatus.PENDING;
 
+    /** When false, transport fee structures are skipped during ledger generation. */
+    @NotNull(message = "Transport required flag is required")
+    @Column(name = "transport_required", nullable = false)
+    private Boolean transportRequired = Boolean.FALSE;
+
     /**
      * Soft-deletes this student and sets {@link StudentStatus#DISCONTINUED}.
      *

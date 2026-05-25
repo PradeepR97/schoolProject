@@ -18,8 +18,8 @@ public class RoleAssignmentValidator {
         }
         return switch (creatorRole) {
             case ADMIN -> true;
-            case PRINCIPAL -> UserRole.CORRESPONDENT.equals(targetRole);
-            case CORRESPONDENT -> false;
+            case PRINCIPAL -> UserRole.CORRESPONDENT.equals(targetRole) || UserRole.ACCOUNTANT.equals(targetRole);
+            case CORRESPONDENT, ACCOUNTANT -> false;
         };
     }
 }

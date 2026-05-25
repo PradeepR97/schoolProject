@@ -163,4 +163,13 @@ public final class MessageConstants {
     public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
     public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
     public static final String DASHBOARD_SUMMARY_RETRIEVED_SUCCESS = "Dashboard data fetched successfully";
+    public static final String FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS = "Fee structure matrix retrieved successfully";
+    public static final String FEE_STRUCTURE_BULK_CREATED_SUCCESS = "Fee structures created successfully";
+    public static final String MERIT_BANDS_LISTED_SUCCESS = "Merit scholarship bands retrieved successfully";
+    public static final String MERIT_BAND_RESOLVED_SUCCESS = "Merit discount resolved successfully";
+    public static final String SCHOLARSHIP_HISTORY_LISTED_SUCCESS = "Scholarship approval history retrieved successfully";
+    public static final String NOTIFICATIONS_LISTED_SUCCESS = "Notifications retrieved successfully";
+    public static final String NOTIFICATION_READ_SUCCESS = "Notification marked as read";
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
+    public static final String NOTIFICATION_UNREAD_COUNT_SUCCESS = "Unread notification count retrieved successfully";
 }

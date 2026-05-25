@@ -26,8 +26,14 @@ import com.infiniteVision.schoolProject.modules.scholarship.repository.SchoolSch
 import com.infiniteVision.schoolProject.modules.scholarship.repository.StudentScholarshipApplicationRepository;
 import com.infiniteVision.schoolProject.modules.dashboard.enums.DashboardActivityType;
 import com.infiniteVision.schoolProject.modules.dashboard.service.DashboardActivityPublisher;
+import com.infiniteVision.schoolProject.modules.notification.service.ScholarshipNotificationDispatcher;
+import com.infiniteVision.schoolProject.modules.scholarship.dto.response.MeritBandResolveResponseDTO;
+import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApprovalAction;
+import com.infiniteVision.schoolProject.modules.scholarship.service.MeritScholarshipBandService;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApplicationService;
+import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipApprovalHistoryService;
 import com.infiniteVision.schoolProject.modules.scholarship.service.ScholarshipDiscountService;
+import java.math.BigDecimal;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.repository.StudentRepository;
 import com.infiniteVision.schoolProject.security.AuthenticatedUser;
@@ -68,6 +74,9 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
     private final ScholarshipDiscountService scholarshipDiscountService;
     private final AuditService auditService;
     private final DashboardActivityPublisher dashboardActivityPublisher;
+    private final MeritScholarshipBandService meritScholarshipBandService;
+    private final ScholarshipApprovalHistoryService approvalHistoryService;
+    private final ScholarshipNotificationDispatcher scholarshipNotificationDispatcher;
 
     /**
      * Staff submits a discount application for a student and scheme.
@@ -106,6 +115,18 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             throw new BusinessException(MessageConstants.SCHOLARSHIP_APPLICATION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
 
+        BigDecimal marks = request.getMarksAtApplication() != null
+                ? request.getMarksAtApplication()
+                : student.getTenthMark();
+        BigDecimal requestedPercent = null;
+        if (marks != null) {
+            MeritBandResolveResponseDTO merit =
+                    meritScholarshipBandService.resolveDiscountPercent(request.getAcademicYearId(), marks);
+            if (merit.isMatched()) {
+                requestedPercent = merit.getDiscountPercent();
+            }
+        }
+
         StudentScholarshipApplication application = StudentScholarshipApplication.builder()
                 .student(student)
                 .scheme(scheme)
@@ -113,6 +134,8 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 .status(ScholarshipApplicationStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .applicationRemarks(request.getApplicationRemarks())
+                .marksAtApplication(marks)
+                .requestedDiscountPercent(requestedPercent)
                 .deleted(Boolean.FALSE)
                 .build();
 
@@ -130,6 +153,15 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 student.getFirstName() + " applied for " + scheme.getSchemeName(),
                 saved.getId(),
                 null);
+        approvalHistoryService.record(
+                saved.getId(),
+                ScholarshipApprovalAction.SUBMITTED,
+                String.valueOf(currentUser().getUserId()),
+                request.getApplicationRemarks(),
+                null,
+                ScholarshipApplicationStatus.PENDING);
+        scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                reload(saved.getId()), ScholarshipApprovalAction.SUBMITTED, currentUser().getUsername());
         return response;
     }
 
@@ -285,6 +317,12 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
                 application.setCorrespondentApprovedAt(now);
             }
             application.setStatus(ScholarshipApplicationStatus.APPROVED);
+            application.setApprovedDiscountPercent(
+                    application.getRequestedDiscountPercent() != null
+                            ? application.getRequestedDiscountPercent()
+                            : (application.getScheme() != null
+                                    ? application.getScheme().getDiscountValue()
+                                    : null));
 
             StudentScholarshipApplication saved = applicationRepository.save(application);
             scholarshipDiscountService.recalculateUnpaidLedgersForStudent(
@@ -293,6 +331,15 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             ScholarshipApplicationResponseDTO after = applicationMapper.toResponse(reload(saved.getId()));
             auditService.logUpdate(
                     AuditEntityType.SCHOLARSHIP_APPLICATION, saved.getId(), before, after);
+            approvalHistoryService.record(
+                    saved.getId(),
+                    ScholarshipApprovalAction.APPROVED,
+                    userId,
+                    null,
+                    previous,
+                    ScholarshipApplicationStatus.APPROVED);
+            scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                    saved, ScholarshipApprovalAction.APPROVED, caller.getUsername());
 
             return ScholarshipApplicationActionResultDTO.builder()
                     .applicationId(saved.getId())
@@ -354,6 +401,15 @@ public class ScholarshipApplicationServiceImpl implements ScholarshipApplication
             ScholarshipApplicationResponseDTO after = applicationMapper.toResponse(reload(saved.getId()));
             auditService.logUpdate(
                     AuditEntityType.SCHOLARSHIP_APPLICATION, saved.getId(), before, after);
+            approvalHistoryService.record(
+                    saved.getId(),
+                    ScholarshipApprovalAction.REJECTED,
+                    String.valueOf(caller.getUserId()),
+                    rejectionReason,
+                    previous,
+                    ScholarshipApplicationStatus.REJECTED);
+            scholarshipNotificationDispatcher.notifyScholarshipEvent(
+                    saved, ScholarshipApprovalAction.REJECTED, caller.getUsername());
 
             return ScholarshipApplicationActionResultDTO.builder()
                     .applicationId(saved.getId())
