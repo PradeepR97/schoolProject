@@ -6,6 +6,7 @@ import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectPayme
 import com.infiniteVision.schoolProject.modules.payment.dto.request.RefundPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentDueSummaryResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDuesResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.enums.PaymentRecordStatus;
 import java.time.LocalDate;
@@ -49,7 +50,17 @@ public interface PaymentService {
      * @param studentId student primary key
      * @param academicYearId optional filter; uses student's year when null
      */
-    StudentFeeDuesResponseDTO getStudentDues(Long studentId, Long academicYearId);
+    StudentFeeDuesResponseDTO getStudentDues(Long studentId, Long academicYearId, boolean outstandingOnly);
+
+    /**
+     * Paginated list of students with outstanding fee balances (multiple fee heads aggregated per student).
+     */
+    PagedResponseDTO<StudentDueSummaryResponseDTO> listDuePayments(
+            Long academicYearId,
+            Long classId,
+            boolean overdueOnly,
+            int page,
+            int size);
 
     /**
      * Loads a payment receipt with related ledger and invoice amounts.
