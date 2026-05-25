@@ -170,6 +170,41 @@ public final class MessageConstants {
     public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
     public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
     public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
+
+    public static final String EXCEL_UPLOAD_TEMPLATE_RETRIEVED_SUCCESS =
+            "Student admission Excel template retrieved successfully";
+    public static final String EXCEL_UPLOAD_BULK_ADMISSION_COMPLETED =
+            "Student admission bulk upload completed";
+    public static final String EXCEL_UPLOAD_FILE_REQUIRED = "Excel file is required";
+    public static final String EXCEL_UPLOAD_INVALID_FILE_TYPE = "Only .xlsx Excel files are supported";
+    public static final String EXCEL_UPLOAD_EMPTY_FILE = "Uploaded file is empty";
+    public static final String EXCEL_UPLOAD_NO_DATA_ROWS = "No student rows found in the Excel file";
+    public static final String EXCEL_UPLOAD_MAX_ROWS_EXCEEDED = "Excel file exceeds the maximum allowed row count";
+    public static final String EXCEL_UPLOAD_MISSING_HEADER_ROW = "Excel file must contain a header row";
+    public static final String EXCEL_UPLOAD_MISSING_REQUIRED_COLUMN = "Missing required column: ";
+    public static final String EXCEL_UPLOAD_DUPLICATE_ADMISSION_NO_IN_FILE =
+            "Duplicate admission number in file";
+    public static final String EXCEL_UPLOAD_DUPLICATE_AADHAR_IN_FILE = "Duplicate Aadhar number in file";
+    public static final String EXCEL_UPLOAD_DRY_RUN_SUCCESS = "Validation completed (dry run, no records saved)";
+
+    public static final String REPORTS_LISTED_SUCCESS = "Reports retrieved successfully";
+    public static final String REPORT_EXPORTED_SUCCESS = "Report exported successfully";
+    public static final String REPORT_ACADEMIC_YEAR_REQUIRED = "Academic year is required for report export";
+    public static final String REPORT_START_MONTH_REQUIRED =
+            "Start month (1-12) is required for fee collection report";
+    public static final String REPORT_START_YEAR_REQUIRED =
+            "Start year is required for fee collection report";
+    public static final String REPORT_END_MONTH_REQUIRED = "End month (1-12) is required for fee collection report";
+    public static final String REPORT_END_YEAR_REQUIRED = "End year is required for fee collection report";
+    public static final String REPORT_INVALID_MONTH_VALUE = "Month must be between 1 and 12";
+    public static final String REPORT_INVALID_YEAR_VALUE = "Year must be between 2000 and 2100";
+    public static final String REPORT_INVALID_MONTH_YEAR = "Invalid month and year combination";
+    public static final String REPORT_END_BEFORE_START_MONTH_YEAR =
+            "End month/year must not be before start month/year";
+    public static final String REPORT_MONTH_YEAR_RANGE_NOT_SUPPORTED_FOR_STUDENT =
+            "Start/end month and year filters are not used for student report";
+    public static final String REPORT_INVALID_EXPORT_FORMAT = "Export format must be EXCEL or PDF";
+    public static final String REPORT_EXPORT_FAILED = "Failed to generate report export";
     public static final String DASHBOARD_SUMMARY_RETRIEVED_SUCCESS = "Dashboard data fetched successfully";
     public static final String FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS = "Fee structure matrix retrieved successfully";
     public static final String FEE_STRUCTURE_BULK_CREATED_SUCCESS = "Fee structures created successfully";
