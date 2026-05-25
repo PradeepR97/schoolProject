@@ -162,4 +162,20 @@ public final class MessageConstants {
     public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
     public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
     public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
+
+    public static final String EXCEL_UPLOAD_TEMPLATE_RETRIEVED_SUCCESS =
+            "Student admission Excel template retrieved successfully";
+    public static final String EXCEL_UPLOAD_BULK_ADMISSION_COMPLETED =
+            "Student admission bulk upload completed";
+    public static final String EXCEL_UPLOAD_FILE_REQUIRED = "Excel file is required";
+    public static final String EXCEL_UPLOAD_INVALID_FILE_TYPE = "Only .xlsx Excel files are supported";
+    public static final String EXCEL_UPLOAD_EMPTY_FILE = "Uploaded file is empty";
+    public static final String EXCEL_UPLOAD_NO_DATA_ROWS = "No student rows found in the Excel file";
+    public static final String EXCEL_UPLOAD_MAX_ROWS_EXCEEDED = "Excel file exceeds the maximum allowed row count";
+    public static final String EXCEL_UPLOAD_MISSING_HEADER_ROW = "Excel file must contain a header row";
+    public static final String EXCEL_UPLOAD_MISSING_REQUIRED_COLUMN = "Missing required column: ";
+    public static final String EXCEL_UPLOAD_DUPLICATE_ADMISSION_NO_IN_FILE =
+            "Duplicate admission number in file";
+    public static final String EXCEL_UPLOAD_DUPLICATE_AADHAR_IN_FILE = "Duplicate Aadhar number in file";
+    public static final String EXCEL_UPLOAD_DRY_RUN_SUCCESS = "Validation completed (dry run, no records saved)";
 }
