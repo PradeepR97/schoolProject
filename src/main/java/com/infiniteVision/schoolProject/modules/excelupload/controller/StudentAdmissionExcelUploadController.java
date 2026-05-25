@@ -1,13 +1,13 @@
 package com.infiniteVision.schoolProject.modules.excelupload.controller;
 
 import com.infiniteVision.schoolProject.common.dto.response.ApiResponse;
+import com.infiniteVision.schoolProject.common.http.FileAttachmentHeaders;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.modules.excelupload.constants.ExcelUploadApiConstants;
 import com.infiniteVision.schoolProject.modules.excelupload.dto.response.BulkStudentAdmissionUploadResponseDTO;
 import com.infiniteVision.schoolProject.modules.excelupload.service.StudentAdmissionExcelUploadService;
 import com.infiniteVision.schoolProject.modules.excelupload.template.StudentAdmissionExcelTemplateService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +45,10 @@ public class StudentAdmissionExcelUploadController {
     }
 
     private static ResponseEntity<byte[]> excelAttachment(byte[] body, String filename) {
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType(
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(body);
+        return FileAttachmentHeaders.okAttachment(
+                body,
+                MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                filename);
     }
 
     /** POST /api/v1/excel-upload/student-admissions/upload */
