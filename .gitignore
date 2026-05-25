@@ -29,13 +29,20 @@ build/
 # Cursor
 .cursor/
 
-# Documentation, rules, and JSON (local / generated — not committed)
+# Documentation and rules (local — not committed)
 *.md
 *.mdc
+
+# JSON (Postman collections, environments, local exports — not committed)
 *.json
 
 # SQL scripts (local / reference DDL — not committed)
 *.sql
+
+# Application config (environment-specific secrets and URLs — not committed)
+**/application.properties
+**/application-*.properties
+!**/application.properties.example
 
 # Secrets
 .env

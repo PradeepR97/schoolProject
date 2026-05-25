@@ -1,8 +1,14 @@
 package com.infiniteVision.schoolProject.modules.auth.service;
 
 import com.infiniteVision.schoolProject.modules.auth.dto.request.ChangePasswordRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ForgotPasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginSendOtpRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginVerifyOtpRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ResetPasswordRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.VerifyOtpRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.response.VerifyOtpResponseDTO;
 
 /**
  * Authentication use cases for the School ERP API.
@@ -47,4 +53,49 @@ public interface AuthService {
      *         if the authenticated user record is missing or soft-deleted
      */
     void changePassword(ChangePasswordRequestDTO request);
+
+    /**
+     * Request a forgot-password OTP for email or phone (generic success; no account enumeration).
+     *
+     * @param request exactly one of {@code email} or {@code phone}
+     * @throws com.infiniteVision.schoolProject.exception.ValidationException
+     *         if resend cooldown active or identifier rules fail
+     */
+    void forgotPassword(ForgotPasswordRequestDTO request);
+
+    /**
+     * Verify 6-digit OTP and issue a one-time reset token.
+     *
+     * @param request identifier and OTP
+     * @return reset token and expiry in seconds
+     * @throws com.infiniteVision.schoolProject.exception.UnauthorizedException
+     *         if OTP is invalid or expired
+     */
+    VerifyOtpResponseDTO verifyOtp(VerifyOtpRequestDTO request);
+
+    /**
+     * Set new password using reset token from OTP verification; revokes all sessions.
+     *
+     * @param request reset token, new password, and confirmation
+     * @throws com.infiniteVision.schoolProject.exception.UnauthorizedException
+     *         if reset token is invalid
+     * @throws com.infiniteVision.schoolProject.exception.ValidationException
+     *         if passwords mismatch or match old password
+     */
+    void resetPassword(ResetPasswordRequestDTO request);
+
+    /**
+     * Send first-login OTP for an account that has not completed OTP verification.
+     */
+    void sendLoginOtp(LoginSendOtpRequestDTO request);
+
+    /**
+     * Resend first-login OTP (30-second cooldown applies).
+     */
+    void resendLoginOtp(LoginSendOtpRequestDTO request);
+
+    /**
+     * Verify first-login OTP, mark user verified, and issue Bearer session token.
+     */
+    LoginResponseDTO verifyLoginOtp(LoginVerifyOtpRequestDTO request);
 }

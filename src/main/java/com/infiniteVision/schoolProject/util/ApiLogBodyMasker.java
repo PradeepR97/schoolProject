@@ -19,6 +19,7 @@ public final class ApiLogBodyMasker {
             "accesstoken",
             "refreshtoken",
             "otp",
+            "resettoken",
             "authorization");
 
     private static final Pattern JSON_FIELD_PATTERN = Pattern.compile(

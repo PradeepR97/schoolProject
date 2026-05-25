@@ -20,6 +20,18 @@ public final class MessageConstants {
     public static final String CURRENT_PASSWORD_INCORRECT = "Current password is incorrect";
     public static final String NEW_PASSWORD_MISMATCH = "New password and confirmation do not match";
     public static final String NEW_PASSWORD_SAME_AS_CURRENT = "New password must be different from current password";
+    public static final String OTP_SENT_SUCCESS = "If the account exists, an OTP has been sent";
+    public static final String OTP_VERIFIED_SUCCESS = "OTP verified successfully";
+    public static final String OTP_VERIFICATION_FAILED = "OTP verification failed";
+    public static final String INVALID_OTP = "Invalid OTP";
+    public static final String LOGIN_OTP_REQUIRED = "OTP verification required to complete login";
+    public static final String LOGIN_OTP_SENT_SUCCESS = "OTP sent successfully";
+    public static final String FIRST_LOGIN_OTP_VERIFIED_SUCCESS =
+            "OTP verified successfully. Login completed.";
+    public static final String OTP_EXPIRED = "OTP has expired";
+    public static final String OTP_RESEND_TOO_SOON = "Please wait 30 seconds before requesting a new OTP";
+    public static final String RESET_TOKEN_INVALID = "Invalid or expired reset token";
+    public static final String PASSWORD_RESET_SUCCESS = "Password reset successfully";
     public static final String USER_CREATED_SUCCESS = "User created successfully";
     public static final String USERS_LISTED_SUCCESS = "Users retrieved successfully";
     public static final String USER_RETRIEVED_SUCCESS = "User retrieved successfully";
@@ -62,6 +74,7 @@ public final class MessageConstants {
             "At least one of father, mother, or guardian name is required";
 
     public static final String MASTER_DATA_RETRIEVED_SUCCESS = "Master data retrieved successfully";
+    public static final String LOOKUPS_RETRIEVED_SUCCESS = "Lookups retrieved successfully";
 
     public static final String SCHOLARSHIP_CREATED_SUCCESS = "Scholarship created successfully";
     public static final String SCHOLARSHIPS_LISTED_SUCCESS = "Scholarships retrieved successfully";

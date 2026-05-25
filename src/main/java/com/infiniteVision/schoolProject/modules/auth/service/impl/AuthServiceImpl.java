@@ -10,8 +10,17 @@ import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.ChangePasswordRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ForgotPasswordRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginSendOtpRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.LoginVerifyOtpRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.ResetPasswordRequestDTO;
+import com.infiniteVision.schoolProject.modules.auth.enums.OtpPurpose;
+import com.infiniteVision.schoolProject.modules.auth.dto.request.VerifyOtpRequestDTO;
 import com.infiniteVision.schoolProject.modules.auth.dto.response.LoginResponseDTO;
+import com.infiniteVision.schoolProject.modules.auth.dto.response.VerifyOtpResponseDTO;
+import com.infiniteVision.schoolProject.modules.auth.service.OtpService;
+import com.infiniteVision.schoolProject.modules.auth.util.AuthIdentifierUtil;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.entity.UserSession;
 import com.infiniteVision.schoolProject.modules.auth.enums.UserStatus;
@@ -41,6 +50,12 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * <b>Change password flow:</b> validate confirmation → verify current BCrypt → save new hash
  * → revoke all DB/Redis sessions (re-login required).
+ * <p>
+ * <b>Forgot password flow:</b> send OTP (Redis) → verify OTP → issue reset token → BCrypt reset
+ * → revoke sessions. Mock OTP {@code 123456} when {@code otp.mock-enabled=true}.
+ * <p>
+ * <b>First login flow:</b> password OK but {@code otp_verified=false} → send OTP, no Bearer token
+ * → verify OTP → set {@code otp_verified=true} → issue session token.
  */
 @Slf4j
 @Service
@@ -53,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserSessionRepository userSessionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final OtpService otpService;
     private final AuditService auditService;
 
     /**
@@ -73,45 +89,18 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException(MessageConstants.AUTHENTICATION_FAILED);
         }
 
-        LocalDateTime sessionStarts = LocalDateTime.now();
-        UUID sessionId = UUID.randomUUID();
+        if (requiresFirstLoginOtp(user)) {
+            String identifier = AuthIdentifierUtil.normalizeIdentifier(request.getEmail(), request.getPhone());
+            otpService.sendOtp(OtpPurpose.FIRST_LOGIN, user.getId(), identifier);
+            log.info("First-login OTP required for user id={}", user.getId());
+            return LoginResponseDTO.builder()
+                    .otpRequired(Boolean.TRUE)
+                    .otpExpiresIn(otpService.otpExpirationSeconds())
+                    .user(toProfile(user))
+                    .build();
+        }
 
-        // Invalidate previous Redis + DB sessions (single active session per user)
-        jwtService.revokeAllSessions(user.getId());
-        userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionStarts);
-
-        userSessionRepository.save(UserSession.builder()
-                .sessionId(sessionId)
-                .userId(user.getId())
-                .sessionStarts(sessionStarts)
-                .deleted(Boolean.FALSE)
-                .build());
-
-        String token = jwtService.generateSessionToken();
-        jwtService.storeSession(user.getId(), token, user.getRole(), sessionId);
-
-        user.setLastLogin(sessionStarts);
-        userRepository.saveAndFlush(user);
-        log.info("Login successful for user id={}, sessionId={}", user.getId(), sessionId);
-
-        auditService.logAuthEvent(
-                AuditEntityType.USER_SESSION,
-                user.getId(),
-                AuditAction.LOGIN,
-                Map.of(
-                        "userId", user.getId(),
-                        "sessionId", sessionId.toString(),
-                        "username", user.getUsername(),
-                        "role", user.getRole().name()),
-                AuditParticipant.of(user.getId(), sessionId),
-                "User login");
-
-        return LoginResponseDTO.builder()
-                .token(token)
-                .tokenType(TOKEN_TYPE)
-                .expiresIn(jwtService.expirationSeconds())
-                .user(toProfile(user))
-                .build();
+        return completeLoginSession(user);
     }
 
     /**
@@ -179,6 +168,193 @@ public class AuthServiceImpl implements AuthService {
         log.info("Password changed for user id={}", user.getId());
     }
 
+    /**
+     * Sends forgot-password OTP for active users; always completes without revealing account existence.
+     */
+    @Override
+    public void forgotPassword(ForgotPasswordRequestDTO request) {
+        AuthIdentifierUtil.validateForgotPasswordIdentifiers(request);
+        String identifier =
+                AuthIdentifierUtil.normalizeIdentifier(request.getEmail(), request.getPhone());
+
+        findUserByIdentifier(request.getEmail(), request.getPhone())
+                .filter(user -> UserStatus.ACTIVE.equals(user.getStatus()))
+                .ifPresent(user -> otpService.sendForgotPasswordOtp(user.getId(), identifier));
+
+        log.info("Forgot-password OTP request processed for identifier={}", identifier.substring(0, Math.min(6, identifier.length())) + "***");
+    }
+
+    /**
+     * Validates OTP in Redis and returns a short-lived reset token for {@link #resetPassword}.
+     */
+    @Override
+    public VerifyOtpResponseDTO verifyOtp(VerifyOtpRequestDTO request) {
+        AuthIdentifierUtil.validateVerifyOtpIdentifiers(request);
+        String identifier =
+                AuthIdentifierUtil.normalizeIdentifier(request.getEmail(), request.getPhone());
+
+        Long userId = otpService.verifyForgotPasswordOtp(identifier, request.getOtp());
+        userRepository
+                .findByIdAndDeletedFalse(userId)
+                .filter(user -> UserStatus.ACTIVE.equals(user.getStatus()))
+                .orElseThrow(() -> new UnauthorizedException(MessageConstants.OTP_VERIFICATION_FAILED));
+
+        String resetToken = otpService.issueResetToken(userId);
+        return VerifyOtpResponseDTO.builder()
+                .resetToken(resetToken)
+                .expiresIn(otpService.resetTokenExpirationSeconds())
+                .build();
+    }
+
+    /**
+     * Updates password from reset token; invalidates token and all login sessions.
+     */
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDTO request) {
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.NEW_PASSWORD_MISMATCH));
+        }
+
+        Long userId = otpService.resolveResetToken(request.getResetToken());
+        User user = userRepository
+                .findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new UnauthorizedException(MessageConstants.RESET_TOKEN_INVALID));
+
+        if (!UserStatus.ACTIVE.equals(user.getStatus())) {
+            throw new UnauthorizedException(MessageConstants.RESET_TOKEN_INVALID);
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.NEW_PASSWORD_SAME_AS_CURRENT));
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.saveAndFlush(user);
+
+        LocalDateTime sessionEnds = LocalDateTime.now();
+        jwtService.revokeAllSessions(user.getId());
+        userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionEnds);
+        otpService.consumeResetToken(request.getResetToken());
+
+        log.info("Password reset successful for user id={}", user.getId());
+    }
+
+    /**
+     * Sends first-login OTP when the account has not completed verification.
+     */
+    @Override
+    public void sendLoginOtp(LoginSendOtpRequestDTO request) {
+        User user = resolveUserPendingFirstLoginOtp(request.getEmail(), request.getPhone());
+        String identifier = AuthIdentifierUtil.normalizeIdentifier(request.getEmail(), request.getPhone());
+        otpService.sendOtp(OtpPurpose.FIRST_LOGIN, user.getId(), identifier);
+        log.info("First-login OTP send requested for user id={}", user.getId());
+    }
+
+    /**
+     * Resend first-login OTP (same rules as send; 30-second cooldown enforced in Redis).
+     */
+    @Override
+    public void resendLoginOtp(LoginSendOtpRequestDTO request) {
+        sendLoginOtp(request);
+    }
+
+    /**
+     * Verifies first-login OTP, marks user verified, and completes login with Bearer token.
+     */
+    @Override
+    @Transactional
+    public LoginResponseDTO verifyLoginOtp(LoginVerifyOtpRequestDTO request) {
+        AuthIdentifierUtil.validateLoginVerifyOtpIdentifiers(request);
+        String identifier =
+                AuthIdentifierUtil.normalizeIdentifier(request.getEmail(), request.getPhone());
+
+        Long userId = otpService.verifyOtp(OtpPurpose.FIRST_LOGIN, identifier, request.getOtp());
+        User user = userRepository
+                .findByIdAndDeletedFalse(userId)
+                .filter(account -> UserStatus.ACTIVE.equals(account.getStatus()))
+                .orElseThrow(() -> new UnauthorizedException(MessageConstants.INVALID_OTP));
+
+        if (!identifierMatchesUser(user, request.getEmail(), request.getPhone())) {
+            throw new UnauthorizedException(MessageConstants.INVALID_OTP);
+        }
+
+        user.setOtpVerified(Boolean.TRUE);
+        userRepository.saveAndFlush(user);
+
+        log.info("First-login OTP verified for user id={}", user.getId());
+        return completeLoginSession(user);
+    }
+
+    /**
+     * Creates DB/Redis session and returns login payload with Bearer token.
+     */
+    private LoginResponseDTO completeLoginSession(User user) {
+        LocalDateTime sessionStarts = LocalDateTime.now();
+        UUID sessionId = UUID.randomUUID();
+
+        jwtService.revokeAllSessions(user.getId());
+        userSessionRepository.endAllActiveSessionsForUser(user.getId(), sessionStarts);
+
+        userSessionRepository.save(UserSession.builder()
+                .sessionId(sessionId)
+                .userId(user.getId())
+                .sessionStarts(sessionStarts)
+                .deleted(Boolean.FALSE)
+                .build());
+
+        String token = jwtService.generateSessionToken();
+        jwtService.storeSession(user.getId(), token, user.getRole(), sessionId);
+
+        user.setLastLogin(sessionStarts);
+        userRepository.saveAndFlush(user);
+        log.info("Login successful for user id={}, sessionId={}", user.getId(), sessionId);
+
+        auditService.logAuthEvent(
+                AuditEntityType.USER_SESSION,
+                user.getId(),
+                AuditAction.LOGIN,
+                Map.of(
+                        "userId", user.getId(),
+                        "sessionId", sessionId.toString(),
+                        "username", user.getUsername(),
+                        "role", user.getRole().name()),
+                AuditParticipant.of(user.getId(), sessionId),
+                "User login");
+
+        return LoginResponseDTO.builder()
+                .token(token)
+                .tokenType(TOKEN_TYPE)
+                .expiresIn(jwtService.expirationSeconds())
+                .otpRequired(Boolean.FALSE)
+                .user(toProfile(user))
+                .build();
+    }
+
+    private User resolveUserPendingFirstLoginOtp(String email, String phone) {
+        AuthIdentifierUtil.validateLoginSendOtpIdentifiers(
+                LoginSendOtpRequestDTO.builder().email(email).phone(phone).build());
+        User user = findUserByIdentifier(email, phone)
+                .orElseThrow(() -> new UnauthorizedException(MessageConstants.AUTHENTICATION_FAILED));
+        if (!UserStatus.ACTIVE.equals(user.getStatus()) || !requiresFirstLoginOtp(user)) {
+            throw new UnauthorizedException(MessageConstants.AUTHENTICATION_FAILED);
+        }
+        return user;
+    }
+
+    private static boolean requiresFirstLoginOtp(User user) {
+        return !Boolean.TRUE.equals(user.getOtpVerified());
+    }
+
+    private static boolean identifierMatchesUser(User user, String email, String phone) {
+        if (AuthIdentifierUtil.hasEmail(email)) {
+            return user.getEmail().equalsIgnoreCase(email.trim());
+        }
+        return user.getPhone().equals(phone.trim());
+    }
+
     private void validateLoginIdentifiers(LoginRequestDTO request) {
         boolean hasEmail = request.getEmail() != null && !request.getEmail().isBlank();
         boolean hasPhone = request.getPhone() != null && !request.getPhone().isBlank();
@@ -190,10 +366,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Optional<User> findUser(LoginRequestDTO request) {
-        if (request.getEmail() != null && !request.getEmail().isBlank()) {
-            return userRepository.findByEmailAndDeletedFalse(request.getEmail().trim());
+        return findUserByIdentifier(request.getEmail(), request.getPhone());
+    }
+
+    private Optional<User> findUserByIdentifier(String email, String phone) {
+        if (AuthIdentifierUtil.hasEmail(email)) {
+            return userRepository.findByEmailAndDeletedFalse(email.trim().toLowerCase());
         }
-        return userRepository.findByPhoneAndDeletedFalse(request.getPhone().trim());
+        return userRepository.findByPhoneAndDeletedFalse(phone.trim());
     }
 
     private LoginResponseDTO.UserProfile toProfile(User user) {

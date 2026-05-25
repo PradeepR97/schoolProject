@@ -19,6 +19,9 @@ public class LoginResponseDTO {
     private String token;
     private String tokenType;
     private long expiresIn;
+    /** {@code true} when password is valid but first-login OTP is still required (no token issued). */
+    private Boolean otpRequired;
+    private Long otpExpiresIn;
     private UserProfile user;
 
     @Getter
