@@ -17,6 +17,7 @@ import com.infiniteVision.schoolProject.modules.payment.dto.request.GenerateInvo
 import com.infiniteVision.schoolProject.modules.payment.dto.request.RefundPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentDueSummaryResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDueItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDuesResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.entity.Invoice;
@@ -44,8 +45,12 @@ import com.infiniteVision.schoolProject.security.AuthenticatedUser;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -267,7 +272,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     @Transactional(readOnly = true)
-    public StudentFeeDuesResponseDTO getStudentDues(Long studentId, Long academicYearId) {
+    public StudentFeeDuesResponseDTO getStudentDues(Long studentId, Long academicYearId, boolean outstandingOnly) {
         Student student = studentRepository
                 .findByIdAndDeletedFalse(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.STUDENT_NOT_FOUND));
@@ -280,7 +285,19 @@ public class PaymentServiceImpl implements PaymentService {
 
         List<StudentFeeDueItemResponseDTO> items = new ArrayList<>();
         BigDecimal totalPendingDiscount = BigDecimal.ZERO;
+        BigDecimal totalNet = BigDecimal.ZERO;
+        BigDecimal totalPaid = BigDecimal.ZERO;
+        BigDecimal totalBalance = BigDecimal.ZERO;
+        long dueCount = 0;
+        long overdueCount = 0;
+
         for (StudentFeeLedger ledger : ledgers) {
+            if (outstandingOnly
+                    && (ledger.getBalanceAmount() == null
+                            || ledger.getBalanceAmount().compareTo(BigDecimal.ZERO) <= 0)) {
+                continue;
+            }
+
             Invoice invoice = invoiceRepository.findByLedger_IdAndDeletedFalse(ledger.getId()).orElse(null);
             FeeStructure structure = ledger.getFeeStructure();
             BigDecimal pendingDiscount = BigDecimal.ZERO;
@@ -292,7 +309,21 @@ public class PaymentServiceImpl implements PaymentService {
                 totalPendingDiscount = totalPendingDiscount.add(
                         pendingDiscount != null ? pendingDiscount : BigDecimal.ZERO);
             }
-            items.add(paymentMapper.toDueItem(ledger, invoice, pendingDiscount, pendingStatus));
+
+            StudentFeeDueItemResponseDTO item =
+                    paymentMapper.toDueItem(ledger, invoice, pendingDiscount, pendingStatus);
+            items.add(item);
+
+            totalNet = totalNet.add(ledger.getNetAmount() != null ? ledger.getNetAmount() : BigDecimal.ZERO);
+            totalPaid = totalPaid.add(ledger.getPaidAmount() != null ? ledger.getPaidAmount() : BigDecimal.ZERO);
+            BigDecimal balance = ledger.getBalanceAmount() != null ? ledger.getBalanceAmount() : BigDecimal.ZERO;
+            totalBalance = totalBalance.add(balance);
+            if (balance.compareTo(BigDecimal.ZERO) > 0) {
+                dueCount++;
+                if (Boolean.TRUE.equals(item.getOverdue())) {
+                    overdueCount++;
+                }
+            }
         }
 
         String studentName = student.getFirstName()
@@ -307,7 +338,98 @@ public class PaymentServiceImpl implements PaymentService {
                 .academicYearId(yearId)
                 .feesPaymentStatus(student.getFeesPaymentStatus())
                 .totalPendingScholarshipDiscount(totalPendingDiscount)
+                .totalNetAmount(totalNet)
+                .totalPaidAmount(totalPaid)
+                .totalBalanceDue(totalBalance)
+                .dueLedgerCount(dueCount)
+                .overdueLedgerCount(overdueCount)
                 .ledgers(items)
+                .build();
+    }
+
+    /**
+     * Lists students with outstanding balances; aggregates multiple fee-head ledgers per student.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponseDTO<StudentDueSummaryResponseDTO> listDuePayments(
+            Long academicYearId, Long classId, boolean overdueOnly, int page, int size) {
+        validatePagination(page, size);
+        int effectiveSize = size > 0 ? Math.min(size, MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
+
+        List<StudentFeeLedger> ledgers = studentFeeLedgerRepository.findAllOutstandingLedgers(
+                academicYearId, classId, overdueOnly, LedgerStatus.OVERDUE, BigDecimal.ZERO);
+
+        Map<Long, List<StudentFeeLedger>> byStudent = ledgers.stream()
+                .collect(Collectors.groupingBy(
+                        l -> l.getStudent().getId(), LinkedHashMap::new, Collectors.toList()));
+
+        List<StudentDueSummaryResponseDTO> summaries = new ArrayList<>();
+        for (List<StudentFeeLedger> studentLedgers : byStudent.values()) {
+            summaries.add(buildDueSummary(studentLedgers));
+        }
+
+        summaries.sort(Comparator.comparing(StudentDueSummaryResponseDTO::getTotalBalanceDue).reversed());
+
+        int total = summaries.size();
+        int from = Math.min(page * effectiveSize, total);
+        int to = Math.min(from + effectiveSize, total);
+        List<StudentDueSummaryResponseDTO> pageContent = summaries.subList(from, to);
+        int totalPages = effectiveSize > 0 ? (int) Math.ceil((double) total / effectiveSize) : 0;
+
+        log.info(
+                "Due payments listed academicYearId={} classId={} overdueOnly={} totalStudents={}",
+                academicYearId,
+                classId,
+                overdueOnly,
+                total);
+
+        return PagedResponseDTO.<StudentDueSummaryResponseDTO>builder()
+                .content(pageContent)
+                .page(page)
+                .size(effectiveSize)
+                .totalElements(total)
+                .totalPages(totalPages)
+                .first(page == 0)
+                .last(page >= totalPages - 1 || totalPages == 0)
+                .build();
+    }
+
+    private StudentDueSummaryResponseDTO buildDueSummary(List<StudentFeeLedger> ledgers) {
+        Student student = ledgers.get(0).getStudent();
+        Long academicYearId =
+                ledgers.get(0).getAcademicYear() != null ? ledgers.get(0).getAcademicYear().getId() : null;
+
+        BigDecimal totalBalance = BigDecimal.ZERO;
+        BigDecimal totalNet = BigDecimal.ZERO;
+        BigDecimal totalPaid = BigDecimal.ZERO;
+        long overdueCount = 0;
+
+        for (StudentFeeLedger ledger : ledgers) {
+            totalBalance = totalBalance.add(
+                    ledger.getBalanceAmount() != null ? ledger.getBalanceAmount() : BigDecimal.ZERO);
+            totalNet = totalNet.add(ledger.getNetAmount() != null ? ledger.getNetAmount() : BigDecimal.ZERO);
+            totalPaid = totalPaid.add(ledger.getPaidAmount() != null ? ledger.getPaidAmount() : BigDecimal.ZERO);
+            StudentFeeDueItemResponseDTO item = paymentMapper.toDueItem(ledger, null);
+            if (Boolean.TRUE.equals(item.getOverdue())) {
+                overdueCount++;
+            }
+        }
+
+        String studentName = formatStudentName(student);
+
+        return StudentDueSummaryResponseDTO.builder()
+                .studentId(student.getId())
+                .admissionNo(student.getAdmissionNo())
+                .studentName(studentName)
+                .classId(student.getClassId())
+                .academicYearId(academicYearId)
+                .feesPaymentStatus(student.getFeesPaymentStatus())
+                .totalBalanceDue(totalBalance)
+                .totalNetAmount(totalNet)
+                .totalPaidAmount(totalPaid)
+                .dueLedgerCount(ledgers.size())
+                .overdueLedgerCount(overdueCount)
                 .build();
     }
 

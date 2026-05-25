@@ -20,6 +20,7 @@ import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceSumm
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.RegenerateLedgerResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentDueSummaryResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDuesResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.enums.InvoiceStatus;
 import com.infiniteVision.schoolProject.modules.payment.enums.PaymentRecordStatus;
@@ -149,13 +150,28 @@ public class PaymentController {
                 .body(ApiResponse.success(MessageConstants.PAYMENT_COLLECTED_SUCCESS, data));
     }
 
-    /** GET /api/v1/payments/students/{studentId}/dues */
+    /** GET /api/v1/payments/dues — students with outstanding fee balances (all fee heads). */
+    @GetMapping("/dues")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
+    public ResponseEntity<ApiResponse<PagedResponseDTO<StudentDueSummaryResponseDTO>>> listDuePayments(
+            @RequestParam(required = false) Long academicYearId,
+            @RequestParam(required = false) Long classId,
+            @RequestParam(defaultValue = "false") boolean overdueOnly,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        PagedResponseDTO<StudentDueSummaryResponseDTO> data =
+                paymentService.listDuePayments(academicYearId, classId, overdueOnly, page, size);
+        return ResponseEntity.ok(ApiResponse.success(MessageConstants.DUE_PAYMENTS_LISTED_SUCCESS, data));
+    }
+
+    /** GET /api/v1/payments/students/{studentId}/dues — per-student breakdown by fee head */
     @GetMapping("/students/{studentId}/dues")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'CORRESPONDENT', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<StudentFeeDuesResponseDTO>> getStudentDues(
             @PathVariable Long studentId,
-            @RequestParam(required = false) Long academicYearId) {
-        StudentFeeDuesResponseDTO data = paymentService.getStudentDues(studentId, academicYearId);
+            @RequestParam(required = false) Long academicYearId,
+            @RequestParam(defaultValue = "false") boolean outstandingOnly) {
+        StudentFeeDuesResponseDTO data = paymentService.getStudentDues(studentId, academicYearId, outstandingOnly);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.STUDENT_DUES_RETRIEVED_SUCCESS, data));
     }
 

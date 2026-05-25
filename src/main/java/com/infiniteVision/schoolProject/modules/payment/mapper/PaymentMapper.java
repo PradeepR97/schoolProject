@@ -14,6 +14,7 @@ import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
 import com.infiniteVision.schoolProject.modules.payment.entity.StudentFeeLedger;
 import com.infiniteVision.schoolProject.modules.payment.enums.InvoiceStatus;
 import com.infiniteVision.schoolProject.modules.payment.enums.LedgerStatus;
+import java.time.LocalDate;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApplicationStatus;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
@@ -231,6 +232,17 @@ public class PaymentMapper {
         } else {
             invoice.setMiscFee(invoice.getMiscFee().add(amount));
         }
+    }
+
+    private static boolean isOverdue(StudentFeeLedger ledger) {
+        if (ledger.getStatus() == LedgerStatus.OVERDUE) {
+            return true;
+        }
+        if (ledger.getBalanceAmount() == null
+                || ledger.getBalanceAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+        return ledger.getDueDate() != null && ledger.getDueDate().isBefore(LocalDate.now());
     }
 
     public void recalculateInvoiceTotals(Invoice invoice) {

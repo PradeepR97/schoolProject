@@ -84,6 +84,14 @@ public final class MessageConstants {
     public static final String SCHOLARSHIP_NOT_FOUND = "Scholarship not found";
     public static final String SCHOLARSHIP_UPDATE_EMPTY = "At least one field must be provided to update";
     public static final String FEE_HEAD_NOT_FOUND = "Fee head not found";
+    public static final String FEE_HEADS_LISTED_SUCCESS = "Fee heads retrieved successfully";
+    public static final String FEE_HEAD_RETRIEVED_SUCCESS = "Fee head retrieved successfully";
+    public static final String FEE_HEAD_CREATED_SUCCESS = "Fee head created successfully";
+    public static final String FEE_HEADS_BULK_CREATED_SUCCESS = "Fee heads created successfully";
+    public static final String FEE_HEAD_UPDATED_SUCCESS = "Fee head updated successfully";
+    public static final String FEE_HEAD_DELETED_SUCCESS = "Fee head deleted successfully";
+    public static final String FEE_HEAD_CODE_ALREADY_EXISTS = "Fee head code already exists";
+    public static final String FEE_HEAD_UPDATE_EMPTY = "At least one field must be provided to update fee head";
     public static final String FEE_HEAD_REQUIRED_FOR_SPECIFIC_HEAD =
             "Fee head is required when applicable to is SPECIFIC_HEAD";
     public static final String DISCOUNT_PERCENTAGE_EXCEEDS_100 =
@@ -164,6 +172,7 @@ public final class MessageConstants {
     public static final String PAYMENT_REFUNDED_SUCCESS = "Payment refunded successfully";
     public static final String PAYMENT_NOT_FOUND = "Payment not found";
     public static final String STUDENT_DUES_RETRIEVED_SUCCESS = "Student fee dues retrieved successfully";
+    public static final String DUE_PAYMENTS_LISTED_SUCCESS = "Due payments listed successfully";
     public static final String STUDENT_CLASS_NOT_ASSIGNED = "Student does not have a class assigned";
     public static final String STUDENT_LEDGER_MISMATCH = "Ledger does not belong to the specified student";
     public static final String PAYMENT_AMOUNT_EXCEEDS_BALANCE = "Payment amount exceeds ledger balance";
