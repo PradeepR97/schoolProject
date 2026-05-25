@@ -162,4 +162,5 @@ public final class MessageConstants {
     public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
     public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
     public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
+    public static final String DASHBOARD_SUMMARY_RETRIEVED_SUCCESS = "Dashboard data fetched successfully";
 }

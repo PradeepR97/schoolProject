@@ -121,9 +121,12 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         feeStructureMapper.applyUpdates(existing, request);
 
         FeeStructure saved = feeStructureRepository.save(existing);
+        FeeStructureResponseDTO afterSnapshot =
+                feeStructureMapper.toResponse(findActiveWithRelationsOrThrow(saved.getId()));
+        auditService.logUpdate(AuditEntityType.FEE_STRUCTURE, id, beforeSnapshot, afterSnapshot);
         log.info("Fee structure updated id={} by user id={}", id, caller.getUserId());
 
-        return feeStructureMapper.toResponse(findActiveWithRelationsOrThrow(saved.getId()));
+        return afterSnapshot;
     }
 
     /**

@@ -16,6 +16,8 @@ import com.infiniteVision.schoolProject.modules.student.entity.StudentParent;
 import com.infiniteVision.schoolProject.modules.student.mapper.StudentAdmissionMapper;
 import com.infiniteVision.schoolProject.modules.student.repository.StudentRepository;
 import com.infiniteVision.schoolProject.modules.student.service.StudentAdmissionService;
+import com.infiniteVision.schoolProject.modules.dashboard.enums.DashboardActivityType;
+import com.infiniteVision.schoolProject.modules.dashboard.service.DashboardActivityPublisher;
 import com.infiniteVision.schoolProject.modules.student.validator.StudentAdmissionValidator;
 import com.infiniteVision.schoolProject.security.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class StudentAdmissionServiceImpl implements StudentAdmissionService {
     private final StudentAdmissionMapper studentAdmissionMapper;
     private final StudentDetailMapper studentDetailMapper;
     private final AuditService auditService;
+    private final DashboardActivityPublisher dashboardActivityPublisher;
 
     /**
      * Validates request, builds entities, links one-to-one children, saves student (cascade).
@@ -75,6 +78,13 @@ public class StudentAdmissionServiceImpl implements StudentAdmissionService {
                 saved.getId(),
                 saved.getAdmissionNo(),
                 caller.getUserId());
+
+        dashboardActivityPublisher.publish(
+                DashboardActivityType.NEW_ADMISSION,
+                "New student admitted",
+                saved.getFirstName() + " (" + saved.getAdmissionNo() + ")",
+                saved.getId(),
+                caller.getUsername());
 
         return studentAdmissionMapper.toResponse(reloaded);
     }
