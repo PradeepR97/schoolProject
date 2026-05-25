@@ -159,6 +159,10 @@ public final class MessageConstants {
             "No active fee structures found for the student's class and academic year";
     public static final String LATE_FEE_ADJUSTED_SUCCESS = "Late fee adjusted successfully";
     public static final String PAYMENT_COLLECTED_SUCCESS = "Payment collected successfully";
+    public static final String PAYMENT_BULK_COLLECTED_SUCCESS = "Bulk payment collected successfully";
+    public static final String PAYMENT_BULK_DUPLICATE_LEDGER = "Duplicate ledger id in bulk payment allocations";
+    public static final String PAYMENT_BULK_NO_OUTSTANDING = "No outstanding fee ledgers to collect for this student";
+    public static final String PAYMENT_BULK_BATCH_NOT_FOUND = "Bulk payment batch not found for idempotency replay";
     public static final String PAYMENT_RECEIPT_RETRIEVED_SUCCESS = "Payment receipt retrieved successfully";
     public static final String RECEIPT_DETAILS_RETRIEVED_SUCCESS = "Receipt details retrieved successfully";
     public static final String RECEIPT_PRINTED_SUCCESS = "Receipt printed successfully";

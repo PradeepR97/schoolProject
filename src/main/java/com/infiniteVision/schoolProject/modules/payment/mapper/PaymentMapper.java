@@ -6,11 +6,13 @@ import com.infiniteVision.schoolProject.modules.payment.dto.response.FeeLedgerSu
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceDetailResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceSummaryResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.BulkCollectPaymentLineResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDueItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.entity.Invoice;
 import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
+import com.infiniteVision.schoolProject.modules.payment.enums.PaymentRecordStatus;
 import com.infiniteVision.schoolProject.modules.payment.entity.StudentFeeLedger;
 import com.infiniteVision.schoolProject.modules.payment.enums.InvoiceStatus;
 import com.infiniteVision.schoolProject.modules.payment.enums.LedgerStatus;
@@ -154,6 +156,22 @@ public class PaymentMapper {
                 .ledgerStatus(ledger.getStatus())
                 .invoiceStatus(invoice.getStatus())
                 .studentFeesPaymentStatus(studentFeesStatus)
+                .build();
+    }
+
+    public BulkCollectPaymentLineResponseDTO toBulkCollectLine(Payment payment, StudentFeeLedger ledger) {
+        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        return BulkCollectPaymentLineResponseDTO.builder()
+                .paymentId(payment.getId())
+                .receiptNo(payment.getReceiptNo())
+                .ledgerId(ledger.getId())
+                .invoiceId(payment.getInvoice() != null ? payment.getInvoice().getId() : null)
+                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .feeHeadCode(feeHead != null ? feeHead.getFeeHeadCode() : null)
+                .amountPaid(payment.getAmountPaid())
+                .ledgerBalanceAmount(ledger.getBalanceAmount())
+                .ledgerStatus(ledger.getStatus())
+                .status(payment.getStatus() != null ? payment.getStatus() : PaymentRecordStatus.SUCCESS)
                 .build();
     }
 

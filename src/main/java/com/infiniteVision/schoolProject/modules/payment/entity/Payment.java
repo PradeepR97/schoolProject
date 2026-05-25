@@ -45,7 +45,8 @@ import org.hibernate.annotations.OnDeleteAction;
         indexes = {
                 @Index(name = "idx_payment_student", columnList = "student_id"),
                 @Index(name = "idx_payment_date", columnList = "payment_date"),
-                @Index(name = "idx_payment_status", columnList = "status")
+                @Index(name = "idx_payment_status", columnList = "status"),
+                @Index(name = "idx_payment_batch_id", columnList = "payment_batch_id")
         })
 @AttributeOverrides({
         @AttributeOverride(name = "id", column = @Column(name = "payment_id", updatable = false, nullable = false)),
@@ -130,6 +131,16 @@ public class Payment extends BaseEntity {
     @Size(max = 64, message = "Idempotency key must not exceed 64 characters")
     @Column(name = "idempotency_key", length = 64)
     private String idempotencyKey;
+
+    /** Shared id for bulk collect (multiple fee heads in one transaction). */
+    @Size(max = 64, message = "Payment batch id must not exceed 64 characters")
+    @Column(name = "payment_batch_id", length = 64)
+    private String paymentBatchId;
+
+    /** Display receipt number shown on combined bulk receipt printouts. */
+    @Size(max = 20, message = "Batch receipt number must not exceed 20 characters")
+    @Column(name = "batch_receipt_no", length = 20)
+    private String batchReceiptNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)

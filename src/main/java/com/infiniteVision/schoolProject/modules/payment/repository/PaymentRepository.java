@@ -45,6 +45,22 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByIdempotencyKeyAndDeletedFalse(String idempotencyKey);
 
+    boolean existsByPaymentBatchIdAndDeletedFalse(String paymentBatchId);
+
+    @Query(
+            """
+            SELECT p FROM Payment p
+            JOIN FETCH p.student
+            JOIN FETCH p.ledger l
+            JOIN FETCH l.feeStructure fs
+            JOIN FETCH fs.feeHead
+            JOIN FETCH p.invoice
+            LEFT JOIN FETCH p.collectedByUser
+            WHERE p.paymentBatchId = :paymentBatchId AND p.deleted = false
+            ORDER BY p.id ASC
+            """)
+    List<Payment> findAllActiveWithRelationsByPaymentBatchId(@Param("paymentBatchId") String paymentBatchId);
+
     @Query(
             """
             SELECT p FROM Payment p

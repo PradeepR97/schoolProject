@@ -11,10 +11,15 @@ import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.repository.UserRepository;
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeStructure;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.BulkCollectPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectAllOutstandingRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CancelPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.PaymentAllocationRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.GenerateInvoiceRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.RefundPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.BulkCollectPaymentLineResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.BulkCollectPaymentResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentDueSummaryResponseDTO;
@@ -46,6 +51,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.UUID;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,6 +218,169 @@ public class PaymentServiceImpl implements PaymentService {
                 caller.getUsername());
 
         return response;
+    }
+
+    /**
+     * Collect payments for multiple fee-head ledgers in one transaction; shares batch receipt and payment_batch_id.
+     */
+    @Override
+    @Transactional
+    public BulkCollectPaymentResponseDTO bulkCollectPayment(BulkCollectPaymentRequestDTO request) {
+        String batchId = resolvePaymentBatchId(request);
+        if (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank()) {
+            List<Payment> existing = paymentRepository.findAllActiveWithRelationsByPaymentBatchId(batchId);
+            if (!existing.isEmpty()) {
+                log.info("Bulk collect idempotent replay batchId={}", batchId);
+                return buildBulkCollectResponse(existing);
+            }
+        }
+
+        paymentValidator.validateBulkCollectRequest(request);
+
+        Student student = studentRepository
+                .findByIdAndDeletedFalse(request.getStudentId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.STUDENT_NOT_FOUND));
+
+        AuthenticatedUser caller = currentUser();
+        User collectedBy = userRepository.findByIdAndDeletedFalse(caller.getUserId()).orElse(null);
+
+        String batchReceiptNo = nextUniqueReceiptNumber();
+        List<Payment> savedPayments = new ArrayList<>();
+        BigDecimal totalPaid = BigDecimal.ZERO;
+        int lineIndex = 1;
+
+        for (PaymentAllocationRequestDTO allocation : request.getAllocations()) {
+            StudentFeeLedger ledger = studentFeeLedgerRepository
+                    .findActiveWithRelationsById(allocation.getLedgerId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.FEE_LEDGER_NOT_FOUND));
+
+            if (!ledger.getStudent().getId().equals(request.getStudentId())) {
+                throw new ValidationException(
+                        MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.STUDENT_LEDGER_MISMATCH));
+            }
+
+            paymentValidator.validateAllocationAmount(ledger, allocation.getAmountPaid());
+
+            Invoice invoice = resolveOrGenerateInvoice(ledger, request.getAutoGenerateInvoice());
+
+            var beforeLedger = paymentMapper.toLedgerSummary(ledger);
+            var beforeInvoice = paymentMapper.toInvoiceSummary(invoice);
+
+            String lineReceiptNo = PaymentDocumentNumberGenerator.batchLineReceiptNumber(batchReceiptNo, lineIndex);
+            while (paymentRepository.existsByReceiptNoAndDeletedFalse(lineReceiptNo)) {
+                lineIndex++;
+                lineReceiptNo = PaymentDocumentNumberGenerator.batchLineReceiptNumber(batchReceiptNo, lineIndex);
+            }
+
+            Payment payment = Payment.builder()
+                    .receiptNo(lineReceiptNo)
+                    .batchReceiptNo(batchReceiptNo)
+                    .paymentBatchId(batchId)
+                    .student(student)
+                    .ledger(ledger)
+                    .invoice(invoice)
+                    .paymentDate(request.getPaymentDate())
+                    .amountPaid(allocation.getAmountPaid())
+                    .paymentMode(request.getPaymentMode())
+                    .transactionRef(request.getTransactionRef())
+                    .chequeNo(request.getChequeNo())
+                    .chequeDate(request.getChequeDate())
+                    .bankName(request.getBankName())
+                    .remarks(request.getRemarks())
+                    .idempotencyKey(null)
+                    .status(PaymentRecordStatus.SUCCESS)
+                    .collectedByUser(collectedBy)
+                    .deleted(Boolean.FALSE)
+                    .build();
+
+            Payment savedPayment = paymentRepository.save(payment);
+            applyPaymentToLedgerAndInvoice(ledger, invoice, allocation.getAmountPaid());
+            studentFeeLedgerRepository.save(ledger);
+            invoiceRepository.save(invoice);
+
+            PaymentReceiptResponseDTO lineAudit =
+                    paymentMapper.toReceiptResponse(savedPayment, ledger, invoice, null);
+            auditService.logCreate(AuditEntityType.PAYMENT, savedPayment.getId(), lineAudit);
+            auditService.logUpdate(
+                    AuditEntityType.FEE_LEDGER, ledger.getId(), beforeLedger, paymentMapper.toLedgerSummary(ledger));
+            auditService.logUpdate(
+                    AuditEntityType.INVOICE, invoice.getId(), beforeInvoice, paymentMapper.toInvoiceSummary(invoice));
+
+            savedPayments.add(savedPayment);
+            totalPaid = totalPaid.add(allocation.getAmountPaid());
+            lineIndex++;
+        }
+
+        FeesPaymentStatus studentFeesStatus = refreshStudentFeesPaymentStatus(student);
+        BulkCollectPaymentResponseDTO response = buildBulkCollectResponse(savedPayments, studentFeesStatus);
+
+        log.info(
+                "Bulk payment collected batchReceipt={} batchId={} studentId={} lines={} total={} by user id={}",
+                batchReceiptNo,
+                batchId,
+                student.getId(),
+                savedPayments.size(),
+                totalPaid,
+                caller.getUserId());
+
+        String studentLabel = formatStudentName(student);
+        dashboardActivityPublisher.publish(
+                DashboardActivityType.PAYMENT_SUCCESS,
+                "Bulk payment received",
+                studentLabel + " paid " + totalPaid + " across " + savedPayments.size() + " fee heads ("
+                        + batchReceiptNo + ")",
+                savedPayments.get(0).getId(),
+                caller.getUsername());
+
+        return response;
+    }
+
+    /**
+     * Builds allocations from all outstanding ledgers and delegates to {@link #bulkCollectPayment}.
+     */
+    @Override
+    @Transactional
+    public BulkCollectPaymentResponseDTO collectAllOutstanding(Long studentId, CollectAllOutstandingRequestDTO request) {
+        Student student = studentRepository
+                .findByIdAndDeletedFalse(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.STUDENT_NOT_FOUND));
+
+        Long yearId = request.getAcademicYearId() != null ? request.getAcademicYearId() : student.getAcademicYearId();
+
+        List<StudentFeeLedger> ledgers = yearId != null
+                ? studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentIdAndYear(studentId, yearId)
+                : studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentId(studentId);
+
+        List<PaymentAllocationRequestDTO> allocations = new ArrayList<>();
+        for (StudentFeeLedger ledger : ledgers) {
+            if (ledger.getBalanceAmount() != null && ledger.getBalanceAmount().compareTo(BigDecimal.ZERO) > 0) {
+                allocations.add(PaymentAllocationRequestDTO.builder()
+                        .ledgerId(ledger.getId())
+                        .amountPaid(ledger.getBalanceAmount())
+                        .build());
+            }
+        }
+
+        if (allocations.isEmpty()) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.PAYMENT_BULK_NO_OUTSTANDING));
+        }
+
+        BulkCollectPaymentRequestDTO bulkRequest = BulkCollectPaymentRequestDTO.builder()
+                .studentId(studentId)
+                .paymentDate(request.getPaymentDate())
+                .paymentMode(request.getPaymentMode())
+                .transactionRef(request.getTransactionRef())
+                .chequeNo(request.getChequeNo())
+                .chequeDate(request.getChequeDate())
+                .bankName(request.getBankName())
+                .remarks(request.getRemarks())
+                .idempotencyKey(request.getIdempotencyKey())
+                .autoGenerateInvoice(request.getAutoGenerateInvoice())
+                .allocations(allocations)
+                .build();
+
+        return bulkCollectPayment(bulkRequest);
     }
 
     /**
@@ -534,6 +703,92 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ValidationException(
                     MessageConstants.VALIDATION_FAILED, List.of("Page size must be zero or greater"));
         }
+    }
+
+    private String resolvePaymentBatchId(BulkCollectPaymentRequestDTO request) {
+        if (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank()) {
+            return request.getIdempotencyKey().trim();
+        }
+        return UUID.randomUUID().toString();
+    }
+
+    private String nextUniqueReceiptNumber() {
+        String receiptNo = PaymentDocumentNumberGenerator.nextReceiptNumber(paymentRepository.countByDeletedFalse() + 1);
+        while (paymentRepository.existsByReceiptNoAndDeletedFalse(receiptNo)) {
+            receiptNo = PaymentDocumentNumberGenerator.nextReceiptNumber(
+                    paymentRepository.countByDeletedFalse() + 1);
+        }
+        return receiptNo;
+    }
+
+    private Invoice resolveOrGenerateInvoice(StudentFeeLedger ledger, Boolean autoGenerateInvoice) {
+        Invoice invoice = invoiceRepository.findByLedger_IdAndDeletedFalse(ledger.getId()).orElse(null);
+        if (invoice == null) {
+            if (Boolean.TRUE.equals(autoGenerateInvoice)) {
+                invoiceService.generateInvoice(
+                        GenerateInvoiceRequestDTO.builder().ledgerId(ledger.getId()).build());
+                return invoiceRepository
+                        .findByLedger_IdAndDeletedFalse(ledger.getId())
+                        .orElseThrow(() -> new BusinessException(
+                                MessageConstants.INVOICE_NOT_FOUND, HttpStatus.BAD_REQUEST));
+            }
+            throw new BusinessException(
+                    MessageConstants.INVOICE_NOT_FOUND + " — generate invoice first or set autoGenerateInvoice=true",
+                    HttpStatus.BAD_REQUEST);
+        }
+        return invoice;
+    }
+
+    private void applyPaymentToLedgerAndInvoice(
+            StudentFeeLedger ledger, Invoice invoice, BigDecimal amountPaid) {
+        BigDecimal newPaid = ledger.getPaidAmount().add(amountPaid);
+        BigDecimal newBalance = ledger.getNetAmount().subtract(newPaid);
+        ledger.setPaidAmount(newPaid);
+        ledger.setBalanceAmount(newBalance);
+        ledger.setStatus(PaymentStatusCalculator.resolveLedgerStatus(
+                ledger.getNetAmount(), newPaid, newBalance, ledger.getDueDate()));
+
+        invoice.setPaidAmount(newPaid);
+        invoice.setBalanceAmount(newBalance);
+        invoice.setStatus(PaymentStatusCalculator.resolveInvoiceStatus(
+                newBalance, newPaid, invoice.getDueDate(), invoice.getStatus()));
+    }
+
+    private BulkCollectPaymentResponseDTO buildBulkCollectResponse(List<Payment> payments) {
+        Student student = payments.get(0).getStudent();
+        FeesPaymentStatus status =
+                student != null ? student.getFeesPaymentStatus() : null;
+        return buildBulkCollectResponse(payments, status);
+    }
+
+    private BulkCollectPaymentResponseDTO buildBulkCollectResponse(
+            List<Payment> payments, FeesPaymentStatus studentFeesStatus) {
+        Payment first = payments.get(0);
+        Student student = first.getStudent();
+        BigDecimal total = BigDecimal.ZERO;
+        List<BulkCollectPaymentLineResponseDTO> lines = new ArrayList<>();
+
+        for (Payment payment : payments) {
+            StudentFeeLedger ledger = payment.getLedger();
+            lines.add(paymentMapper.toBulkCollectLine(payment, ledger));
+            total = total.add(payment.getAmountPaid());
+        }
+
+        String studentName = student != null ? formatStudentName(student) : "";
+
+        return BulkCollectPaymentResponseDTO.builder()
+                .paymentBatchId(first.getPaymentBatchId())
+                .batchReceiptNo(first.getBatchReceiptNo())
+                .studentId(student != null ? student.getId() : null)
+                .admissionNo(student != null ? student.getAdmissionNo() : null)
+                .studentName(studentName)
+                .paymentDate(first.getPaymentDate())
+                .paymentMode(first.getPaymentMode())
+                .totalAmountPaid(total)
+                .allocationCount(lines.size())
+                .studentFeesPaymentStatus(studentFeesStatus)
+                .lines(lines)
+                .build();
     }
 
     private static String formatStudentName(Student student) {

@@ -6,6 +6,8 @@ import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.modules.payment.constants.PaymentApiConstants;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.AdjustLateFeeRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CancelPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.BulkCollectPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectAllOutstandingRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.GenerateInvoiceRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.GenerateLedgerRequestDTO;
@@ -17,6 +19,7 @@ import com.infiniteVision.schoolProject.modules.payment.dto.response.GenerateLed
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceDetailResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceSummaryResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.BulkCollectPaymentResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.RegenerateLedgerResponseDTO;
@@ -148,6 +151,29 @@ public class PaymentController {
         PaymentReceiptResponseDTO data = paymentService.collectPayment(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(MessageConstants.PAYMENT_COLLECTED_SUCCESS, data));
+    }
+
+    /** POST /api/v1/payments/collect/bulk — pay multiple fee-head ledgers in one transaction */
+    @PostMapping("/collect/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
+    public ResponseEntity<ApiResponse<BulkCollectPaymentResponseDTO>> bulkCollectPayment(
+            @Valid @RequestBody BulkCollectPaymentRequestDTO request) {
+        BulkCollectPaymentResponseDTO data = paymentService.bulkCollectPayment(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(MessageConstants.PAYMENT_BULK_COLLECTED_SUCCESS, data));
+    }
+
+    /**
+     * POST /api/v1/payments/students/{studentId}/collect/bulk — pay all outstanding fee heads
+     * (tuition, exam, transport, lab, etc.) in one receipt without listing ledger ids.
+     */
+    @PostMapping("/students/{studentId}/collect/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
+    public ResponseEntity<ApiResponse<BulkCollectPaymentResponseDTO>> collectAllOutstanding(
+            @PathVariable Long studentId, @Valid @RequestBody CollectAllOutstandingRequestDTO request) {
+        BulkCollectPaymentResponseDTO data = paymentService.collectAllOutstanding(studentId, request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(MessageConstants.PAYMENT_BULK_COLLECTED_SUCCESS, data));
     }
 
     /** GET /api/v1/payments/dues — students with outstanding fee balances (all fee heads). */

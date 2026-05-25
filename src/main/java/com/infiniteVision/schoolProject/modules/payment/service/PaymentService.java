@@ -2,7 +2,10 @@ package com.infiniteVision.schoolProject.modules.payment.service;
 
 import com.infiniteVision.schoolProject.common.dto.response.PagedResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CancelPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.BulkCollectPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectAllOutstandingRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectPaymentRequestDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.BulkCollectPaymentResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.RefundPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
@@ -20,6 +23,16 @@ public interface PaymentService {
      * Records a payment and updates ledger, invoice, and student fee status in one transaction.
      */
     PaymentReceiptResponseDTO collectPayment(CollectPaymentRequestDTO request);
+
+    /**
+     * Collect payments against multiple ledgers (fee heads) in one transaction with a shared batch receipt.
+     */
+    BulkCollectPaymentResponseDTO bulkCollectPayment(BulkCollectPaymentRequestDTO request);
+
+    /**
+     * Pays full pending balance on every outstanding ledger for the student (all fee heads in one bulk receipt).
+     */
+    BulkCollectPaymentResponseDTO collectAllOutstanding(Long studentId, CollectAllOutstandingRequestDTO request);
 
     /**
      * Paginated payment list with optional filters.
