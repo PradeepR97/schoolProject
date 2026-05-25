@@ -152,6 +152,14 @@ public final class MessageConstants {
     public static final String LATE_FEE_ADJUSTED_SUCCESS = "Late fee adjusted successfully";
     public static final String PAYMENT_COLLECTED_SUCCESS = "Payment collected successfully";
     public static final String PAYMENT_RECEIPT_RETRIEVED_SUCCESS = "Payment receipt retrieved successfully";
+    public static final String RECEIPT_DETAILS_RETRIEVED_SUCCESS = "Receipt details retrieved successfully";
+    public static final String RECEIPT_PRINTED_SUCCESS = "Receipt printed successfully";
+    public static final String RECEIPT_REPRINTED_SUCCESS = "Receipt reprinted successfully";
+    public static final String RECEIPT_PRINT_HISTORY_RETRIEVED_SUCCESS = "Receipt print history retrieved successfully";
+    public static final String RECEIPT_REPRINT_REQUIRES_INITIAL_PRINT = "Print the receipt once before reprinting";
+    public static final String RECEIPT_REPRINT_LIMIT_EXCEEDED = "Maximum receipt reprint limit exceeded";
+    public static final String RECEIPT_PRINT_ONLY_SUCCESS_PAYMENTS = "Receipts can only be printed for successful payments";
+    public static final String RECEIPT_PDF_GENERATION_FAILED = "Failed to generate receipt PDF";
     public static final String PAYMENT_CANCELLED_SUCCESS = "Payment cancelled successfully";
     public static final String PAYMENT_REFUNDED_SUCCESS = "Payment refunded successfully";
     public static final String PAYMENT_NOT_FOUND = "Payment not found";
