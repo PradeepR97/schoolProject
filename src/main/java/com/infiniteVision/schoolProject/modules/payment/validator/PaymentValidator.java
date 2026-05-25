@@ -5,6 +5,7 @@ import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.CollectPaymentRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.entity.StudentFeeLedger;
 import com.infiniteVision.schoolProject.modules.payment.enums.LedgerStatus;
+import com.infiniteVision.schoolProject.modules.payment.enums.PaymentRecordStatus;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import java.math.BigDecimal;
 import java.util.List;
@@ -49,6 +50,36 @@ public class PaymentValidator {
         if (request.getAmountPaid().compareTo(ledger.getBalanceAmount()) > 0) {
             throw new ValidationException(
                     MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.PAYMENT_AMOUNT_EXCEEDS_BALANCE));
+        }
+    }
+
+    public void validatePaymentReversible(PaymentRecordStatus status) {
+        if (PaymentRecordStatus.CANCELLED.equals(status)) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.PAYMENT_ALREADY_CANCELLED));
+        }
+        if (PaymentRecordStatus.REFUNDED.equals(status)) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.PAYMENT_ALREADY_REFUNDED));
+        }
+        if (!PaymentRecordStatus.SUCCESS.equals(status)) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.PAYMENT_CANNOT_REVERSE));
+        }
+    }
+
+    public void validateLateFeeAdjustment(StudentFeeLedger ledger, BigDecimal lateFee) {
+        if (LedgerStatus.PAID.equals(ledger.getStatus())
+                || ledger.getBalanceAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.FEE_LEDGER_CANNOT_ADJUST_LATE_FEE));
+        }
+        BigDecimal net = ledger.getActualAmount()
+                .subtract(ledger.getDiscountAmount() != null ? ledger.getDiscountAmount() : BigDecimal.ZERO)
+                .add(lateFee);
+        if (ledger.getPaidAmount().compareTo(net) > 0) {
+            throw new ValidationException(
+                    MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.FEE_LEDGER_PAID_EXCEEDS_NET));
         }
     }
 }

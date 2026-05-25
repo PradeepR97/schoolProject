@@ -40,4 +40,10 @@ public class CollectPaymentRequestDTO {
     private LocalDate chequeDate;
     private String bankName;
     private String remarks;
+
+    /** Client-generated key; duplicate requests return the original receipt. */
+    private String idempotencyKey;
+
+    /** When true and no invoice exists, one is created before collection. */
+    private Boolean autoGenerateInvoice;
 }

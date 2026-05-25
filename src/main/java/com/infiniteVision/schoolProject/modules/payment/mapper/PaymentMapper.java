@@ -1,8 +1,12 @@
 package com.infiniteVision.schoolProject.modules.payment.mapper;
 
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.FeeLedgerDetailResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.FeeLedgerSummaryResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceDetailResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceSummaryResponseDTO;
+import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.PaymentReceiptResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.StudentFeeDueItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.entity.Invoice;
@@ -10,6 +14,8 @@ import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
 import com.infiniteVision.schoolProject.modules.payment.entity.StudentFeeLedger;
 import com.infiniteVision.schoolProject.modules.payment.enums.InvoiceStatus;
 import com.infiniteVision.schoolProject.modules.payment.enums.LedgerStatus;
+import com.infiniteVision.schoolProject.modules.scholarship.enums.ScholarshipApplicationStatus;
+import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.enums.FeesPaymentStatus;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
@@ -50,6 +56,14 @@ public class PaymentMapper {
     }
 
     public StudentFeeDueItemResponseDTO toDueItem(StudentFeeLedger ledger, Invoice invoice) {
+        return toDueItem(ledger, invoice, null, null);
+    }
+
+    public StudentFeeDueItemResponseDTO toDueItem(
+            StudentFeeLedger ledger,
+            Invoice invoice,
+            BigDecimal pendingScholarshipDiscount,
+            ScholarshipApplicationStatus pendingScholarshipStatus) {
         FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
         return StudentFeeDueItemResponseDTO.builder()
                 .ledgerId(ledger.getId())
@@ -64,6 +78,58 @@ public class PaymentMapper {
                 .invoiceId(invoice != null ? invoice.getId() : null)
                 .invoiceNo(invoice != null ? invoice.getInvoiceNo() : null)
                 .invoiceStatus(invoice != null ? invoice.getStatus() : null)
+                .pendingScholarshipDiscount(pendingScholarshipDiscount)
+                .pendingScholarshipStatus(pendingScholarshipStatus)
+                .build();
+    }
+
+    public FeeLedgerDetailResponseDTO toLedgerDetail(
+            StudentFeeLedger ledger,
+            BigDecimal pendingScholarshipDiscount,
+            ScholarshipApplicationStatus pendingScholarshipStatus) {
+        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        return FeeLedgerDetailResponseDTO.builder()
+                .ledgerId(ledger.getId())
+                .studentId(ledger.getStudent() != null ? ledger.getStudent().getId() : null)
+                .academicYearId(
+                        ledger.getAcademicYear() != null ? ledger.getAcademicYear().getId() : null)
+                .structureId(ledger.getFeeStructure() != null ? ledger.getFeeStructure().getId() : null)
+                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .term(ledger.getTerm())
+                .actualAmount(ledger.getActualAmount())
+                .discountAmount(ledger.getDiscountAmount())
+                .lateFee(ledger.getLateFee())
+                .netAmount(ledger.getNetAmount())
+                .paidAmount(ledger.getPaidAmount())
+                .balanceAmount(ledger.getBalanceAmount())
+                .dueDate(ledger.getDueDate())
+                .status(ledger.getStatus())
+                .pendingScholarshipDiscount(pendingScholarshipDiscount)
+                .pendingScholarshipStatus(pendingScholarshipStatus)
+                .build();
+    }
+
+    public InvoiceDetailResponseDTO toInvoiceDetail(Invoice invoice) {
+        Student student = invoice.getStudent();
+        return InvoiceDetailResponseDTO.builder()
+                .invoiceId(invoice.getId())
+                .invoiceNo(invoice.getInvoiceNo())
+                .studentId(student != null ? student.getId() : null)
+                .admissionNo(student != null ? student.getAdmissionNo() : null)
+                .studentName(formatStudentName(student))
+                .ledgerId(invoice.getLedger() != null ? invoice.getLedger().getId() : null)
+                .academicYearId(
+                        invoice.getAcademicYear() != null ? invoice.getAcademicYear().getId() : null)
+                .term(invoice.getTerm())
+                .invoiceDate(invoice.getInvoiceDate())
+                .dueDate(invoice.getDueDate())
+                .grossAmount(invoice.getGrossAmount())
+                .discountAmount(invoice.getDiscountAmount())
+                .lateFee(invoice.getLateFee())
+                .netAmount(invoice.getNetAmount())
+                .paidAmount(invoice.getPaidAmount())
+                .balanceAmount(invoice.getBalanceAmount())
+                .status(invoice.getStatus())
                 .build();
     }
 
@@ -88,6 +154,56 @@ public class PaymentMapper {
                 .invoiceStatus(invoice.getStatus())
                 .studentFeesPaymentStatus(studentFeesStatus)
                 .build();
+    }
+
+    public PaymentListItemResponseDTO toPaymentListItem(Payment payment) {
+        Student student = payment.getStudent();
+        return PaymentListItemResponseDTO.builder()
+                .paymentId(payment.getId())
+                .receiptNo(payment.getReceiptNo())
+                .studentId(student != null ? student.getId() : null)
+                .admissionNo(student != null ? student.getAdmissionNo() : null)
+                .studentName(formatStudentName(student))
+                .ledgerId(payment.getLedger() != null ? payment.getLedger().getId() : null)
+                .invoiceId(payment.getInvoice() != null ? payment.getInvoice().getId() : null)
+                .invoiceNo(payment.getInvoice() != null ? payment.getInvoice().getInvoiceNo() : null)
+                .amountPaid(payment.getAmountPaid())
+                .paymentMode(payment.getPaymentMode())
+                .paymentDate(payment.getPaymentDate())
+                .status(payment.getStatus())
+                .collectedByUsername(
+                        payment.getCollectedByUser() != null ? payment.getCollectedByUser().getUsername() : null)
+                .build();
+    }
+
+    public InvoiceListItemResponseDTO toInvoiceListItem(Invoice invoice) {
+        Student student = invoice.getStudent();
+        return InvoiceListItemResponseDTO.builder()
+                .invoiceId(invoice.getId())
+                .invoiceNo(invoice.getInvoiceNo())
+                .studentId(student != null ? student.getId() : null)
+                .admissionNo(student != null ? student.getAdmissionNo() : null)
+                .studentName(formatStudentName(student))
+                .ledgerId(invoice.getLedger() != null ? invoice.getLedger().getId() : null)
+                .term(invoice.getTerm())
+                .invoiceDate(invoice.getInvoiceDate())
+                .dueDate(invoice.getDueDate())
+                .netAmount(invoice.getNetAmount())
+                .paidAmount(invoice.getPaidAmount())
+                .balanceAmount(invoice.getBalanceAmount())
+                .status(invoice.getStatus())
+                .build();
+    }
+
+    private String formatStudentName(Student student) {
+        if (student == null) {
+            return null;
+        }
+        String name = student.getFirstName()
+                + (student.getLastName() != null && !student.getLastName().isBlank()
+                        ? " " + student.getLastName()
+                        : "");
+        return name.trim();
     }
 
     /**

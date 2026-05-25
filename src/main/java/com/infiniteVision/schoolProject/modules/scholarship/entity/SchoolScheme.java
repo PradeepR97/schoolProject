@@ -41,7 +41,7 @@ import org.hibernate.annotations.OnDeleteAction;
  */
 @Entity
 @Table(
-        name = "school_schemes",
+        name = "scholarship_schemes",
         indexes = {
                 @Index(name = "idx_school_schemes_academic_year", columnList = "academic_year_id"),
                 @Index(name = "idx_school_schemes_fee_head", columnList = "fee_head_id"),

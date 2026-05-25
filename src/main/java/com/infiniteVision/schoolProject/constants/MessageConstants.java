@@ -61,7 +61,7 @@ public final class MessageConstants {
     public static final String PARENT_CONTACT_REQUIRED =
             "At least one of father, mother, or guardian name is required";
 
-    public static final String LOOKUPS_RETRIEVED_SUCCESS = "Lookups retrieved successfully";
+    public static final String MASTER_DATA_RETRIEVED_SUCCESS = "Master data retrieved successfully";
 
     public static final String SCHOLARSHIP_CREATED_SUCCESS = "Scholarship created successfully";
     public static final String SCHOLARSHIPS_LISTED_SUCCESS = "Scholarships retrieved successfully";
@@ -75,6 +75,41 @@ public final class MessageConstants {
             "Fee head is required when applicable to is SPECIFIC_HEAD";
     public static final String DISCOUNT_PERCENTAGE_EXCEEDS_100 =
             "Percentage discount cannot exceed 100";
+
+    public static final String SCHOLARSHIP_APPLICATION_CREATED_SUCCESS =
+            "Scholarship application created successfully";
+    public static final String SCHOLARSHIP_APPLICATIONS_LISTED_SUCCESS =
+            "Scholarship applications retrieved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_RETRIEVED_SUCCESS =
+            "Scholarship application retrieved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_APPROVED_SUCCESS =
+            "Scholarship application approved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_REJECTED_SUCCESS =
+            "Scholarship application rejected successfully";
+    public static final String SCHOLARSHIP_APPLICATION_BULK_APPROVED_SUCCESS =
+            "Scholarship applications bulk approved successfully";
+    public static final String SCHOLARSHIP_APPLICATION_BULK_REJECTED_SUCCESS =
+            "Scholarship applications bulk rejected successfully";
+    public static final String SCHOLARSHIP_APPLICATION_NOT_FOUND = "Scholarship application not found";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_EXISTS =
+            "Scholarship application already exists for this student, scheme, and academic year";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_APPROVED =
+            "Scholarship application is already approved";
+    public static final String SCHOLARSHIP_APPLICATION_ALREADY_REJECTED =
+            "Scholarship application is already rejected";
+    public static final String SCHOLARSHIP_APPLICATION_INVALID_STATE =
+            "Scholarship application is not in a valid state for this action";
+    public static final String SCHOLARSHIP_PRINCIPAL_ALREADY_APPROVED =
+            "Principal has already approved this application";
+    public static final String SCHOLARSHIP_CORRESPONDENT_ALREADY_APPROVED =
+            "Correspondent has already approved this application";
+    public static final String SCHOLARSHIP_AWAITING_PRINCIPAL_APPROVAL =
+            "Application is awaiting principal approval";
+    public static final String SCHOLARSHIP_APPROVAL_ROLE_FORBIDDEN =
+            "You are not allowed to perform this approval action";
+    public static final String SCHOLARSHIP_SCHEME_YEAR_MISMATCH =
+            "Scholarship scheme does not belong to the specified academic year";
+
     public static final String FEE_STRUCTURES_LISTED_SUCCESS = "Fee structures retrieved successfully";
     public static final String FEE_STRUCTURE_RETRIEVED_SUCCESS = "Fee structure retrieved successfully";
     public static final String FEE_STRUCTURE_CREATED_SUCCESS = "Fee structure created successfully";
@@ -85,20 +120,33 @@ public final class MessageConstants {
     public static final String FEE_STRUCTURE_ALREADY_EXISTS =
             "Fee structure already exists for this academic year, class, fee head, and term";
 
-    public static final String FEE_LEDGER_GENERATED_SUCCESS = "Fee ledger generated successfully";
-    public static final String FEE_LEDGER_NOT_FOUND = "Fee ledger not found";
-    public static final String FEE_LEDGER_ALREADY_EXISTS = "Fee ledger already exists for this student, term, and fee structure";
-    public static final String FEE_LEDGER_ALREADY_PAID = "Fee ledger is already fully paid";
+    public static final String PAYMENTS_LISTED_SUCCESS = "Payments retrieved successfully";
+    public static final String INVOICES_LISTED_SUCCESS = "Invoices retrieved successfully";
+    public static final String INVOICE_RETRIEVED_SUCCESS = "Invoice retrieved successfully";
     public static final String INVOICE_GENERATED_SUCCESS = "Invoice generated successfully";
     public static final String INVOICE_NOT_FOUND = "Invoice not found";
-    public static final String INVOICE_ALREADY_EXISTS = "Invoice already exists for this fee ledger";
+    public static final String INVOICE_ALREADY_EXISTS = "Invoice already exists for this ledger";
+    public static final String FEE_LEDGER_GENERATED_SUCCESS = "Fee ledgers generated successfully";
+    public static final String FEE_LEDGER_REGENERATED_SUCCESS = "Fee ledgers regenerated successfully";
+    public static final String FEE_LEDGER_RETRIEVED_SUCCESS = "Fee ledger retrieved successfully";
+    public static final String FEE_LEDGER_NOT_FOUND = "Fee ledger not found";
+    public static final String FEE_LEDGER_ALREADY_PAID = "Fee ledger is already fully paid";
+    public static final String FEE_LEDGER_CANNOT_ADJUST_LATE_FEE =
+            "Late fee cannot be adjusted on a fully paid ledger";
+    public static final String FEE_LEDGER_PAID_EXCEEDS_NET = "Paid amount cannot exceed net ledger amount";
+    public static final String NO_FEE_STRUCTURES_FOR_CLASS =
+            "No active fee structures found for the student's class and academic year";
+    public static final String LATE_FEE_ADJUSTED_SUCCESS = "Late fee adjusted successfully";
     public static final String PAYMENT_COLLECTED_SUCCESS = "Payment collected successfully";
-    public static final String PAYMENT_NOT_FOUND = "Payment not found";
     public static final String PAYMENT_RECEIPT_RETRIEVED_SUCCESS = "Payment receipt retrieved successfully";
+    public static final String PAYMENT_CANCELLED_SUCCESS = "Payment cancelled successfully";
+    public static final String PAYMENT_REFUNDED_SUCCESS = "Payment refunded successfully";
+    public static final String PAYMENT_NOT_FOUND = "Payment not found";
     public static final String STUDENT_DUES_RETRIEVED_SUCCESS = "Student fee dues retrieved successfully";
-    public static final String PAYMENT_AMOUNT_INVALID = "Payment amount must be greater than zero";
-    public static final String PAYMENT_AMOUNT_EXCEEDS_BALANCE = "Payment amount exceeds outstanding balance";
-    public static final String STUDENT_LEDGER_MISMATCH = "Fee ledger does not belong to the specified student";
-    public static final String STUDENT_CLASS_NOT_ASSIGNED = "Student must have class and academic year assigned";
-    public static final String NO_FEE_STRUCTURES_FOR_CLASS = "No active fee structures found for student class and academic year";
+    public static final String STUDENT_CLASS_NOT_ASSIGNED = "Student does not have a class assigned";
+    public static final String STUDENT_LEDGER_MISMATCH = "Ledger does not belong to the specified student";
+    public static final String PAYMENT_AMOUNT_EXCEEDS_BALANCE = "Payment amount exceeds ledger balance";
+    public static final String PAYMENT_ALREADY_CANCELLED = "Payment is already cancelled";
+    public static final String PAYMENT_ALREADY_REFUNDED = "Payment is already refunded";
+    public static final String PAYMENT_CANNOT_REVERSE = "Payment cannot be reversed in its current state";
 }
