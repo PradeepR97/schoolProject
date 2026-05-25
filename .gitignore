@@ -1,10 +1,17 @@
-HELP.md
+# Build
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# IDE
+.idea
+*.iws
+*.iml
+*.ipr
 .apt_generated
 .classpath
 .factorypath
@@ -12,22 +19,31 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
+
+# Cursor
+.cursor/
+
+# Documentation and rules (local — not committed)
+*.md
+*.mdc
+
+# JSON (Postman collections, environments, local exports — not committed)
+*.json
+
+# SQL scripts (local / reference DDL — not committed)
+*.sql
+
+# Application config (environment-specific secrets and URLs — not committed)
+**/application.properties
+**/application-*.properties
+!**/application.properties.example
+
+# Secrets
+.env
+.env.*
