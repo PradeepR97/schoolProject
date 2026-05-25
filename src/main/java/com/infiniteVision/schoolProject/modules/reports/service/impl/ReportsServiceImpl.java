@@ -14,6 +14,8 @@ import com.infiniteVision.schoolProject.modules.reports.model.ReportMonthYearRan
 import com.infiniteVision.schoolProject.modules.reports.service.ReportContentBuilder;
 import com.infiniteVision.schoolProject.modules.reports.service.ReportsService;
 import com.infiniteVision.schoolProject.modules.reports.validator.ReportFilterValidator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReportsServiceImpl implements ReportsService {
+
+    private static final DateTimeFormatter EXPORT_FILENAME_TIMESTAMP =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
 
     private final ReportFilterValidator reportFilterValidator;
     private final ReportContentBuilder reportContentBuilder;
@@ -57,7 +62,8 @@ public class ReportsServiceImpl implements ReportsService {
                 academicYearId, classId, startMonth, startYear, endMonth, endYear, reportType);
         ReportDataset dataset = buildDataset(
                 reportType, academicYearId, classId, startMonth, startYear, endMonth, endYear);
-        String baseFilename = reportType.name().toLowerCase(Locale.ROOT) + "-report";
+        String timestamp = LocalDateTime.now().format(EXPORT_FILENAME_TIMESTAMP);
+        String baseFilename = reportType.name().toLowerCase(Locale.ROOT) + "-report-" + timestamp;
         return switch (format) {
             case EXCEL -> ReportExportResult.builder()
                     .content(reportExcelExporter.export(dataset))
