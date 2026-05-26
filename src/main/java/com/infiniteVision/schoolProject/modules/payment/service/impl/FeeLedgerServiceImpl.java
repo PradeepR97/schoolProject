@@ -73,8 +73,8 @@ public class FeeLedgerServiceImpl implements FeeLedgerService {
                 .findByIdAndDeletedFalse(request.getAcademicYearId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.ACADEMIC_YEAR_NOT_FOUND));
 
-        List<FeeStructure> structures = feeStructureRepository.findActiveByClassIdAndSectionIdAndAcademicYearId(
-                student.getClassId(), student.getSectionId(), request.getAcademicYearId());
+        List<FeeStructure> structures = feeStructureRepository.findActiveByClassIdAndAcademicYearId(
+                student.getClassId(), request.getAcademicYearId());
 
         if (structures.isEmpty()) {
             throw new ValidationException(

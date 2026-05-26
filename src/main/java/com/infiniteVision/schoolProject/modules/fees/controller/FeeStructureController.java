@@ -9,9 +9,9 @@ import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStruct
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureMatrixResponseDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.response.FeeStructureResponseDTO;
-import java.util.List;
 import com.infiniteVision.schoolProject.modules.fees.service.FeeStructureService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST APIs for fee structure (amount per class, year, fee head, term).
+ * REST APIs for fee structure (amount per class, year, fee type, term).
  */
 @RestController
 @RequestMapping(value = FeesApiConstants.FEE_STRUCTURE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,13 +45,12 @@ public class FeeStructureController {
     public ResponseEntity<ApiResponse<PagedResponseDTO<FeeStructureResponseDTO>>> listFeeStructures(
             @RequestParam(required = false) Long academicYearId,
             @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long sectionId,
             @RequestParam(required = false) Long feeTypeId,
             @RequestParam(defaultValue = "false") boolean activeOnly,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         PagedResponseDTO<FeeStructureResponseDTO> data = feeStructureService.listFeeStructures(
-                academicYearId, classId, sectionId, feeTypeId, activeOnly, page, size);
+                academicYearId, classId, feeTypeId, activeOnly, page, size);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_STRUCTURES_LISTED_SUCCESS, data));
     }
 
@@ -61,11 +60,9 @@ public class FeeStructureController {
     @GetMapping("/matrix")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRINCIPAL', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<FeeStructureMatrixResponseDTO>> getFeeStructureMatrix(
-            @RequestParam Long academicYearId,
-            @RequestParam Long classId,
-            @RequestParam Long sectionId) {
+            @RequestParam Long academicYearId, @RequestParam Long classId) {
         FeeStructureMatrixResponseDTO data =
-                feeStructureService.getFeeStructureMatrix(academicYearId, classId, sectionId);
+                feeStructureService.getFeeStructureMatrix(academicYearId, classId);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_STRUCTURE_MATRIX_RETRIEVED_SUCCESS, data));
     }
 

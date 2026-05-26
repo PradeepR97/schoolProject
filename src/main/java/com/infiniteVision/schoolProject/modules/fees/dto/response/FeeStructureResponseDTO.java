@@ -22,8 +22,6 @@ public class FeeStructureResponseDTO {
     private String academicYearName;
     private Long classId;
     private String className;
-    private Long sectionId;
-    private String sectionCode;
     private Long feeTypeId;
     private String feeTypeCode;
     private String feeTypeName;

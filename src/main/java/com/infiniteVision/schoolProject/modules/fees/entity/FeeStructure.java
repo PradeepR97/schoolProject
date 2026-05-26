@@ -3,7 +3,6 @@ package com.infiniteVision.schoolProject.modules.fees.entity;
 import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
-import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.fees.enums.TermType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -32,26 +31,27 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 /**
- * Fee amount per academic year, grade, section, fee head, and term. Maps to {@code fee_structure}.
+ * Fee amount per academic year, grade (class), fee type, and term. Maps to {@code fee_structure}.
+ * <p>
+ * Fees are defined at class level only; all sections in a class share the same structure rows.
  */
 @Entity
 @Table(
         name = "fee_structure",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_fee_structure_year_class_section_head_term",
+                        name = "uk_fee_structure_year_class_type_term",
                         columnNames = {
                             "academic_year_id",
                             "class_id",
-                            "section_id",
                             "fee_type_id",
                             "term_type"
                         })
         },
         indexes = {
                 @Index(
-                        name = "idx_fee_structure_year_class_section",
-                        columnList = "academic_year_id, class_id, section_id"),
+                        name = "idx_fee_structure_year_class",
+                        columnList = "academic_year_id, class_id"),
                 @Index(name = "idx_fee_structure_active", columnList = "is_active")
         })
 @AttributeOverrides({
@@ -63,7 +63,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "classMaster", "section", "feeType"})
+@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "classMaster", "feeType"})
 public class FeeStructure extends BaseEntity {
 
     @NotNull(message = "Academic year is required")
@@ -83,15 +83,6 @@ public class FeeStructure extends BaseEntity {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_fee_structure_class"))
     private ClassMaster classMaster;
-
-    @NotNull(message = "Section is required")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(
-            name = "section_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_fee_structure_section"))
-    private SectionMaster section;
 
     @NotNull(message = "Fee type is required")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -26,22 +26,13 @@ public class FeeStructureValidator {
     private final FeeStructureRepository feeStructureRepository;
 
     /**
-     * Validates create request including uniqueness of year + class + section + type + term.
+     * Validates create request including uniqueness of year + class + fee type + term.
      */
     public void validateCreate(CreateFeeStructureRequestDTO request) {
         List<String> errors = new ArrayList<>();
-        validateReferences(
-                request.getAcademicYearId(),
-                request.getClassId(),
-                request.getSectionId(),
-                request.getFeeTypeId(),
-                errors);
-        if (feeStructureRepository.existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndDeletedFalse(
-                request.getAcademicYearId(),
-                request.getClassId(),
-                request.getSectionId(),
-                request.getFeeTypeId(),
-                request.getTermType())) {
+        validateReferences(request.getAcademicYearId(), request.getClassId(), request.getFeeTypeId(), errors);
+        if (feeStructureRepository.existsByAcademicYear_IdAndClassMaster_IdAndFeeType_IdAndTermTypeAndDeletedFalse(
+                request.getAcademicYearId(), request.getClassId(), request.getFeeTypeId(), request.getTermType())) {
             errors.add(MessageConstants.FEE_STRUCTURE_ALREADY_EXISTS);
         }
         if (!errors.isEmpty()) {
@@ -62,15 +53,13 @@ public class FeeStructureValidator {
         Long academicYearId =
                 request.getAcademicYearId() != null ? request.getAcademicYearId() : existing.getAcademicYear().getId();
         Long classId = request.getClassId() != null ? request.getClassId() : existing.getClassMaster().getId();
-        Long sectionId = request.getSectionId() != null ? request.getSectionId() : existing.getSection().getId();
         Long feeTypeId = request.getFeeTypeId() != null ? request.getFeeTypeId() : existing.getFeeType().getId();
         TermType termType = request.getTermType() != null ? request.getTermType() : existing.getTermType();
 
-        validateReferences(academicYearId, classId, sectionId, feeTypeId, errors);
+        validateReferences(academicYearId, classId, feeTypeId, errors);
 
-        if (feeStructureRepository
-                .existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndIdNotAndDeletedFalse(
-                        academicYearId, classId, sectionId, feeTypeId, termType, structureId)) {
+        if (feeStructureRepository.existsByAcademicYear_IdAndClassMaster_IdAndFeeType_IdAndTermTypeAndIdNotAndDeletedFalse(
+                academicYearId, classId, feeTypeId, termType, structureId)) {
             errors.add(MessageConstants.FEE_STRUCTURE_ALREADY_EXISTS);
         }
 
@@ -79,9 +68,8 @@ public class FeeStructureValidator {
         }
     }
 
-    private void validateReferences(
-            Long academicYearId, Long classId, Long sectionId, Long feeTypeId, List<String> errors) {
-        academicEnrollmentValidator.validateEnrollment(academicYearId, classId, sectionId, errors);
+    private void validateReferences(Long academicYearId, Long classId, Long feeTypeId, List<String> errors) {
+        academicEnrollmentValidator.validateClassForAcademicYear(academicYearId, classId, errors);
 
         if (!feeTypeRepository.findByIdAndDeletedFalse(feeTypeId).isPresent()) {
             errors.add(MessageConstants.FEE_TYPE_NOT_FOUND);
@@ -91,7 +79,6 @@ public class FeeStructureValidator {
     private static boolean hasAnyField(UpdateFeeStructureRequestDTO request) {
         return request.getAcademicYearId() != null
                 || request.getClassId() != null
-                || request.getSectionId() != null
                 || request.getFeeTypeId() != null
                 || request.getTermType() != null
                 || request.getAmount() != null

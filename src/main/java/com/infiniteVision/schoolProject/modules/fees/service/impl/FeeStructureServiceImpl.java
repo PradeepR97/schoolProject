@@ -8,9 +8,7 @@ import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
-import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
-import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.academic.util.ClassSectionDisplayFormatter;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.BulkCreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStructureRequestDTO;
@@ -37,8 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Fee structure lifecycle: filtered paginated list, get, create, partial update, soft delete.
  * <p>
- * Uniqueness: one row per (academic year, class, fee head, term type). References must align
- * (class belongs to academic year; fee head must exist).
+ * Uniqueness: one row per (academic year, class, fee type, term). Class must belong to the year.
  */
 @Slf4j
 @Service
@@ -53,7 +50,6 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     private final FeeStructureValidator feeStructureValidator;
     private final AuditService auditService;
     private final ClassMasterRepository classMasterRepository;
-    private final SectionMasterRepository sectionMasterRepository;
 
     /**
      * Load filtered page of non-deleted fee structures; default sort by structure id descending.
@@ -63,7 +59,6 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     public PagedResponseDTO<FeeStructureResponseDTO> listFeeStructures(
             Long academicYearId,
             Long classId,
-            Long sectionId,
             Long feeTypeId,
             boolean activeOnly,
             int page,
@@ -72,8 +67,8 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         int effectiveSize = size > 0 ? Math.min(size, MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
 
         Pageable pageable = PageRequest.of(page, effectiveSize, Sort.by("id").descending());
-        Page<FeeStructure> structurePage = feeStructureRepository.findAllFiltered(
-                academicYearId, classId, sectionId, feeTypeId, activeOnly, pageable);
+        Page<FeeStructure> structurePage =
+                feeStructureRepository.findAllFiltered(academicYearId, classId, feeTypeId, activeOnly, pageable);
 
         List<FeeStructureResponseDTO> content =
                 structurePage.getContent().stream().map(feeStructureMapper::toResponse).toList();
@@ -96,7 +91,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
     }
 
     /**
-     * Load one active fee structure with academic year, class, and fee head.
+     * Load one active fee structure with academic year, class, and fee type.
      */
     @Override
     @Transactional(readOnly = true)
@@ -166,16 +161,13 @@ public class FeeStructureServiceImpl implements FeeStructureService {
      */
     @Override
     @Transactional(readOnly = true)
-    public FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId, Long sectionId) {
+    public FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId) {
         ClassMaster classMaster = classMasterRepository
                 .findByIdAndDeletedFalse(classId)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.CLASS_NOT_FOUND));
-        SectionMaster section = sectionMasterRepository
-                .findByIdAndDeletedFalse(sectionId)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.SECTION_NOT_FOUND));
 
         List<FeeStructureResponseDTO> structures = feeStructureRepository
-                .findActiveByClassIdAndSectionIdAndAcademicYearId(classId, sectionId, academicYearId)
+                .findActiveByClassIdAndAcademicYearId(classId, academicYearId)
                 .stream()
                 .map(feeStructureMapper::toResponse)
                 .toList();
@@ -183,14 +175,13 @@ public class FeeStructureServiceImpl implements FeeStructureService {
         return FeeStructureMatrixResponseDTO.builder()
                 .academicYearId(academicYearId)
                 .classId(classId)
-                .sectionId(sectionId)
-                .className(ClassSectionDisplayFormatter.format(classMaster, section))
+                .className(ClassSectionDisplayFormatter.formatGradeOnly(classMaster.getClassName()))
                 .structures(structures)
                 .build();
     }
 
     /**
-     * Persists each structure row; skips none — duplicates raise validation from repository layer.
+     * Persists each structure row; duplicates raise validation from repository layer.
      */
     @Override
     @Transactional

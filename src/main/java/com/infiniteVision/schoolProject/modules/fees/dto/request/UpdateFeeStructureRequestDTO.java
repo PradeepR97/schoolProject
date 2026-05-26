@@ -24,8 +24,6 @@ public class UpdateFeeStructureRequestDTO {
 
     private Long classId;
 
-    private Long sectionId;
-
     private Long feeTypeId;
 
     private TermType termType;

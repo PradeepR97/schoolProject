@@ -2,10 +2,8 @@ package com.infiniteVision.schoolProject.modules.fees.mapper;
 
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
-import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.AcademicYearRepository;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
-import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.academic.util.ClassSectionDisplayFormatter;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
@@ -26,7 +24,6 @@ public class FeeStructureMapper {
 
     private final AcademicYearRepository academicYearRepository;
     private final ClassMasterRepository classMasterRepository;
-    private final SectionMasterRepository sectionMasterRepository;
     private final FeeTypeRepository feeTypeRepository;
 
     public FeeStructure toEntity(CreateFeeStructureRequestDTO request) {
@@ -36,15 +33,11 @@ public class FeeStructureMapper {
         ClassMaster classMaster = classMasterRepository
                 .findByIdAndDeletedFalse(request.getClassId())
                 .orElseThrow();
-        SectionMaster section = sectionMasterRepository
-                .findByIdAndDeletedFalse(request.getSectionId())
-                .orElseThrow();
         FeeType feeType = feeTypeRepository.findByIdAndDeletedFalse(request.getFeeTypeId()).orElseThrow();
 
         return FeeStructure.builder()
                 .academicYear(academicYear)
                 .classMaster(classMaster)
-                .section(section)
                 .feeType(feeType)
                 .termType(request.getTermType())
                 .amount(request.getAmount())
@@ -70,11 +63,6 @@ public class FeeStructureMapper {
         if (request.getClassId() != null) {
             entity.setClassMaster(classMasterRepository
                     .findByIdAndDeletedFalse(request.getClassId())
-                    .orElseThrow());
-        }
-        if (request.getSectionId() != null) {
-            entity.setSection(sectionMasterRepository
-                    .findByIdAndDeletedFalse(request.getSectionId())
                     .orElseThrow());
         }
         if (request.getFeeTypeId() != null) {
@@ -115,9 +103,7 @@ public class FeeStructureMapper {
                 .academicYearId(entity.getAcademicYear().getId())
                 .academicYearName(entity.getAcademicYear().getYearName())
                 .classId(entity.getClassMaster().getId())
-                .className(ClassSectionDisplayFormatter.format(entity.getClassMaster(), entity.getSection()))
-                .sectionId(entity.getSection().getId())
-                .sectionCode(entity.getSection().getSectionCode())
+                .className(ClassSectionDisplayFormatter.formatGradeOnly(entity.getClassMaster().getClassName()))
                 .feeTypeId(entity.getFeeType().getId())
                 .feeTypeCode(entity.getFeeType().getFeeTypeCode())
                 .feeTypeName(entity.getFeeType().getFeeTypeName())

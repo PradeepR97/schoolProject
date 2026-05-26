@@ -22,6 +22,26 @@ public class AcademicEnrollmentValidator {
     private final SectionMasterRepository sectionMasterRepository;
 
     /**
+     * Ensures academic year and grade exist and the grade belongs to the academic year (no section).
+     */
+    public void validateClassForAcademicYear(Long academicYearId, Long classId, List<String> errors) {
+        if (!academicYearRepository.findByIdAndDeletedFalse(academicYearId).isPresent()) {
+            errors.add(MessageConstants.ACADEMIC_YEAR_NOT_FOUND);
+            return;
+        }
+
+        ClassMaster classMaster = classMasterRepository.findByIdAndDeletedFalse(classId).orElse(null);
+        if (classMaster == null) {
+            errors.add(MessageConstants.CLASS_NOT_FOUND);
+            return;
+        }
+
+        if (!academicYearId.equals(classMaster.getAcademicYear().getId())) {
+            errors.add(MessageConstants.CLASS_ACADEMIC_YEAR_MISMATCH);
+        }
+    }
+
+    /**
      * Ensures year, grade, and section exist and the grade belongs to the academic year.
      */
     public void validateEnrollment(Long academicYearId, Long classId, Long sectionId, List<String> errors) {
