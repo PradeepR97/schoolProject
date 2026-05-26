@@ -1,7 +1,9 @@
 package com.infiniteVision.schoolProject.modules.student.mapper;
 
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentDocumentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentParentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentProfileDTO;
@@ -25,10 +27,11 @@ import org.springframework.stereotype.Component;
 public class StudentDetailMapper {
 
     private final ClassMasterRepository classMasterRepository;
+    private final SectionMasterRepository sectionMasterRepository;
     private final StudentListMapper studentListMapper;
 
     public StudentDetailResponseDTO toDetail(Student student) {
-        String className = resolveClassName(student.getClassId());
+        String className = resolveClassName(student.getClassId(), student.getSectionId());
         return StudentDetailResponseDTO.builder()
                 .student(toProfile(student, className))
                 .parents(toParents(student.getParents()))
@@ -45,9 +48,6 @@ public class StudentDetailMapper {
         }
         if (dto.getRationCardNumber() != null) {
             student.setRationCardNumber(trimToNull(dto.getRationCardNumber()));
-        }
-        if (dto.getApplicationNumber() != null) {
-            student.setApplicationNumber(trimToNull(dto.getApplicationNumber()));
         }
         if (dto.getStudentIdCardNo() != null) {
             student.setStudentIdCardNo(trimToNull(dto.getStudentIdCardNo()));
@@ -90,6 +90,9 @@ public class StudentDetailMapper {
         }
         if (dto.getClassId() != null) {
             student.setClassId(dto.getClassId());
+        }
+        if (dto.getSectionId() != null) {
+            student.setSectionId(dto.getSectionId());
         }
         if (dto.getAcademicYearId() != null) {
             student.setAcademicYearId(dto.getAcademicYearId());
@@ -201,7 +204,6 @@ public class StudentDetailMapper {
         return StudentProfileResponseDTO.builder()
                 .studentId(student.getId())
                 .admissionNo(student.getAdmissionNo())
-                .applicationNumber(student.getApplicationNumber())
                 .studentIdCardNo(student.getStudentIdCardNo())
                 .aadharNumber(student.getAadharNumber())
                 .emisNumber(student.getEmisNumber())
@@ -220,6 +222,8 @@ public class StudentDetailMapper {
                 .address(student.getAddress())
                 .classId(student.getClassId())
                 .className(className)
+                .sectionId(student.getSectionId())
+                .sectionCode(resolveSectionCode(student.getSectionId()))
                 .academicYearId(student.getAcademicYearId())
                 .bloodGroup(student.getBloodGroup())
                 .religion(student.getReligion())
@@ -274,12 +278,27 @@ public class StudentDetailMapper {
                 .build();
     }
 
-    private String resolveClassName(Long classId) {
+    private String resolveClassName(Long classId, Long sectionId) {
         if (classId == null) {
             return null;
         }
-        Optional<ClassMaster> classMaster = classMasterRepository.findByIdAndDeletedFalseWithSection(classId);
-        return classMaster.map(studentListMapper::formatClassName).orElse(null);
+        Optional<ClassMaster> classMaster = classMasterRepository.findByIdAndDeletedFalse(classId);
+        Optional<SectionMaster> section =
+                sectionId != null ? sectionMasterRepository.findByIdAndDeletedFalse(sectionId) : Optional.empty();
+        if (classMaster.isEmpty()) {
+            return null;
+        }
+        return studentListMapper.formatClassName(classMaster.get(), section.orElse(null));
+    }
+
+    private String resolveSectionCode(Long sectionId) {
+        if (sectionId == null) {
+            return null;
+        }
+        return sectionMasterRepository
+                .findByIdAndDeletedFalse(sectionId)
+                .map(SectionMaster::getSectionCode)
+                .orElse(null);
     }
 
     private static String trimToNull(String value) {

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class PaymentValidator {
 
     public void validateStudentHasClassAndYear(Student student) {
-        if (student.getClassId() == null || student.getAcademicYearId() == null) {
+        if (student.getClassId() == null || student.getSectionId() == null || student.getAcademicYearId() == null) {
             throw new ValidationException(
                     MessageConstants.VALIDATION_FAILED, List.of(MessageConstants.STUDENT_CLASS_NOT_ASSIGNED));
         }

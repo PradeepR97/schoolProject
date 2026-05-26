@@ -121,6 +121,7 @@ public class ScholarshipNotificationDispatcherImpl implements ScholarshipNotific
         payload.put("studentId", student != null ? student.getId() : null);
         payload.put("studentName", student != null ? student.getFirstName() : null);
         payload.put("classId", student != null ? student.getClassId() : null);
+        payload.put("sectionId", student != null ? student.getSectionId() : null);
         payload.put("schemeName", application.getScheme() != null ? application.getScheme().getSchemeName() : null);
         payload.put("status", application.getStatus() != null ? application.getStatus().name() : null);
         payload.put("requestedDiscountPercent", application.getRequestedDiscountPercent());

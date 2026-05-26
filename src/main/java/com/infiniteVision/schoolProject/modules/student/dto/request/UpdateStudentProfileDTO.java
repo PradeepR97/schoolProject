@@ -37,9 +37,6 @@ public class UpdateStudentProfileDTO {
     @Size(max = 30, message = "Ration card number must not exceed 30 characters")
     private String rationCardNumber;
 
-    @Size(max = 30, message = "Application number must not exceed 30 characters")
-    private String applicationNumber;
-
     @Size(max = 20, message = "Student ID card number must not exceed 20 characters")
     private String studentIdCardNo;
 
@@ -76,6 +73,8 @@ public class UpdateStudentProfileDTO {
     private String address;
 
     private Long classId;
+
+    private Long sectionId;
 
     private Long academicYearId;
 

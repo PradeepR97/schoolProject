@@ -22,7 +22,6 @@ public class StudentProfileResponseDTO {
 
     private Long studentId;
     private String admissionNo;
-    private String applicationNumber;
     private String studentIdCardNo;
     private String aadharNumber;
     private String emisNumber;
@@ -41,6 +40,8 @@ public class StudentProfileResponseDTO {
     private String address;
     private Long classId;
     private String className;
+    private Long sectionId;
+    private String sectionCode;
     private Long academicYearId;
     private BloodGroup bloodGroup;
     private Religion religion;

@@ -1,64 +1,10 @@
 {
   "info": {
-    "_postman_id": "9a4dca95-44fb-4064-89d4-e833f7dfea84",
+    "_postman_id": "79d2dac5-d397-432f-92a1-ca1687e8f6c4",
     "name": "School ERP API",
-    "description": "Complete REST API collection for School ERP Backend.\n\n1. Import Local.postman_environment.json\n2. Run Health Check\n3. Login (or Login + Verify OTP if otp_verified=false)\n4. Use Bearer {{token}} on protected APIs\n\nMock OTP: 123456",
+    "description": "School ERP Backend \u2014 all REST APIs (Auth, Students, Fees, Payments, Scholarships, Reports, etc.).\n\nSetup:\n1. Import `Local.postman_environment.json`\n2. Set `baseUrl` (default http://localhost:8080)\n3. Run **01 - Auth > Public > Login** \u2014 saves `token` and `userId`\n4. Other requests inherit Bearer {{token}} from collection auth",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "token",
-      "value": ""
-    },
-    {
-      "key": "userId",
-      "value": "1"
-    },
-    {
-      "key": "studentId",
-      "value": "1"
-    },
-    {
-      "key": "resetToken",
-      "value": ""
-    },
-    {
-      "key": "schemeId",
-      "value": "1"
-    },
-    {
-      "key": "applicationId",
-      "value": "1"
-    },
-    {
-      "key": "ledgerId",
-      "value": "1"
-    },
-    {
-      "key": "invoiceId",
-      "value": "1"
-    },
-    {
-      "key": "paymentId",
-      "value": "1"
-    },
-    {
-      "key": "academicYearId",
-      "value": "1"
-    },
-    {
-      "key": "classId",
-      "value": "1"
-    },
-    {
-      "key": "feeHeadId",
-      "value": "1"
-    }
-  ],
   "auth": {
     "type": "bearer",
     "bearer": [
@@ -69,10 +15,16 @@
       }
     ]
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
   "item": [
     {
-      "name": "Health",
-      "description": "Public",
+      "name": "00 - Health & Master Data",
+      "description": "",
       "item": [
         {
           "name": "Health Check",
@@ -80,7 +32,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -95,624 +47,19 @@
                 "health"
               ]
             },
-            "description": "",
+            "description": "No auth required",
             "auth": {
               "type": "noauth"
             }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Auth",
-      "description": "Authentication",
-      "item": [
-        {
-          "name": "Login (Email)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Returns token or otpRequired=true",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\",\n  \"password\": \"SecurePass123!\"\n}"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const json = pm.response.json();",
-                  "    if (json.data && json.data.token) {",
-                  "        pm.collectionVariables.set('token', json.data.token);",
-                  "        pm.environment.set('token', json.data.token);",
-                  "    }",
-                  "    if (json.data && json.data.user && json.data.user.id) {",
-                  "        pm.collectionVariables.set('userId', String(json.data.user.id));",
-                  "    }",
-                  "}"
-                ]
-              }
-            }
-          ]
+          }
         },
-        {
-          "name": "Login (Phone)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"phone\": \"9876543210\",\n  \"password\": \"SecurePass123!\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login Verify OTP",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login/verify-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login",
-                "verify-otp"
-              ]
-            },
-            "description": "First login only. Mock OTP 123456",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\",\n  \"otp\": \"123456\"\n}"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const json = pm.response.json();",
-                  "    if (json.data && json.data.token) {",
-                  "        pm.collectionVariables.set('token', json.data.token);",
-                  "    }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Login Send OTP",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login/send-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login",
-                "send-otp"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login Resend OTP",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login/resend-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login",
-                "resend-otp"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Forgot Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "forgot-password"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Verify OTP (Forgot)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/verify-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "verify-otp"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.example\",\n  \"otp\": \"123456\"\n}"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200 && pm.response.json().data && pm.response.json().data.resetToken) {",
-                  "    pm.collectionVariables.set('resetToken', pm.response.json().data.resetToken);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/reset-password",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "reset-password"
-              ]
-            },
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewSecurePass456!\",\n  \"confirmNewPassword\": \"NewSecurePass456!\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "logout"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/change-password",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "change-password"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"SecurePass123!\",\n  \"newPassword\": \"NewSecurePass456!\",\n  \"confirmNewPassword\": \"NewSecurePass456!\"\n}"
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Users",
-      "description": "ADMIN or PRINCIPAL",
-      "item": [
-        {
-          "name": "List Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "users"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
-        },
-        {
-          "name": "Get User by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "users",
-                "{{userId}}"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
-        },
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "users"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"jane.doe\",\n  \"password\": \"SecurePass123!\",\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"jane@school.example\",\n  \"phone\": \"9876543211\",\n  \"role\": \"CORRESPONDENT\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "users",
-                "{{userId}}"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Jane D. Doe\",\n  \"status\": \"ACTIVE\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete User",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "users",
-                "{{userId}}"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Master Data",
-      "description": "Dropdown options",
-      "item": [
         {
           "name": "Get Master Data",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/master-data",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "master-data"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
-        },
-        {
-          "name": "Get Master Data (by year)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -733,16 +80,613 @@
                 }
               ]
             },
-            "description": "?academicYearId=1"
-          },
-          "response": []
+            "description": "Optional academicYearId filters class list. Requires JWT."
+          }
         }
       ]
     },
     {
-      "name": "Students",
-      "description": "Student management",
+      "name": "01 - Auth",
+      "description": "",
       "item": [
+        {
+          "name": "Public",
+          "description": "",
+          "item": [
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Email or phone + password. Sets {{token}}, {{userId}}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@school.com\",\n  \"password\": \"Admin@123\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const json = pm.response.json();",
+                      "  const d = json.data;",
+                      "  if (!d) return;",
+                      "  if (d.token) pm.environment.set('token', d.token);",
+                      "  if (d.user && d.user.id) pm.environment.set('userId', String(d.user.id));",
+                      "  if (d.resetToken) pm.environment.set('resetToken', d.resetToken);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Send Login OTP",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login/send-otp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login",
+                    "send-otp"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@school.com\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Resend Login OTP",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login/resend-otp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login",
+                    "resend-otp"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@school.com\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Verify Login OTP",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login/verify-otp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login",
+                    "verify-otp"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@school.com\",\n  \"otp\": \"123456\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const json = pm.response.json();",
+                      "  const d = json.data;",
+                      "  if (!d) return;",
+                      "  if (d.token) pm.environment.set('token', d.token);",
+                      "  if (d.user && d.user.id) pm.environment.set('userId', String(d.user.id));",
+                      "  if (d.resetToken) pm.environment.set('resetToken', d.resetToken);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Forgot Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "forgot-password"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@school.com\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            },
+            {
+              "name": "Verify OTP (Password Reset)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/verify-otp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "verify-otp"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@school.com\",\n  \"otp\": \"123456\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const json = pm.response.json();",
+                      "  const d = json.data;",
+                      "  if (!d) return;",
+                      "  if (d.token) pm.environment.set('token', d.token);",
+                      "  if (d.user && d.user.id) pm.environment.set('userId', String(d.user.id));",
+                      "  if (d.resetToken) pm.environment.set('resetToken', d.resetToken);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "reset-password"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPass@123\",\n  \"confirmPassword\": \"NewPass@123\"\n}"
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Session",
+          "description": "",
+          "item": [
+            {
+              "name": "Logout",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Change Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/change-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "change-password"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"currentPassword\": \"Admin@123\",\n  \"newPassword\": \"NewPass@123\",\n  \"confirmPassword\": \"NewPass@123\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users (ADMIN / PRINCIPAL)",
+          "description": "",
+          "item": [
+            {
+              "name": "List Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Get User",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Create User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"accountant01\",\n  \"password\": \"Accountant@123\",\n  \"fullName\": \"Fee Accountant\",\n  \"email\": \"accountant01@school.com\",\n  \"phone\": \"9876543211\",\n  \"role\": \"ACCOUNTANT\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const d = pm.response.json().data;",
+                      "    if (!d) return;",
+                      "    const map = {",
+                      "      studentId: ['studentId'],",
+                      "      applicationId: ['applicationId', 'id'],",
+                      "      ledgerId: ['ledgerId'],",
+                      "      invoiceId: ['invoiceId'],",
+                      "      paymentId: ['paymentId'],",
+                      "      schemeId: ['schemeId'],",
+                      "      feeHeadId: ['feeHeadId', 'id'],",
+                      "      structureId: ['structureId', 'id'],",
+                      "      userId: ['userId', 'id']",
+                      "    };",
+                      "    Object.keys(map).forEach(envKey => {",
+                      "      for (const field of map[envKey]) {",
+                      "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                      "      }",
+                      "    });",
+                      "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                      "      const first = d.content[0];",
+                      "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                      "    }",
+                      "  } catch (e) {}",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Fee Accountant Updated\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Students",
+      "description": "",
+      "item": [
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students?page=0&size=10&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get Student",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
         {
           "name": "Admit Student",
           "request": {
@@ -750,10 +694,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -772,61 +712,45 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"student\": {\n    \"admissionNo\": \"ADM-2026-001\",\n    \"aadharNumber\": \"123456789012\",\n    \"firstName\": \"Arun\",\n    \"lastName\": \"Kumar\",\n    \"dateOfBirth\": \"2015-06-15\",\n    \"gender\": \"MALE\",\n    \"medium\": \"ENGLISH\",\n    \"classId\": 1,\n    \"academicYearId\": 1,\n    \"status\": \"ACTIVE\"\n  },\n  \"parents\": {\n    \"fatherName\": \"Ravi Kumar\",\n    \"fatherPhone\": \"9876543211\",\n    \"primaryContact\": \"FATHER\"\n  },\n  \"documents\": {\n    \"aadharNo\": \"123456789012\"\n  }\n}"
+              "raw": "{\n  \"student\": {\n    \"firstName\": \"Ravi\",\n    \"lastName\": \"Kumar\",\n    \"gender\": \"MALE\",\n    \"dateOfBirth\": \"2015-06-15\",\n    \"admissionNo\": \"ADM-2026-101\",\n    \"applicationNo\": \"APP-2026-101\",\n    \"aadharNumber\": \"123456789013\",\n    \"classId\": 1,\n    \"academicYearId\": 1,\n    \"medium\": \"ENGLISH\",\n    \"community\": \"OC\",\n    \"religion\": \"HINDU\",\n    \"address\": \"Chennai\",\n    \"feesPaymentStatus\": \"PENDING\"\n  },\n  \"parents\": {\n    \"fatherName\": \"Father Name\",\n    \"fatherPhone\": \"9876543210\",\n    \"primaryContact\": \"FATHER\"\n  },\n  \"documents\": {\n    \"profilePhotoUrl\": \"https://example.com/photo.jpg\"\n  }\n}"
             }
           },
-          "response": []
-        },
-        {
-          "name": "List Students",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
               }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/students",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "students"
-              ]
-            },
-            "description": "?page=0&size=10"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Student by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "students",
-                "{{studentId}}"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
+            }
+          ]
         },
         {
           "name": "Update Student",
@@ -836,10 +760,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
               }
             ],
             "url": {
@@ -857,10 +777,9 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"student\": {\n    \"firstName\": \"Arun\",\n    \"lastName\": \"Kumar Updated\"\n  }\n}"
+              "raw": "{\n  \"student\": {\n    \"address\": \"Updated address, Chennai\"\n  }\n}"
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Delete Student",
@@ -868,7 +787,7 @@
             "method": "DELETE",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -885,169 +804,1158 @@
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         }
       ]
     },
     {
-      "name": "Fees - Structure",
-      "description": "ADMIN or PRINCIPAL",
+      "name": "03 - Excel Upload",
+      "description": "",
       "item": [
         {
-          "name": "List Fee Structures",
+          "name": "Download Template",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/fees/structure",
+              "raw": "{{baseUrl}}/api/v1/excel-upload/student-admissions/template",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "fees",
-                "structure"
+                "excel-upload",
+                "student-admissions",
+                "template"
               ]
             },
-            "description": "?academicYearId=&classId=&page=0&size=10"
-          },
-          "response": []
+            "description": "Returns .xlsx (ADMIN/PRINCIPAL/CORRESPONDENT)"
+          }
         },
         {
-          "name": "Get Fee Structure",
+          "name": "Download Sample",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/fees/structure/1",
+              "raw": "{{baseUrl}}/api/v1/excel-upload/student-admissions/sample",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "fees",
-                "structure",
-                "1"
+                "excel-upload",
+                "student-admissions",
+                "sample"
               ]
             },
-            "description": ""
-          },
-          "response": []
+            "description": "Template with sample rows"
+          }
         },
         {
-          "name": "Create Fee Structure",
+          "name": "Upload Admissions",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/fees/structure",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "fees",
-                "structure"
-              ]
-            },
-            "description": "",
+            "header": [],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"academicYearId\": 1,\n  \"classId\": 1,\n  \"feeHeadId\": 1,\n  \"termType\": \"ANNUAL\",\n  \"amount\": 50000,\n  \"active\": true\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Fee Structure",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": ".xlsx file"
+                },
+                {
+                  "key": "dryRun",
+                  "value": "false",
+                  "type": "text",
+                  "description": "true = validate only"
+                }
+              ]
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/fees/structure/1",
+              "raw": "{{baseUrl}}/api/v1/excel-upload/student-admissions/upload",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "fees",
-                "structure",
-                "1"
+                "excel-upload",
+                "student-admissions",
+                "upload"
               ]
             },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 52000,\n  \"active\": true\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Fee Structure",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/fees/structure/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "fees",
-                "structure",
-                "1"
-              ]
-            },
-            "description": ""
-          },
-          "response": []
+            "description": "multipart/form-data: file, dryRun (optional, default false)"
+          }
         }
       ]
     },
     {
-      "name": "Payments",
-      "description": "Fee ledgers, invoices, collection",
+      "name": "04 - Fees",
+      "description": "",
+      "item": [
+        {
+          "name": "Fee Heads",
+          "description": "",
+          "item": [
+            {
+              "name": "List Fee Heads",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads?activeOnly=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads"
+                  ],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Get Fee Head",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads/{{feeHeadId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads",
+                    "{{feeHeadId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Create Fee Head",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"feeHeadCode\": \"TRANSPORT\",\n  \"feeHeadName\": \"Transport Fee\",\n  \"category\": \"TRANSPORT\",\n  \"active\": true\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const d = pm.response.json().data;",
+                      "    if (!d) return;",
+                      "    const map = {",
+                      "      studentId: ['studentId'],",
+                      "      applicationId: ['applicationId', 'id'],",
+                      "      ledgerId: ['ledgerId'],",
+                      "      invoiceId: ['invoiceId'],",
+                      "      paymentId: ['paymentId'],",
+                      "      schemeId: ['schemeId'],",
+                      "      feeHeadId: ['feeHeadId', 'id'],",
+                      "      structureId: ['structureId', 'id'],",
+                      "      userId: ['userId', 'id']",
+                      "    };",
+                      "    Object.keys(map).forEach(envKey => {",
+                      "      for (const field of map[envKey]) {",
+                      "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                      "      }",
+                      "    });",
+                      "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                      "      const first = d.content[0];",
+                      "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                      "    }",
+                      "  } catch (e) {}",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Bulk Create Fee Heads",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads/bulk",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads",
+                    "bulk"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"feeHeads\": [\n    {\n      \"feeHeadCode\": \"LAB\",\n      \"feeHeadName\": \"Lab Fee\",\n      \"category\": \"ACADEMIC\",\n      \"active\": true\n    }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Fee Head",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads/{{feeHeadId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads",
+                    "{{feeHeadId}}"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"feeHeadName\": \"Transport Fee (Updated)\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Fee Head",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/heads/{{feeHeadId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "heads",
+                    "{{feeHeadId}}"
+                  ]
+                },
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fee Structure",
+          "description": "",
+          "item": [
+            {
+              "name": "List Fee Structures",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure?academicYearId={{academicYearId}}&classId={{classId}}&page=0&size=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure"
+                  ],
+                  "query": [
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    },
+                    {
+                      "key": "classId",
+                      "value": "{{classId}}"
+                    },
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Fee Structure Matrix",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure/matrix?academicYearId={{academicYearId}}&classId={{classId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure",
+                    "matrix"
+                  ],
+                  "query": [
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    },
+                    {
+                      "key": "classId",
+                      "value": "{{classId}}"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Get Fee Structure",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure/{{structureId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure",
+                    "{{structureId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Create Fee Structure",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"academicYearId\": 1,\n  \"classId\": 1,\n  \"feeHeadId\": 1,\n  \"termType\": \"TERM_1\",\n  \"amount\": 25000,\n  \"dueDate\": \"2026-06-15\",\n  \"scholarshipAllowed\": true,\n  \"active\": true\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const d = pm.response.json().data;",
+                      "    if (!d) return;",
+                      "    const map = {",
+                      "      studentId: ['studentId'],",
+                      "      applicationId: ['applicationId', 'id'],",
+                      "      ledgerId: ['ledgerId'],",
+                      "      invoiceId: ['invoiceId'],",
+                      "      paymentId: ['paymentId'],",
+                      "      schemeId: ['schemeId'],",
+                      "      feeHeadId: ['feeHeadId', 'id'],",
+                      "      structureId: ['structureId', 'id'],",
+                      "      userId: ['userId', 'id']",
+                      "    };",
+                      "    Object.keys(map).forEach(envKey => {",
+                      "      for (const field of map[envKey]) {",
+                      "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                      "      }",
+                      "    });",
+                      "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                      "      const first = d.content[0];",
+                      "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                      "    }",
+                      "  } catch (e) {}",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Bulk Create Fee Structures",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure/bulk",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure",
+                    "bulk"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"structures\": [\n    {\n      \"academicYearId\": 1,\n      \"classId\": 1,\n      \"feeHeadId\": 1,\n      \"termType\": \"TERM_2\",\n      \"amount\": 25000,\n      \"dueDate\": \"2026-12-15\",\n      \"scholarshipAllowed\": true,\n      \"active\": true\n    }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Fee Structure",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure/{{structureId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure",
+                    "{{structureId}}"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 26000\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Fee Structure",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/fees/structure/{{structureId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "fees",
+                    "structure",
+                    "{{structureId}}"
+                  ]
+                },
+                "description": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Scholarships",
+      "description": "",
+      "item": [
+        {
+          "name": "Schemes & Merit Bands",
+          "description": "",
+          "item": [
+            {
+              "name": "List Schemes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Get Scheme",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships",
+                    "{{schemeId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Create Scheme",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"schemeName\": \"Merit Scholarship 2026\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 25,\n  \"applicableTo\": \"TUITION_ONLY\",\n  \"isActive\": true\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const d = pm.response.json().data;",
+                      "    if (!d) return;",
+                      "    const map = {",
+                      "      studentId: ['studentId'],",
+                      "      applicationId: ['applicationId', 'id'],",
+                      "      ledgerId: ['ledgerId'],",
+                      "      invoiceId: ['invoiceId'],",
+                      "      paymentId: ['paymentId'],",
+                      "      schemeId: ['schemeId'],",
+                      "      feeHeadId: ['feeHeadId', 'id'],",
+                      "      structureId: ['structureId', 'id'],",
+                      "      userId: ['userId', 'id']",
+                      "    };",
+                      "    Object.keys(map).forEach(envKey => {",
+                      "      for (const field of map[envKey]) {",
+                      "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                      "      }",
+                      "    });",
+                      "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                      "      const first = d.content[0];",
+                      "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                      "    }",
+                      "  } catch (e) {}",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Scheme",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships",
+                    "{{schemeId}}"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"discountValue\": 30\n}"
+                }
+              }
+            },
+            {
+              "name": "Deactivate Scheme",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships",
+                    "{{schemeId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "List Merit Bands",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships/merit-bands?academicYearId={{academicYearId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships",
+                    "merit-bands"
+                  ],
+                  "query": [
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Resolve Merit Band",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarships/merit-bands/resolve?academicYearId={{academicYearId}}&marks=92.5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarships",
+                    "merit-bands",
+                    "resolve"
+                  ],
+                  "query": [
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    },
+                    {
+                      "key": "marks",
+                      "value": "92.5"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "name": "Applications",
+          "description": "",
+          "item": [
+            {
+              "name": "Create Application",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"studentId\": 1,\n  \"schemeId\": 1,\n  \"academicYearId\": 1,\n  \"applicationRemarks\": \"Merit-based application\",\n  \"marksAtApplication\": 95.5\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const d = pm.response.json().data;",
+                      "    if (!d) return;",
+                      "    const map = {",
+                      "      studentId: ['studentId'],",
+                      "      applicationId: ['applicationId', 'id'],",
+                      "      ledgerId: ['ledgerId'],",
+                      "      invoiceId: ['invoiceId'],",
+                      "      paymentId: ['paymentId'],",
+                      "      schemeId: ['schemeId'],",
+                      "      feeHeadId: ['feeHeadId', 'id'],",
+                      "      structureId: ['structureId', 'id'],",
+                      "      userId: ['userId', 'id']",
+                      "    };",
+                      "    Object.keys(map).forEach(envKey => {",
+                      "      for (const field of map[envKey]) {",
+                      "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                      "      }",
+                      "    });",
+                      "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                      "      const first = d.content[0];",
+                      "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                      "    }",
+                      "  } catch (e) {}",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List Applications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications?status=PENDING&studentId={{studentId}}&academicYearId={{academicYearId}}&page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "PENDING"
+                    },
+                    {
+                      "key": "studentId",
+                      "value": "{{studentId}}"
+                    },
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    },
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Get Application",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "{{applicationId}}"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "List by Student",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/students/{{studentId}}?page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "students",
+                    "{{studentId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Approval History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "{{applicationId}}",
+                    "history"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Approve",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "{{applicationId}}",
+                    "approve"
+                  ]
+                },
+                "description": "PRINCIPAL or CORRESPONDENT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Reject",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "{{applicationId}}",
+                    "reject"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rejectionReason\": \"Documents incomplete\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Bulk Approve",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/bulk-approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "bulk-approve"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"applicationIds\": [\n    1,\n    2\n  ],\n  \"remarks\": \"Approved in batch\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Bulk Reject",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/scholarship-applications/bulk-reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "scholarship-applications",
+                    "bulk-reject"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"applicationIds\": [\n    3\n  ],\n  \"rejectionReason\": \"Not eligible\"\n}"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 - Payments",
+      "description": "",
       "item": [
         {
           "name": "List Payments",
@@ -1055,12 +1963,12 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments",
+              "raw": "{{baseUrl}}/api/v1/payments?studentId={{studentId}}&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1068,11 +1976,24 @@
                 "api",
                 "v1",
                 "payments"
+              ],
+              "query": [
+                {
+                  "key": "studentId",
+                  "value": "{{studentId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             },
-            "description": "?page=0&size=10"
-          },
-          "response": []
+            "description": ""
+          }
         },
         {
           "name": "List Invoices",
@@ -1080,12 +2001,12 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/invoices",
+              "raw": "{{baseUrl}}/api/v1/payments/invoices?studentId={{studentId}}&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1094,11 +2015,24 @@
                 "v1",
                 "payments",
                 "invoices"
+              ],
+              "query": [
+                {
+                  "key": "studentId",
+                  "value": "{{studentId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Invoice",
@@ -1106,7 +2040,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -1124,8 +2058,7 @@
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
           "name": "Generate Ledgers",
@@ -1134,10 +2067,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1157,10 +2086,45 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": 1,\n  \"academicYearId\": 1\n}"
+              "raw": "{\n  \"studentId\": 1,\n  \"academicYearId\": 1,\n  \"term\": \"TERM1\"\n}"
             }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Regenerate Ledgers",
@@ -1169,10 +2133,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1194,8 +2154,7 @@
               "mode": "raw",
               "raw": "{\n  \"studentId\": 1,\n  \"academicYearId\": 1\n}"
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Ledger",
@@ -1203,7 +2162,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -1221,8 +2180,7 @@
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
           "name": "Adjust Late Fee",
@@ -1231,10 +2189,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1255,10 +2209,9 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lateFee\": 500,\n  \"remarks\": \"Manual adjustment\"\n}"
+              "raw": "{\n  \"lateFee\": 500,\n  \"remarks\": \"Late payment penalty\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Generate Invoice",
@@ -1267,10 +2220,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1293,7 +2242,42 @@
               "raw": "{\n  \"ledgerId\": 1\n}"
             }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Collect Payment",
@@ -1302,10 +2286,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1324,10 +2304,222 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": 1,\n  \"ledgerId\": 1,\n  \"amountPaid\": 10000,\n  \"paymentMode\": \"CASH\",\n  \"paymentDate\": \"2026-05-22\",\n  \"autoGenerateInvoice\": true\n}"
+              "raw": "{\n  \"studentId\": 1,\n  \"ledgerId\": 1,\n  \"amountPaid\": 10000,\n  \"paymentMode\": \"CASH\",\n  \"paymentDate\": \"2026-05-22\",\n  \"idempotencyKey\": \"collect-demo-001\",\n  \"autoGenerateInvoice\": true,\n  \"remarks\": \"Term 1 partial\"\n}"
             }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bulk Collect",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/collect/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "collect",
+                "bulk"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": 1,\n  \"paymentDate\": \"2026-05-22\",\n  \"paymentMode\": \"UPI\",\n  \"transactionRef\": \"UPI123456\",\n  \"autoGenerateInvoice\": true,\n  \"idempotencyKey\": \"bulk-collect-001\",\n  \"allocations\": [\n    {\n      \"ledgerId\": 1,\n      \"amountPaid\": 5000\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Collect All Outstanding",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/students/{{studentId}}/collect/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "students",
+                "{{studentId}}",
+                "collect",
+                "bulk"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentDate\": \"2026-05-22\",\n  \"paymentMode\": \"CASH\",\n  \"autoGenerateInvoice\": true,\n  \"remarks\": \"Full outstanding settlement\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const d = pm.response.json().data;",
+                  "    if (!d) return;",
+                  "    const map = {",
+                  "      studentId: ['studentId'],",
+                  "      applicationId: ['applicationId', 'id'],",
+                  "      ledgerId: ['ledgerId'],",
+                  "      invoiceId: ['invoiceId'],",
+                  "      paymentId: ['paymentId'],",
+                  "      schemeId: ['schemeId'],",
+                  "      feeHeadId: ['feeHeadId', 'id'],",
+                  "      structureId: ['structureId', 'id'],",
+                  "      userId: ['userId', 'id']",
+                  "    };",
+                  "    Object.keys(map).forEach(envKey => {",
+                  "      for (const field of map[envKey]) {",
+                  "        if (d[field] != null) { pm.environment.set(envKey, String(d[field])); break; }",
+                  "      }",
+                  "    });",
+                  "    if (d.content && Array.isArray(d.content) && d.content[0]) {",
+                  "      const first = d.content[0];",
+                  "      if (first.paymentId) pm.environment.set('paymentId', String(first.paymentId));",
+                  "    }",
+                  "  } catch (e) {}",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Due Payments (Defaulters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/dues?academicYearId={{academicYearId}}&classId={{classId}}&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "dues"
+              ],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                },
+                {
+                  "key": "classId",
+                  "value": "{{classId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": ""
+          }
         },
         {
           "name": "Student Dues",
@@ -1335,12 +2527,12 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/students/{{studentId}}/dues",
+              "raw": "{{baseUrl}}/api/v1/payments/students/{{studentId}}/dues?academicYearId={{academicYearId}}&outstandingOnly=false",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1351,11 +2543,20 @@
                 "students",
                 "{{studentId}}",
                 "dues"
+              ],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                },
+                {
+                  "key": "outstandingOnly",
+                  "value": "false"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Receipt",
@@ -1363,7 +2564,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
@@ -1381,8 +2582,7 @@
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
           "name": "Cancel Payment",
@@ -1391,10 +2591,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1416,8 +2612,7 @@
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Duplicate entry\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Refund Payment",
@@ -1426,10 +2621,6 @@
             "header": [
               {
                 "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
                 "value": "application/json"
               }
             ],
@@ -1449,411 +2640,488 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Overpayment\"\n}"
+              "raw": "{\n  \"reason\": \"Overpayment refund\"\n}"
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Receipt Print",
+          "description": "",
+          "item": [
+            {
+              "name": "Receipt Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/receipts/{{paymentId}}/details",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "receipts",
+                    "{{paymentId}}",
+                    "details"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            {
+              "name": "Print Receipt",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/receipts/{{paymentId}}/print",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "receipts",
+                    "{{paymentId}}",
+                    "print"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"printerType\": \"LASER\",\n  \"copyType\": \"ORIGINAL\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Reprint Receipt",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/receipts/{{paymentId}}/reprint",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "receipts",
+                    "{{paymentId}}",
+                    "reprint"
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"printerType\": \"LASER\",\n  \"copyType\": \"DUPLICATE\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Download Receipt PDF",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/receipts/{{paymentId}}/pdf?printerType=LASER&copyType=ORIGINAL",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "receipts",
+                    "{{paymentId}}",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "printerType",
+                      "value": "LASER"
+                    },
+                    {
+                      "key": "copyType",
+                      "value": "ORIGINAL"
+                    }
+                  ]
+                },
+                "description": "Binary PDF response"
+              }
+            },
+            {
+              "name": "Print History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/receipts/{{paymentId}}/print-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "receipts",
+                    "{{paymentId}}",
+                    "print-history"
+                  ]
+                },
+                "description": ""
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Scholarships",
-      "description": "Scholarship schemes",
+      "name": "07 - Dashboard & Notifications",
+      "description": "",
       "item": [
         {
-          "name": "Create Scholarship",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarships",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "scholarships"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"schemeName\": \"Merit 10%\",\n  \"schemeType\": \"MERIT\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 10,\n  \"applicableTo\": \"ALL_FEES\",\n  \"academicYearId\": 1,\n  \"isActive\": true\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "List Scholarships",
+          "name": "Dashboard Summary",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarships",
+              "raw": "{{baseUrl}}/api/v1/dashboard/summary?academicYearId={{academicYearId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarships"
+                "dashboard",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
-          "name": "Get Scholarship",
+          "name": "List Notifications",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
+              "raw": "{{baseUrl}}/api/v1/notifications?page=0&size=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarships",
-                "{{schemeId}}"
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
-          "name": "Update Scholarship",
+          "name": "Unread Count",
           "request": {
-            "method": "PUT",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
+              "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarships",
-                "{{schemeId}}"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"schemeName\": \"Merit 15%\",\n  \"discountValue\": 15\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Deactivate Scholarship",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarships/{{schemeId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "scholarships",
-                "{{schemeId}}"
+                "notifications",
+                "unread-count"
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     },
     {
-      "name": "Scholarship Applications",
-      "description": "Per-student discount workflow",
+      "name": "08 - Reports",
+      "description": "",
       "item": [
         {
-          "name": "Create Application",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "scholarship-applications"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"studentId\": 1,\n  \"schemeId\": 1,\n  \"academicYearId\": 1,\n  \"applicationRemarks\": \"Merit student\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "List Applications",
+          "name": "List Report Types",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications",
+              "raw": "{{baseUrl}}/api/v1/reports",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarship-applications"
+                "reports"
               ]
             },
-            "description": "?status=PENDING&page=0&size=10"
-          },
-          "response": []
+            "description": ""
+          }
         },
         {
-          "name": "Get Application",
+          "name": "Export STUDENT (Excel)",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}",
+              "raw": "{{baseUrl}}/api/v1/reports/STUDENT/export?format=EXCEL&academicYearId={{academicYearId}}&classId={{classId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarship-applications",
-                "{{applicationId}}"
+                "reports",
+                "STUDENT",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "EXCEL"
+                },
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                },
+                {
+                  "key": "classId",
+                  "value": "{{classId}}"
+                }
               ]
             },
-            "description": ""
-          },
-          "response": []
+            "description": "File download"
+          }
         },
         {
-          "name": "List by Student",
+          "name": "Export FEE_COLLECTION (PDF)",
           "request": {
             "method": "GET",
             "header": [
               {
-                "key": "Accept",
+                "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/students/{{studentId}}",
+              "raw": "{{baseUrl}}/api/v1/reports/FEE_COLLECTION/export?format=PDF&academicYearId=1&startMonth=1&startYear=2026&endMonth=12&endYear=2026",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarship-applications",
-                "students",
-                "{{studentId}}"
+                "reports",
+                "FEE_COLLECTION",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "PDF"
+                },
+                {
+                  "key": "academicYearId",
+                  "value": "1"
+                },
+                {
+                  "key": "startMonth",
+                  "value": "1"
+                },
+                {
+                  "key": "startYear",
+                  "value": "2026"
+                },
+                {
+                  "key": "endMonth",
+                  "value": "12"
+                },
+                {
+                  "key": "endYear",
+                  "value": "2026"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
-          "name": "Approve Application",
+          "name": "Export PENDING_FEES (Excel)",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}/approve",
+              "raw": "{{baseUrl}}/api/v1/reports/PENDING_FEES/export?format=EXCEL&academicYearId={{academicYearId}}&classId={{classId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarship-applications",
-                "{{applicationId}}",
-                "approve"
+                "reports",
+                "PENDING_FEES",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "EXCEL"
+                },
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                },
+                {
+                  "key": "classId",
+                  "value": "{{classId}}"
+                }
               ]
             },
             "description": ""
-          },
-          "response": []
+          }
         },
         {
-          "name": "Reject Application",
+          "name": "Export SCHOLARSHIP (Excel)",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/{{applicationId}}/reject",
+              "raw": "{{baseUrl}}/api/v1/reports/SCHOLARSHIP/export?format=EXCEL&academicYearId={{academicYearId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "scholarship-applications",
-                "{{applicationId}}",
-                "reject"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"rejectionReason\": \"Incomplete documents\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Bulk Approve",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/bulk-approve",
-              "host": [
-                "{{baseUrl}}"
+                "reports",
+                "SCHOLARSHIP",
+                "export"
               ],
-              "path": [
-                "api",
-                "v1",
-                "scholarship-applications",
-                "bulk-approve"
+              "query": [
+                {
+                  "key": "format",
+                  "value": "EXCEL"
+                },
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
               ]
             },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"applicationIds\": [\n    1,\n    2\n  ]\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Bulk Reject",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/scholarship-applications/bulk-reject",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "scholarship-applications",
-                "bulk-reject"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"applicationIds\": [\n    3\n  ],\n  \"rejectionReason\": \"Not eligible\"\n}"
-            }
-          },
-          "response": []
+            "description": ""
+          }
         }
       ]
     }

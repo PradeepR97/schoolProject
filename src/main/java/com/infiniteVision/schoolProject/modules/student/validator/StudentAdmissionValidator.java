@@ -2,9 +2,7 @@ package com.infiniteVision.schoolProject.modules.student.validator;
 
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ValidationException;
-import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
-import com.infiniteVision.schoolProject.modules.academic.repository.AcademicYearRepository;
-import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.validator.AcademicEnrollmentValidator;
 import com.infiniteVision.schoolProject.modules.student.dto.request.StudentAdmissionDocumentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.StudentAdmissionParentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.StudentAdmissionRequestDTO;
@@ -26,8 +24,7 @@ public class StudentAdmissionValidator {
 
     private final StudentRepository studentRepository;
     private final StudentDocumentRepository studentDocumentRepository;
-    private final ClassMasterRepository classMasterRepository;
-    private final AcademicYearRepository academicYearRepository;
+    private final AcademicEnrollmentValidator academicEnrollmentValidator;
 
     /**
      * Validates admission payload before persistence.
@@ -38,32 +35,14 @@ public class StudentAdmissionValidator {
         StudentAdmissionParentsDTO parents = request.getParents();
         StudentAdmissionDocumentsDTO documents = request.getDocuments();
 
-        validateAcademicReferences(student, errors);
+        academicEnrollmentValidator.validateEnrollment(
+                student.getAcademicYearId(), student.getClassId(), student.getSectionId(), errors);
         validateUniqueness(student, documents, errors);
         validateAadharAlignment(student, documents, errors);
         validateParents(parents, errors);
 
         if (!errors.isEmpty()) {
             throw new ValidationException(MessageConstants.VALIDATION_FAILED, errors);
-        }
-    }
-
-    private void validateAcademicReferences(StudentAdmissionStudentDTO student, List<String> errors) {
-        if (!academicYearRepository.findByIdAndDeletedFalse(student.getAcademicYearId()).isPresent()) {
-            errors.add(MessageConstants.ACADEMIC_YEAR_NOT_FOUND);
-            return;
-        }
-
-        ClassMaster classMaster = classMasterRepository
-                .findByIdAndDeletedFalse(student.getClassId())
-                .orElse(null);
-        if (classMaster == null) {
-            errors.add(MessageConstants.CLASS_NOT_FOUND);
-            return;
-        }
-
-        if (!student.getAcademicYearId().equals(classMaster.getAcademicYear().getId())) {
-            errors.add(MessageConstants.CLASS_ACADEMIC_YEAR_MISMATCH);
         }
     }
 
@@ -80,7 +59,7 @@ public class StudentAdmissionValidator {
             errors.add(MessageConstants.STUDENT_AADHAR_ALREADY_EXISTS);
         }
 
-        String documentAadhar = resolveDocumentAadhar(student, documents);
+        String documentAadhar = documents != null ? trimToNull(documents.getAadharNo()) : null;
         if (documentAadhar != null && studentDocumentRepository.existsByAadharNoAndDeletedFalse(documentAadhar)) {
             errors.add(MessageConstants.DOCUMENT_AADHAR_ALREADY_EXISTS);
         }
@@ -91,9 +70,7 @@ public class StudentAdmissionValidator {
             StudentAdmissionDocumentsDTO documents,
             List<String> errors) {
         String studentAadhar = trimToNull(student.getAadharNumber());
-        String documentAadhar =
-                documents != null ? trimToNull(documents.getAadharNo()) : null;
-
+        String documentAadhar = documents != null ? trimToNull(documents.getAadharNo()) : null;
         if (studentAadhar != null && documentAadhar != null && !studentAadhar.equals(documentAadhar)) {
             errors.add(MessageConstants.AADHAR_MISMATCH);
         }

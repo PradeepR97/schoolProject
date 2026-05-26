@@ -20,6 +20,7 @@ public enum StudentAdmissionExcelColumn {
     MEDIUM("medium", true),
     GENDER("gender", false),
     CLASS_ID("classId", true),
+    SECTION_ID("sectionId", true),
     ACADEMIC_YEAR_ID("academicYearId", true),
     AADHAR_NUMBER("aadharNumber", false),
     EMIS_NUMBER("emisNumber", false),

@@ -38,20 +38,21 @@ import lombok.experimental.SuperBuilder;
  * Master student profile. Maps to {@code students}.
  * <p>
  * Primary key and audit fields are inherited from {@link BaseEntity}.
- * {@code class_id} and {@code academic_year_id} reference academic tables when present;
- * FK constraints can be added after {@code class_master} and {@code academic_year} exist.
+ * {@code class_id} references grade ({@code class_master}); {@code section_id} references {@code section_master};
+ * {@code academic_year_id} references {@code academic_year}.
  */
 @Entity
 @Table(
         name = "students",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_students_admission_no", columnNames = "admission_no"),
-                @UniqueConstraint(name = "uk_students_application_no", columnNames = "application_no"),
                 @UniqueConstraint(name = "uk_students_aadhar_number", columnNames = "aadhar_number"),
                 @UniqueConstraint(name = "uk_students_id_card_no", columnNames = "student_id_card_no")
         },
         indexes = {
-                @Index(name = "idx_students_class_year", columnList = "class_id, academic_year_id"),
+                @Index(
+                        name = "idx_students_class_section_year",
+                        columnList = "class_id, section_id, academic_year_id"),
                 @Index(name = "idx_students_status", columnList = "status"),
                 @Index(name = "idx_students_admission_no", columnList = "admission_no"),
                 @Index(name = "idx_students_fees_payment_status", columnList = "fees_payment_status")
@@ -78,10 +79,6 @@ public class Student extends BaseEntity {
     @Size(max = 20, message = "Admission number must not exceed 20 characters")
     @Column(name = "admission_no", nullable = false, length = 20)
     private String admissionNo;
-
-    @Size(max = 30, message = "Application number must not exceed 30 characters")
-    @Column(name = "application_no", length = 30)
-    private String applicationNumber;
 
     /** Number printed on the physical student ID card (not the database primary key). */
     @Size(max = 20, message = "Student ID card number must not exceed 20 characters")
@@ -147,10 +144,16 @@ public class Student extends BaseEntity {
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
 
-    @Column(name = "class_id")
+    @NotNull(message = "Class id is required")
+    @Column(name = "class_id", nullable = false)
     private Long classId;
 
-    @Column(name = "academic_year_id")
+    @NotNull(message = "Section id is required")
+    @Column(name = "section_id", nullable = false)
+    private Long sectionId;
+
+    @NotNull(message = "Academic year id is required")
+    @Column(name = "academic_year_id", nullable = false)
     private Long academicYearId;
 
     @Enumerated(EnumType.STRING)

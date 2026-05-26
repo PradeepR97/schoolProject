@@ -18,15 +18,11 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     boolean existsByAdmissionNoAndDeletedFalse(String admissionNo);
 
-    boolean existsByApplicationNumberAndDeletedFalse(String applicationNumber);
-
     boolean existsByAadharNumberAndDeletedFalse(String aadharNumber);
 
     boolean existsByStudentIdCardNoAndDeletedFalse(String studentIdCardNo);
 
     boolean existsByAadharNumberAndIdNotAndDeletedFalse(String aadharNumber, Long studentId);
-
-    boolean existsByApplicationNumberAndIdNotAndDeletedFalse(String applicationNumber, Long studentId);
 
     boolean existsByStudentIdCardNoAndIdNotAndDeletedFalse(String studentIdCardNo, Long studentId);
 

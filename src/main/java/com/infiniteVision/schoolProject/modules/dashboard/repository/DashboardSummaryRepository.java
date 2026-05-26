@@ -74,7 +74,7 @@ public interface DashboardSummaryRepository extends JpaRepository<DashboardActiv
             FROM Payment p
             JOIN p.student s
             LEFT JOIN ClassMaster c ON c.id = s.classId AND c.deleted = false
-            LEFT JOIN c.section sec
+            LEFT JOIN SectionMaster sec ON sec.id = s.sectionId AND sec.deleted = false
             WHERE p.deleted = false
             ORDER BY p.createdAt DESC
             """)
@@ -82,13 +82,13 @@ public interface DashboardSummaryRepository extends JpaRepository<DashboardActiv
 
     @Query(
             """
-            SELECT COALESCE(s.applicationNumber, s.admissionNo) AS applicationNo,
+            SELECT s.admissionNo AS applicationNo,
                    CONCAT(s.firstName, ' ', COALESCE(s.lastName, '')) AS studentName,
                    CONCAT(c.className, ' - ', sec.sectionCode) AS className,
                    s.status AS status
             FROM Student s
             LEFT JOIN ClassMaster c ON c.id = s.classId AND c.deleted = false
-            LEFT JOIN c.section sec
+            LEFT JOIN SectionMaster sec ON sec.id = s.sectionId AND sec.deleted = false
             WHERE s.deleted = false
             AND (:academicYearId IS NULL OR s.academicYearId = :academicYearId)
             ORDER BY s.createdAt DESC

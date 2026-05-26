@@ -17,7 +17,8 @@ public interface FeeStructureService {
      * Paginated list of fee structures with optional filters.
      *
      * @param academicYearId optional filter
-     * @param classId optional filter
+     * @param classId optional grade filter
+     * @param sectionId optional section filter
      * @param feeHeadId optional filter
      * @param activeOnly when true, only active rows
      * @param page zero-based page
@@ -25,7 +26,13 @@ public interface FeeStructureService {
      * @return paginated fee structure rows
      */
     PagedResponseDTO<FeeStructureResponseDTO> listFeeStructures(
-            Long academicYearId, Long classId, Long feeHeadId, boolean activeOnly, int page, int size);
+            Long academicYearId,
+            Long classId,
+            Long sectionId,
+            Long feeHeadId,
+            boolean activeOnly,
+            int page,
+            int size);
 
     /**
      * Returns one active fee structure by id.
@@ -60,9 +67,9 @@ public interface FeeStructureService {
     void deleteFeeStructure(Long id);
 
     /**
-     * Returns all active fee structure rows for a class and academic year (matrix view).
+     * Returns all active fee structure rows for a grade, section, and academic year (matrix view).
      */
-    FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId);
+    FeeStructureMatrixResponseDTO getFeeStructureMatrix(Long academicYearId, Long classId, Long sectionId);
 
     /**
      * Creates multiple fee structure rows in one transaction.

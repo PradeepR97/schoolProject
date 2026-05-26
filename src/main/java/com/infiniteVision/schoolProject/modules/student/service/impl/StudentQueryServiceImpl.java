@@ -4,7 +4,9 @@ import com.infiniteVision.schoolProject.common.dto.response.PagedResponseDTO;
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.student.dto.response.StudentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.mapper.StudentListMapper;
@@ -26,9 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Paginated student list for school staff screens.
- * <p>
- * Loads active students with parents, resolves class labels from {@code class_master},
- * and maps primary contact name/phone from {@code student_parents.primary_contact}.
  */
 @Slf4j
 @Service
@@ -40,11 +39,9 @@ public class StudentQueryServiceImpl implements StudentQueryService {
 
     private final StudentRepository studentRepository;
     private final ClassMasterRepository classMasterRepository;
+    private final SectionMasterRepository sectionMasterRepository;
     private final StudentListMapper studentListMapper;
 
-    /**
-     * Load one page of non-deleted students; default size 10, sorted by first name.
-     */
     @Override
     @Transactional(readOnly = true)
     public PagedResponseDTO<StudentListItemResponseDTO> listStudents(int page, int size) {
@@ -54,11 +51,11 @@ public class StudentQueryServiceImpl implements StudentQueryService {
         Pageable pageable = PageRequest.of(page, effectiveSize, Sort.by("firstName").ascending());
         Page<Student> studentPage = studentRepository.findAllActiveWithParents(pageable);
 
-        Map<Long, String> classNameById = resolveClassNames(studentPage.getContent());
+        Map<Long, String> classNameByStudentId = resolveClassNames(studentPage.getContent());
 
         List<StudentListItemResponseDTO> content = studentPage.getContent().stream()
                 .map(student -> studentListMapper.toListItem(
-                        student, classNameById.get(student.getClassId())))
+                        student, classNameByStudentId.get(student.getId())))
                 .toList();
 
         log.info(
@@ -78,12 +75,13 @@ public class StudentQueryServiceImpl implements StudentQueryService {
                 .build();
     }
 
-    /**
-     * Batch-load class labels for distinct {@code classId} values on the current page.
-     */
     private Map<Long, String> resolveClassNames(List<Student> students) {
         Set<Long> classIds = students.stream()
                 .map(Student::getClassId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Set<Long> sectionIds = students.stream()
+                .map(Student::getSectionId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
@@ -91,12 +89,16 @@ public class StudentQueryServiceImpl implements StudentQueryService {
             return Map.of();
         }
 
-        Map<Long, ClassMaster> classMasterById = classMasterRepository
-                .findAllByIdInAndDeletedFalseWithSection(classIds)
-                .stream()
+        Map<Long, ClassMaster> classMasterById = classMasterRepository.findAllByIdInAndDeletedFalse(classIds).stream()
                 .collect(Collectors.toMap(ClassMaster::getId, classMaster -> classMaster));
 
-        return studentListMapper.toClassNameById(classMasterById);
+        Map<Long, SectionMaster> sectionById = sectionIds.isEmpty()
+                ? Map.of()
+                : sectionMasterRepository.findAllById(sectionIds).stream()
+                        .filter(section -> !Boolean.TRUE.equals(section.getDeleted()))
+                        .collect(Collectors.toMap(SectionMaster::getId, section -> section));
+
+        return studentListMapper.toClassNameByStudentId(classMasterById, sectionById, students);
     }
 
     private void validatePagination(int page, int size) {

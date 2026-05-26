@@ -66,6 +66,9 @@ public class StudentAdmissionStudentDTO {
     @NotNull(message = "Class id is required")
     private Long classId;
 
+    @NotNull(message = "Section id is required")
+    private Long sectionId;
+
     @NotNull(message = "Academic year id is required")
     private Long academicYearId;
 

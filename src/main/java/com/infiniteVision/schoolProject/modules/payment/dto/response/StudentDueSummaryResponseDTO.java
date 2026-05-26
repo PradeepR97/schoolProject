@@ -20,6 +20,7 @@ public class StudentDueSummaryResponseDTO {
     private String admissionNo;
     private String studentName;
     private Long classId;
+    private Long sectionId;
     private Long academicYearId;
     private FeesPaymentStatus feesPaymentStatus;
     private BigDecimal totalBalanceDue;

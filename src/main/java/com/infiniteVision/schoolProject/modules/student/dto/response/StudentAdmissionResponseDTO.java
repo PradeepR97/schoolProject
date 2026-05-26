@@ -23,6 +23,7 @@ public class StudentAdmissionResponseDTO {
     private String lastName;
     private Medium medium;
     private Long classId;
+    private Long sectionId;
     private Long academicYearId;
     private StudentStatus status;
     private FeesPaymentStatus feesPaymentStatus;

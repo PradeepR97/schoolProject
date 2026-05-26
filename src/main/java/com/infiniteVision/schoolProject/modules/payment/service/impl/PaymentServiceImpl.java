@@ -592,6 +592,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .admissionNo(student.getAdmissionNo())
                 .studentName(studentName)
                 .classId(student.getClassId())
+                .sectionId(student.getSectionId())
                 .academicYearId(academicYearId)
                 .feesPaymentStatus(student.getFeesPaymentStatus())
                 .totalBalanceDue(totalBalance)

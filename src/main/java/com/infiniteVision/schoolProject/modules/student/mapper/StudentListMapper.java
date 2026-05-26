@@ -1,6 +1,8 @@
 package com.infiniteVision.schoolProject.modules.student.mapper;
 
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
+import com.infiniteVision.schoolProject.modules.academic.util.ClassSectionDisplayFormatter;
 import com.infiniteVision.schoolProject.modules.student.dto.response.StudentListItemResponseDTO;
 import com.infiniteVision.schoolProject.modules.student.entity.Student;
 import com.infiniteVision.schoolProject.modules.student.entity.StudentParent;
@@ -31,24 +33,25 @@ public class StudentListMapper {
     }
 
     /**
-     * Formats class display label from {@link ClassMaster}, e.g. {@code Class 10 - A}.
+     * Formats grade + section display label, e.g. {@code Class 10 - A}.
      */
-    public String formatClassName(ClassMaster classMaster) {
-        if (classMaster == null) {
-            return null;
-        }
-        String sectionCode =
-                classMaster.getSection() != null ? classMaster.getSection().getSectionCode() : "";
-        return classMaster.getClassName() + " - " + sectionCode;
+    public String formatClassName(ClassMaster classMaster, SectionMaster section) {
+        return ClassSectionDisplayFormatter.format(classMaster, section);
     }
 
     /**
-     * Builds a map of class id to display label for batch lookups on a page of students.
+     * Builds a map of student id to display label for batch lookups on a page of students.
      */
-    public Map<Long, String> toClassNameById(Map<Long, ClassMaster> classMasterById) {
-        return classMasterById.entrySet().stream()
+    public Map<Long, String> toClassNameByStudentId(
+            Map<Long, ClassMaster> classMasterById, Map<Long, SectionMaster> sectionById, java.util.List<Student> students) {
+        return students.stream()
+                .filter(student -> student.getClassId() != null)
                 .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey, entry -> formatClassName(entry.getValue())));
+                        Student::getId,
+                        student -> formatClassName(
+                                classMasterById.get(student.getClassId()),
+                                sectionById.get(student.getSectionId())),
+                        (first, second) -> first));
     }
 
     private static String buildStudentName(String firstName, String lastName) {

@@ -131,10 +131,15 @@ public class StudentAdmissionExcelParser {
                 errors);
         Long classId = ExcelCellValueReader.readLong(
                 row, columns.get(StudentAdmissionExcelColumn.CLASS_ID), "classId", errors);
+        Long sectionId = ExcelCellValueReader.readLong(
+                row, columns.get(StudentAdmissionExcelColumn.SECTION_ID), "sectionId", errors);
         Long academicYearId = ExcelCellValueReader.readLong(
                 row, columns.get(StudentAdmissionExcelColumn.ACADEMIC_YEAR_ID), "academicYearId", errors);
         if (classId == null) {
             errors.add("classId is required");
+        }
+        if (sectionId == null) {
+            errors.add("sectionId is required");
         }
         if (academicYearId == null) {
             errors.add("academicYearId is required");
@@ -165,6 +170,7 @@ public class StudentAdmissionExcelParser {
                         "gender",
                         errors))
                 .classId(classId)
+                .sectionId(sectionId)
                 .academicYearId(academicYearId)
                 .aadharNumber(ExcelCellValueReader.readFixedDigitString(
                         row,

@@ -68,6 +68,8 @@ public final class MessageConstants {
     public static final String ACADEMIC_YEAR_NOT_FOUND = "Academic year not found";
     public static final String CLASS_ACADEMIC_YEAR_MISMATCH =
             "Class does not belong to the specified academic year";
+    public static final String SECTION_NOT_FOUND = "Section not found";
+    public static final String SECTION_NOT_ACTIVE = "Section is not active";
     public static final String GUARDIAN_DETAILS_REQUIRED =
             "Guardian name and phone are required when primary contact is guardian";
     public static final String PARENT_CONTACT_REQUIRED =

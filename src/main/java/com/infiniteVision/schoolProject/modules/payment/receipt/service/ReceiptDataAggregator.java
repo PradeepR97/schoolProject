@@ -2,8 +2,11 @@ package com.infiniteVision.schoolProject.modules.payment.receipt.service;
 
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.AcademicYearRepository;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.util.ClassSectionDisplayFormatter;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.payment.entity.Invoice;
 import com.infiniteVision.schoolProject.modules.payment.entity.Payment;
@@ -33,6 +36,7 @@ public class ReceiptDataAggregator {
 
     private final SchoolPrintSettingsRepository schoolPrintSettingsRepository;
     private final ClassMasterRepository classMasterRepository;
+    private final SectionMasterRepository sectionMasterRepository;
     private final AcademicYearRepository academicYearRepository;
 
     public ReceiptPrintModel build(
@@ -44,9 +48,11 @@ public class ReceiptDataAggregator {
         Invoice invoice = payment.getInvoice();
         SchoolPrintSettings settings = resolveSettings();
 
-        String className = resolveClassName(invoice.getClassMaster() != null
-                ? invoice.getClassMaster().getId()
-                : student.getClassId());
+        String className = resolveClassName(
+                invoice.getClassMaster() != null ? invoice.getClassMaster() : null,
+                invoice.getSection() != null ? invoice.getSection() : null,
+                student.getClassId(),
+                student.getSectionId());
         String yearLabel = resolveYearLabel(invoice.getAcademicYear() != null
                 ? invoice.getAcademicYear().getId()
                 : student.getAcademicYearId());
@@ -127,14 +133,23 @@ public class ReceiptDataAggregator {
                 .build();
     }
 
-    private String resolveClassName(Long classId) {
+    private String resolveClassName(
+            ClassMaster invoiceClass,
+            SectionMaster invoiceSection,
+            Long studentClassId,
+            Long studentSectionId) {
+        if (invoiceClass != null && invoiceSection != null) {
+            return ClassSectionDisplayFormatter.format(invoiceClass, invoiceSection);
+        }
+        Long classId = studentClassId;
+        Long sectionId = studentSectionId;
         if (classId == null) {
             return "";
         }
-        return classMasterRepository
-                .findById(classId)
-                .map(ClassMaster::getClassName)
-                .orElse("");
+        ClassMaster classMaster = classMasterRepository.findById(classId).orElse(null);
+        SectionMaster section =
+                sectionId != null ? sectionMasterRepository.findById(sectionId).orElse(null) : null;
+        return ClassSectionDisplayFormatter.format(classMaster, section);
     }
 
     private String resolveYearLabel(Long yearId) {

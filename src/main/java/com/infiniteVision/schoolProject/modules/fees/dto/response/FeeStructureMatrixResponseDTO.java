@@ -17,6 +17,7 @@ public class FeeStructureMatrixResponseDTO {
 
     private Long academicYearId;
     private Long classId;
+    private Long sectionId;
     private String className;
     private List<FeeStructureResponseDTO> structures;
 }

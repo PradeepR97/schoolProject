@@ -3,6 +3,7 @@ package com.infiniteVision.schoolProject.modules.payment.entity;
 import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.payment.enums.FeeBillingTerm;
 import com.infiniteVision.schoolProject.modules.payment.enums.InvoiceStatus;
@@ -60,7 +61,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @SuperBuilder
 @EqualsAndHashCode(
         callSuper = true,
-        exclude = {"student", "classMaster", "academicYear", "ledger", "generatedByUser"})
+        exclude = {"student", "classMaster", "section", "academicYear", "ledger", "generatedByUser"})
 public class Invoice extends BaseEntity {
 
     @NotBlank(message = "Invoice number is required")
@@ -93,6 +94,15 @@ public class Invoice extends BaseEntity {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_invoice_class"))
     private ClassMaster classMaster;
+
+    @NotNull(message = "Section is required")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.RESTRICT)
+    @JoinColumn(
+            name = "section_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_invoice_section"))
+    private SectionMaster section;
 
     @NotNull(message = "Academic year is required")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

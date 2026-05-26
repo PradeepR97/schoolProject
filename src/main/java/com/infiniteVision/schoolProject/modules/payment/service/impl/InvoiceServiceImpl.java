@@ -9,7 +9,9 @@ import com.infiniteVision.schoolProject.exception.ResourceNotFoundException;
 import com.infiniteVision.schoolProject.exception.UnauthorizedException;
 import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
+import com.infiniteVision.schoolProject.modules.academic.entity.SectionMaster;
 import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.repository.UserRepository;
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
@@ -55,6 +57,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final StudentFeeLedgerRepository studentFeeLedgerRepository;
     private final InvoiceRepository invoiceRepository;
     private final ClassMasterRepository classMasterRepository;
+    private final SectionMasterRepository sectionMasterRepository;
     private final UserRepository userRepository;
     private final PaymentMapper paymentMapper;
     private final AuditService auditService;
@@ -77,6 +80,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         ClassMaster classMaster = classMasterRepository
                 .findByIdAndDeletedFalse(student.getClassId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.CLASS_NOT_FOUND));
+        SectionMaster section = sectionMasterRepository
+                .findByIdAndDeletedFalse(student.getSectionId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.SECTION_NOT_FOUND));
 
         AuthenticatedUser caller = currentUser();
         User generatedBy = userRepository
@@ -92,6 +98,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .dueDate(ledger.getDueDate())
                 .student(student)
                 .classMaster(classMaster)
+                .section(section)
                 .academicYear(ledger.getAcademicYear())
                 .ledger(ledger)
                 .term(ledger.getTerm())

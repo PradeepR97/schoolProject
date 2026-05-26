@@ -27,6 +27,9 @@ public class CreateFeeStructureRequestDTO {
     @NotNull(message = "Class id is required")
     private Long classId;
 
+    @NotNull(message = "Section id is required")
+    private Long sectionId;
+
     @NotNull(message = "Fee head id is required")
     private Long feeHeadId;
 

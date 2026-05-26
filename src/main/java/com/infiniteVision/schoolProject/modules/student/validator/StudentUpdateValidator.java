@@ -2,9 +2,7 @@ package com.infiniteVision.schoolProject.modules.student.validator;
 
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ValidationException;
-import com.infiniteVision.schoolProject.modules.academic.entity.ClassMaster;
-import com.infiniteVision.schoolProject.modules.academic.repository.AcademicYearRepository;
-import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterRepository;
+import com.infiniteVision.schoolProject.modules.academic.validator.AcademicEnrollmentValidator;
 import com.infiniteVision.schoolProject.modules.student.dto.request.StudentAdmissionParentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentDocumentsDTO;
 import com.infiniteVision.schoolProject.modules.student.dto.request.UpdateStudentParentsDTO;
@@ -30,8 +28,7 @@ public class StudentUpdateValidator {
 
     private final StudentRepository studentRepository;
     private final StudentDocumentRepository studentDocumentRepository;
-    private final ClassMasterRepository classMasterRepository;
-    private final AcademicYearRepository academicYearRepository;
+    private final AcademicEnrollmentValidator academicEnrollmentValidator;
 
     /**
      * Validates update payload against current aggregate state.
@@ -69,31 +66,22 @@ public class StudentUpdateValidator {
 
     private void validateAcademicReferences(
             UpdateStudentProfileDTO profile, Student student, List<String> errors) {
-        Long academicYearId = profile.getAcademicYearId() != null ? profile.getAcademicYearId() : student.getAcademicYearId();
+        Long academicYearId =
+                profile.getAcademicYearId() != null ? profile.getAcademicYearId() : student.getAcademicYearId();
         Long classId = profile.getClassId() != null ? profile.getClassId() : student.getClassId();
+        Long sectionId = profile.getSectionId() != null ? profile.getSectionId() : student.getSectionId();
 
         if (profile.getAcademicYearId() != null
-                && !academicYearRepository.findByIdAndDeletedFalse(profile.getAcademicYearId()).isPresent()) {
-            errors.add(MessageConstants.ACADEMIC_YEAR_NOT_FOUND);
+                && profile.getClassId() == null
+                && profile.getSectionId() == null
+                && student.getClassId() != null) {
+            academicEnrollmentValidator.validateEnrollment(
+                    academicYearId, student.getClassId(), student.getSectionId(), errors);
             return;
         }
 
-        if (profile.getClassId() != null) {
-            ClassMaster classMaster = classMasterRepository.findByIdAndDeletedFalse(classId).orElse(null);
-            if (classMaster == null) {
-                errors.add(MessageConstants.CLASS_NOT_FOUND);
-                return;
-            }
-            if (!academicYearId.equals(classMaster.getAcademicYear().getId())) {
-                errors.add(MessageConstants.CLASS_ACADEMIC_YEAR_MISMATCH);
-            }
-        } else if (profile.getAcademicYearId() != null && student.getClassId() != null) {
-            ClassMaster classMaster = classMasterRepository
-                    .findByIdAndDeletedFalse(student.getClassId())
-                    .orElse(null);
-            if (classMaster != null && !profile.getAcademicYearId().equals(classMaster.getAcademicYear().getId())) {
-                errors.add(MessageConstants.CLASS_ACADEMIC_YEAR_MISMATCH);
-            }
+        if (profile.getClassId() != null || profile.getSectionId() != null || profile.getAcademicYearId() != null) {
+            academicEnrollmentValidator.validateEnrollment(academicYearId, classId, sectionId, errors);
         }
     }
 
@@ -106,12 +94,6 @@ public class StudentUpdateValidator {
         String aadharNumber = trimToNull(profile.getAadharNumber());
         if (aadharNumber != null && studentRepository.existsByAadharNumberAndIdNotAndDeletedFalse(aadharNumber, studentId)) {
             errors.add(MessageConstants.STUDENT_AADHAR_ALREADY_EXISTS);
-        }
-
-        String applicationNumber = trimToNull(profile.getApplicationNumber());
-        if (applicationNumber != null
-                && studentRepository.existsByApplicationNumberAndIdNotAndDeletedFalse(applicationNumber, studentId)) {
-            errors.add("Application number is already registered");
         }
 
         String idCardNo = trimToNull(profile.getStudentIdCardNo());
@@ -217,7 +199,6 @@ public class StudentUpdateValidator {
         return profile.getAadharNumber() != null
                 || profile.getEmisNumber() != null
                 || profile.getRationCardNumber() != null
-                || profile.getApplicationNumber() != null
                 || profile.getStudentIdCardNo() != null
                 || profile.getFirstName() != null
                 || profile.getLastName() != null
@@ -232,6 +213,7 @@ public class StudentUpdateValidator {
                 || profile.getIdentificationMark2() != null
                 || profile.getAddress() != null
                 || profile.getClassId() != null
+                || profile.getSectionId() != null
                 || profile.getAcademicYearId() != null
                 || profile.getBloodGroup() != null
                 || profile.getReligion() != null
