@@ -1,7 +1,7 @@
 package com.infiniteVision.schoolProject.modules.scholarship.util;
 
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeStructure;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.scholarship.entity.SchoolScheme;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ApplicableTo;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.DiscountType;
@@ -51,7 +51,7 @@ public final class ScholarshipDiscountCalculator {
     }
 
     public static boolean schemeAppliesToFeeStructure(SchoolScheme scheme, FeeStructure structure) {
-        if (scheme == null || structure == null || structure.getFeeHead() == null) {
+        if (scheme == null || structure == null || structure.getFeeType() == null) {
             return false;
         }
         if (Boolean.FALSE.equals(structure.getScholarshipAllowed())) {
@@ -61,37 +61,35 @@ public final class ScholarshipDiscountCalculator {
         if (ApplicableTo.ALL_FEES.equals(applicableTo)) {
             return true;
         }
-        FeeHead feeHead = structure.getFeeHead();
+        FeeType feeType = structure.getFeeType();
         if (ApplicableTo.TUITION_ONLY.equals(applicableTo)) {
-            return isTuitionHead(feeHead);
+            return isTuitionType(feeType);
         }
-        if (ApplicableTo.SPECIFIC_HEAD.equals(applicableTo) && scheme.getFeeHead() != null) {
-            return scheme.getFeeHead().getId().equals(feeHead.getId());
+        if (ApplicableTo.SPECIFIC_HEAD.equals(applicableTo) && scheme.getFeeType() != null) {
+            return scheme.getFeeType().getId().equals(feeType.getId());
         }
         return false;
     }
 
-    public static boolean isTransportHead(FeeHead feeHead) {
-        if (feeHead == null) {
+    public static boolean isTransportType(FeeType feeType) {
+        if (feeType == null || feeType.getFeeTypeCode() == null) {
             return false;
         }
-        if (feeHead.getFeeHeadCode() != null
-                && "TRANSPORT".equalsIgnoreCase(feeHead.getFeeHeadCode().trim())) {
-            return true;
-        }
-        return feeHead.getFeeCategory() != null
-                && "TRANSPORT".equalsIgnoreCase(feeHead.getFeeCategory().trim());
+        return "TRANSPORT".equalsIgnoreCase(feeType.getFeeTypeCode().trim());
     }
 
-    public static boolean isTuitionHead(FeeHead feeHead) {
-        if (feeHead.getFeeHeadCode() != null) {
-            String code = feeHead.getFeeHeadCode().toUpperCase();
+    public static boolean isTuitionType(FeeType feeType) {
+        if (feeType == null) {
+            return false;
+        }
+        if (feeType.getFeeTypeCode() != null) {
+            String code = feeType.getFeeTypeCode().toUpperCase();
             if (code.contains("TUITION") || code.contains("TUIT")) {
                 return true;
             }
         }
-        if (feeHead.getFeeHeadName() != null) {
-            return feeHead.getFeeHeadName().toUpperCase().contains("TUITION");
+        if (feeType.getFeeTypeName() != null) {
+            return feeType.getFeeTypeName().toUpperCase().contains("TUITION");
         }
         return false;
     }

@@ -2,7 +2,7 @@ package com.infiniteVision.schoolProject.modules.scholarship.entity;
 
 import com.infiniteVision.schoolProject.common.entity.BaseEntity;
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ApplicableTo;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.DiscountType;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.SchemeType;
@@ -44,7 +44,7 @@ import org.hibernate.annotations.OnDeleteAction;
         name = "scholarship_schemes",
         indexes = {
                 @Index(name = "idx_school_schemes_academic_year", columnList = "academic_year_id"),
-                @Index(name = "idx_school_schemes_fee_head", columnList = "fee_head_id"),
+                @Index(name = "idx_school_schemes_fee_type", columnList = "fee_type_id"),
                 @Index(name = "idx_school_schemes_type", columnList = "scheme_type"),
                 @Index(name = "idx_school_schemes_active", columnList = "is_active")
         })
@@ -57,7 +57,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "feeHead"})
+@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "feeType"})
 public class SchoolScheme extends BaseEntity {
 
     @NotBlank(message = "Scheme name is required")
@@ -92,9 +92,9 @@ public class SchoolScheme extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.RESTRICT)
     @JoinColumn(
-            name = "fee_head_id",
-            foreignKey = @ForeignKey(name = "fk_school_schemes_fee_head"))
-    private FeeHead feeHead;
+            name = "fee_type_id",
+            foreignKey = @ForeignKey(name = "fk_school_schemes_fee_type"))
+    private FeeType feeType;
 
     @NotNull(message = "Academic year is required")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

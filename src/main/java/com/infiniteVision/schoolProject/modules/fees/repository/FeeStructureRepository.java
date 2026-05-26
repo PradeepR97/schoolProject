@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * Persistence access for {@link FeeStructure} rows (amount per grade, section, year, head, term).
+ * Persistence access for {@link FeeStructure} rows (amount per grade, section, year, type, term).
  */
 @Repository
 public interface FeeStructureRepository extends JpaRepository<FeeStructure, Long> {
@@ -24,7 +24,7 @@ public interface FeeStructureRepository extends JpaRepository<FeeStructure, Long
             JOIN FETCH fs.academicYear
             JOIN FETCH fs.classMaster cm
             JOIN FETCH fs.section
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             WHERE fs.id = :id AND fs.deleted = false
             """)
     Optional<FeeStructure> findActiveWithRelationsById(@Param("id") Long id);
@@ -35,12 +35,12 @@ public interface FeeStructureRepository extends JpaRepository<FeeStructure, Long
                     JOIN FETCH fs.academicYear ay
                     JOIN FETCH fs.classMaster cm
                     JOIN FETCH fs.section sec
-                    JOIN FETCH fs.feeHead fh
+                    JOIN FETCH fs.feeType ft
                     WHERE fs.deleted = false
                     AND (:academicYearId IS NULL OR ay.id = :academicYearId)
                     AND (:classId IS NULL OR cm.id = :classId)
                     AND (:sectionId IS NULL OR sec.id = :sectionId)
-                    AND (:feeHeadId IS NULL OR fh.id = :feeHeadId)
+                    AND (:feeTypeId IS NULL OR ft.id = :feeTypeId)
                     AND (:activeOnly = false OR fs.active = true)
                     """,
             countQuery = """
@@ -49,32 +49,32 @@ public interface FeeStructureRepository extends JpaRepository<FeeStructure, Long
                     AND (:academicYearId IS NULL OR fs.academicYear.id = :academicYearId)
                     AND (:classId IS NULL OR fs.classMaster.id = :classId)
                     AND (:sectionId IS NULL OR fs.section.id = :sectionId)
-                    AND (:feeHeadId IS NULL OR fs.feeHead.id = :feeHeadId)
+                    AND (:feeTypeId IS NULL OR fs.feeType.id = :feeTypeId)
                     AND (:activeOnly = false OR fs.active = true)
                     """)
     Page<FeeStructure> findAllFiltered(
             @Param("academicYearId") Long academicYearId,
             @Param("classId") Long classId,
             @Param("sectionId") Long sectionId,
-            @Param("feeHeadId") Long feeHeadId,
+            @Param("feeTypeId") Long feeTypeId,
             @Param("activeOnly") boolean activeOnly,
             Pageable pageable);
 
-    boolean existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeHead_IdAndTermTypeAndDeletedFalse(
-            Long academicYearId, Long classId, Long sectionId, Long feeHeadId, TermType termType);
+    boolean existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndDeletedFalse(
+            Long academicYearId, Long classId, Long sectionId, Long feeTypeId, TermType termType);
 
-    boolean existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeHead_IdAndTermTypeAndIdNotAndDeletedFalse(
+    boolean existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndIdNotAndDeletedFalse(
             Long academicYearId,
             Long classId,
             Long sectionId,
-            Long feeHeadId,
+            Long feeTypeId,
             TermType termType,
             Long structureId);
 
     @Query(
             """
             SELECT fs FROM FeeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             JOIN FETCH fs.academicYear
             JOIN FETCH fs.classMaster
             JOIN FETCH fs.section

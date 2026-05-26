@@ -7,8 +7,8 @@ import com.infiniteVision.schoolProject.modules.fees.dto.request.CreateFeeStruct
 import com.infiniteVision.schoolProject.modules.fees.dto.request.UpdateFeeStructureRequestDTO;
 import com.infiniteVision.schoolProject.modules.fees.entity.FeeStructure;
 import com.infiniteVision.schoolProject.modules.fees.enums.TermType;
-import com.infiniteVision.schoolProject.modules.fees.repository.FeeHeadRepository;
 import com.infiniteVision.schoolProject.modules.fees.repository.FeeStructureRepository;
+import com.infiniteVision.schoolProject.modules.fees.repository.FeeTypeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 public class FeeStructureValidator {
 
     private final AcademicEnrollmentValidator academicEnrollmentValidator;
-    private final FeeHeadRepository feeHeadRepository;
+    private final FeeTypeRepository feeTypeRepository;
     private final FeeStructureRepository feeStructureRepository;
 
     /**
-     * Validates create request including uniqueness of year + class + section + head + term.
+     * Validates create request including uniqueness of year + class + section + type + term.
      */
     public void validateCreate(CreateFeeStructureRequestDTO request) {
         List<String> errors = new ArrayList<>();
@@ -34,13 +34,13 @@ public class FeeStructureValidator {
                 request.getAcademicYearId(),
                 request.getClassId(),
                 request.getSectionId(),
-                request.getFeeHeadId(),
+                request.getFeeTypeId(),
                 errors);
-        if (feeStructureRepository.existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeHead_IdAndTermTypeAndDeletedFalse(
+        if (feeStructureRepository.existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndDeletedFalse(
                 request.getAcademicYearId(),
                 request.getClassId(),
                 request.getSectionId(),
-                request.getFeeHeadId(),
+                request.getFeeTypeId(),
                 request.getTermType())) {
             errors.add(MessageConstants.FEE_STRUCTURE_ALREADY_EXISTS);
         }
@@ -63,14 +63,14 @@ public class FeeStructureValidator {
                 request.getAcademicYearId() != null ? request.getAcademicYearId() : existing.getAcademicYear().getId();
         Long classId = request.getClassId() != null ? request.getClassId() : existing.getClassMaster().getId();
         Long sectionId = request.getSectionId() != null ? request.getSectionId() : existing.getSection().getId();
-        Long feeHeadId = request.getFeeHeadId() != null ? request.getFeeHeadId() : existing.getFeeHead().getId();
+        Long feeTypeId = request.getFeeTypeId() != null ? request.getFeeTypeId() : existing.getFeeType().getId();
         TermType termType = request.getTermType() != null ? request.getTermType() : existing.getTermType();
 
-        validateReferences(academicYearId, classId, sectionId, feeHeadId, errors);
+        validateReferences(academicYearId, classId, sectionId, feeTypeId, errors);
 
         if (feeStructureRepository
-                .existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeHead_IdAndTermTypeAndIdNotAndDeletedFalse(
-                        academicYearId, classId, sectionId, feeHeadId, termType, structureId)) {
+                .existsByAcademicYear_IdAndClassMaster_IdAndSection_IdAndFeeType_IdAndTermTypeAndIdNotAndDeletedFalse(
+                        academicYearId, classId, sectionId, feeTypeId, termType, structureId)) {
             errors.add(MessageConstants.FEE_STRUCTURE_ALREADY_EXISTS);
         }
 
@@ -80,11 +80,11 @@ public class FeeStructureValidator {
     }
 
     private void validateReferences(
-            Long academicYearId, Long classId, Long sectionId, Long feeHeadId, List<String> errors) {
+            Long academicYearId, Long classId, Long sectionId, Long feeTypeId, List<String> errors) {
         academicEnrollmentValidator.validateEnrollment(academicYearId, classId, sectionId, errors);
 
-        if (!feeHeadRepository.findByIdAndDeletedFalse(feeHeadId).isPresent()) {
-            errors.add(MessageConstants.FEE_HEAD_NOT_FOUND);
+        if (!feeTypeRepository.findByIdAndDeletedFalse(feeTypeId).isPresent()) {
+            errors.add(MessageConstants.FEE_TYPE_NOT_FOUND);
         }
     }
 
@@ -92,7 +92,7 @@ public class FeeStructureValidator {
         return request.getAcademicYearId() != null
                 || request.getClassId() != null
                 || request.getSectionId() != null
-                || request.getFeeHeadId() != null
+                || request.getFeeTypeId() != null
                 || request.getTermType() != null
                 || request.getAmount() != null
                 || request.getDueDate() != null

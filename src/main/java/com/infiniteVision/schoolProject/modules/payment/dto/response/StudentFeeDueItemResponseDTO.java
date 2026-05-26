@@ -22,9 +22,9 @@ public class StudentFeeDueItemResponseDTO {
 
     private Long ledgerId;
     private Long structureId;
-    private Long feeHeadId;
-    private String feeHeadCode;
-    private String feeHeadName;
+    private Long feeTypeId;
+    private String feeTypeCode;
+    private String feeTypeName;
     private Boolean overdue;
     private FeeBillingTerm term;
     private BigDecimal netAmount;

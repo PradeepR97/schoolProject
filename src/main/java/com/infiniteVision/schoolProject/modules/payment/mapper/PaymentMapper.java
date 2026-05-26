@@ -1,6 +1,6 @@
 package com.infiniteVision.schoolProject.modules.payment.mapper;
 
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.FeeLedgerDetailResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.FeeLedgerSummaryResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceDetailResponseDTO;
@@ -30,11 +30,11 @@ import org.springframework.stereotype.Component;
 public class PaymentMapper {
 
     public FeeLedgerSummaryResponseDTO toLedgerSummary(StudentFeeLedger ledger) {
-        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        FeeType feeType = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeType() : null;
         return FeeLedgerSummaryResponseDTO.builder()
                 .ledgerId(ledger.getId())
                 .structureId(ledger.getFeeStructure() != null ? ledger.getFeeStructure().getId() : null)
-                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .feeTypeName(feeType != null ? feeType.getFeeTypeName() : null)
                 .term(ledger.getTerm())
                 .netAmount(ledger.getNetAmount())
                 .paidAmount(ledger.getPaidAmount())
@@ -67,11 +67,13 @@ public class PaymentMapper {
             Invoice invoice,
             BigDecimal pendingScholarshipDiscount,
             ScholarshipApplicationStatus pendingScholarshipStatus) {
-        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        FeeType feeType = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeType() : null;
         return StudentFeeDueItemResponseDTO.builder()
                 .ledgerId(ledger.getId())
                 .structureId(ledger.getFeeStructure() != null ? ledger.getFeeStructure().getId() : null)
-                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .feeTypeId(feeType != null ? feeType.getId() : null)
+                .feeTypeCode(feeType != null ? feeType.getFeeTypeCode() : null)
+                .feeTypeName(feeType != null ? feeType.getFeeTypeName() : null)
                 .term(ledger.getTerm())
                 .netAmount(ledger.getNetAmount())
                 .paidAmount(ledger.getPaidAmount())
@@ -90,14 +92,14 @@ public class PaymentMapper {
             StudentFeeLedger ledger,
             BigDecimal pendingScholarshipDiscount,
             ScholarshipApplicationStatus pendingScholarshipStatus) {
-        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        FeeType feeType = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeType() : null;
         return FeeLedgerDetailResponseDTO.builder()
                 .ledgerId(ledger.getId())
                 .studentId(ledger.getStudent() != null ? ledger.getStudent().getId() : null)
                 .academicYearId(
                         ledger.getAcademicYear() != null ? ledger.getAcademicYear().getId() : null)
                 .structureId(ledger.getFeeStructure() != null ? ledger.getFeeStructure().getId() : null)
-                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .feeTypeName(feeType != null ? feeType.getFeeTypeName() : null)
                 .term(ledger.getTerm())
                 .actualAmount(ledger.getActualAmount())
                 .discountAmount(ledger.getDiscountAmount())
@@ -160,14 +162,14 @@ public class PaymentMapper {
     }
 
     public BulkCollectPaymentLineResponseDTO toBulkCollectLine(Payment payment, StudentFeeLedger ledger) {
-        FeeHead feeHead = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeHead() : null;
+        FeeType feeType = ledger.getFeeStructure() != null ? ledger.getFeeStructure().getFeeType() : null;
         return BulkCollectPaymentLineResponseDTO.builder()
                 .paymentId(payment.getId())
                 .receiptNo(payment.getReceiptNo())
                 .ledgerId(ledger.getId())
                 .invoiceId(payment.getInvoice() != null ? payment.getInvoice().getId() : null)
-                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
-                .feeHeadCode(feeHead != null ? feeHead.getFeeHeadCode() : null)
+                .feeTypeName(feeType != null ? feeType.getFeeTypeName() : null)
+                .feeTypeCode(feeType != null ? feeType.getFeeTypeCode() : null)
                 .amountPaid(payment.getAmountPaid())
                 .ledgerBalanceAmount(ledger.getBalanceAmount())
                 .ledgerStatus(ledger.getStatus())
@@ -226,13 +228,13 @@ public class PaymentMapper {
     }
 
     /**
-     * Applies fee head code to the matching invoice line column; remainder goes to {@code misc_fee}.
+     * Applies fee type code to the matching invoice line column; remainder goes to {@code misc_fee}.
      */
-    public void applyFeeHeadToInvoiceLine(Invoice invoice, String feeHeadCode, BigDecimal amount) {
-        if (feeHeadCode == null || amount == null) {
+    public void applyFeeTypeToInvoiceLine(Invoice invoice, String feeTypeCode, BigDecimal amount) {
+        if (feeTypeCode == null || amount == null) {
             return;
         }
-        String code = feeHeadCode.toUpperCase();
+        String code = feeTypeCode.toUpperCase();
         if (code.contains("TUITION")) {
             invoice.setTuitionFee(invoice.getTuitionFee().add(amount));
         } else if (code.contains("EXAM")) {

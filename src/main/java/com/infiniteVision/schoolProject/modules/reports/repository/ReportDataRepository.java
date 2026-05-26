@@ -58,7 +58,7 @@ public interface ReportDataRepository extends JpaRepository<Student, Long> {
             JOIN FETCH l.student s
             LEFT JOIN FETCH s.parents
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             WHERE l.deleted = false
             AND l.academicYear.id = :academicYearId
             AND l.balanceAmount > 0
@@ -77,7 +77,7 @@ public interface ReportDataRepository extends JpaRepository<Student, Long> {
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             JOIN FETCH a.student st
             JOIN FETCH a.academicYear
             WHERE a.deleted = false

@@ -11,6 +11,6 @@ public final class FeesApiConstants {
     }
 
     public static final String FEES_BASE = ApiConstants.API_V1_PREFIX + "/fees";
-    public static final String FEE_HEADS = FEES_BASE + "/heads";
+    public static final String FEE_TYPES = FEES_BASE + "/types";
     public static final String FEE_STRUCTURE = FEES_BASE + "/structure";
 }

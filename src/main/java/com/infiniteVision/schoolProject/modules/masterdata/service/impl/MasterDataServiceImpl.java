@@ -8,8 +8,8 @@ import com.infiniteVision.schoolProject.modules.academic.repository.SectionMaste
 import com.infiniteVision.schoolProject.modules.academic.util.ClassSectionDisplayFormatter;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.repository.UserRepository;
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
-import com.infiniteVision.schoolProject.modules.fees.repository.FeeHeadRepository;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
+import com.infiniteVision.schoolProject.modules.fees.repository.FeeTypeRepository;
 import com.infiniteVision.schoolProject.modules.masterdata.constants.MasterDataStaticOptions;
 import com.infiniteVision.schoolProject.modules.masterdata.dto.MasterDataOptionDTO;
 import com.infiniteVision.schoolProject.modules.masterdata.service.MasterDataService;
@@ -47,7 +47,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     private final AcademicYearRepository academicYearRepository;
     private final SectionMasterRepository sectionMasterRepository;
     private final ClassMasterRepository classMasterRepository;
-    private final FeeHeadRepository feeHeadRepository;
+    private final FeeTypeRepository feeTypeRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -76,7 +76,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         masterData.put("academicYear", mapAcademicYears());
         masterData.put("section", mapSections());
         masterData.put("class", mapClasses(academicYearId));
-        masterData.put("feeHead", mapFeeHeads());
+        masterData.put("feeType", mapFeeTypes());
         masterData.put("user", mapUsers());
 
         log.debug("Master data built with {} keys, academicYearId={}", masterData.size(), academicYearId);
@@ -130,17 +130,17 @@ public class MasterDataServiceImpl implements MasterDataService {
                 .build();
     }
 
-    private List<MasterDataOptionDTO> mapFeeHeads() {
-        return feeHeadRepository.findAllByActiveTrueAndDeletedFalseOrderByDisplayOrderAscFeeHeadNameAsc().stream()
-                .map(this::toFeeHeadOption)
+    private List<MasterDataOptionDTO> mapFeeTypes() {
+        return feeTypeRepository.findAllByActiveTrueAndDeletedFalseOrderByDisplayOrderAscFeeTypeNameAsc().stream()
+                .map(this::toFeeTypeOption)
                 .toList();
     }
 
-    private MasterDataOptionDTO toFeeHeadOption(FeeHead feeHead) {
+    private MasterDataOptionDTO toFeeTypeOption(FeeType feeType) {
         return MasterDataOptionDTO.builder()
-                .id(feeHead.getId())
-                .label(feeHead.getFeeHeadName())
-                .value(String.valueOf(feeHead.getId()))
+                .id(feeType.getId())
+                .label(feeType.getFeeTypeName())
+                .value(String.valueOf(feeType.getId()))
                 .build();
     }
 

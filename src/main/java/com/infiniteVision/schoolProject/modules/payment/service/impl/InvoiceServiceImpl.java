@@ -14,7 +14,7 @@ import com.infiniteVision.schoolProject.modules.academic.repository.ClassMasterR
 import com.infiniteVision.schoolProject.modules.academic.repository.SectionMasterRepository;
 import com.infiniteVision.schoolProject.modules.auth.entity.User;
 import com.infiniteVision.schoolProject.modules.auth.repository.UserRepository;
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.payment.dto.request.GenerateInvoiceRequestDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceDetailResponseDTO;
 import com.infiniteVision.schoolProject.modules.payment.dto.response.InvoiceListItemResponseDTO;
@@ -121,9 +121,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .deleted(Boolean.FALSE)
                 .build();
 
-        FeeHead feeHead = ledger.getFeeStructure().getFeeHead();
-        if (feeHead != null) {
-            paymentMapper.applyFeeHeadToInvoiceLine(invoice, feeHead.getFeeHeadCode(), ledger.getNetAmount());
+        FeeType feeType = ledger.getFeeStructure().getFeeType();
+        if (feeType != null) {
+            paymentMapper.applyFeeTypeToInvoiceLine(invoice, feeType.getFeeTypeCode(), ledger.getNetAmount());
             paymentMapper.recalculateInvoiceTotals(invoice);
             invoice.setNetAmount(ledger.getNetAmount());
             invoice.setBalanceAmount(ledger.getBalanceAmount());

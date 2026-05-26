@@ -150,9 +150,9 @@ public class ReportContentBuilder {
         for (StudentFeeLedger ledger : ledgers) {
             Student student = ledger.getStudent();
             StudentParent parents = student != null ? student.getParents() : null;
-            String feeHeadName =
-                    ledger.getFeeStructure() != null && ledger.getFeeStructure().getFeeHead() != null
-                            ? ledger.getFeeStructure().getFeeHead().getFeeHeadName()
+            String feeTypeName =
+                    ledger.getFeeStructure() != null && ledger.getFeeStructure().getFeeType() != null
+                            ? ledger.getFeeStructure().getFeeType().getFeeTypeName()
                             : "";
             rows.add(List.of(
                     student != null ? safe(student.getAdmissionNo()) : "",
@@ -160,7 +160,7 @@ public class ReportContentBuilder {
                     student != null
                             ? reportClassLabelService.resolveClassName(classNames, student.getClassId())
                             : "",
-                    feeHeadName,
+                    feeTypeName,
                     enumOrEmpty(ledger.getTerm()),
                     decimalOrEmpty(ledger.getNetAmount()),
                     decimalOrEmpty(ledger.getPaidAmount()),

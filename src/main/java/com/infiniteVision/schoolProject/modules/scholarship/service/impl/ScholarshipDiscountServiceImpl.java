@@ -123,7 +123,7 @@ public class ScholarshipDiscountServiceImpl implements ScholarshipDiscountServic
     @Transactional
     public void recalculateUnpaidLedgersForStudent(Long studentId, Long academicYearId) {
         List<StudentFeeLedger> ledgers =
-                studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentIdAndYear(studentId, academicYearId);
+                studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentIdAndYear(studentId, academicYearId);
         for (StudentFeeLedger ledger : ledgers) {
             if (LedgerStatus.PAID.equals(ledger.getStatus())
                     || ledger.getBalanceAmount().compareTo(BigDecimal.ZERO) <= 0) {

@@ -53,7 +53,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             JOIN FETCH p.student
             JOIN FETCH p.ledger l
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             JOIN FETCH p.invoice
             LEFT JOIN FETCH p.collectedByUser
             WHERE p.paymentBatchId = :paymentBatchId AND p.deleted = false

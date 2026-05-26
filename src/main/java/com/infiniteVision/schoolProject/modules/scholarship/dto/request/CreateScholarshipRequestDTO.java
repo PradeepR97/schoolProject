@@ -43,7 +43,7 @@ public class CreateScholarshipRequestDTO {
     @NotNull(message = "Applicable to is required")
     private ApplicableTo applicableTo;
 
-    private Long feeHeadId;
+    private Long feeTypeId;
 
     @NotNull(message = "Academic year id is required")
     private Long academicYearId;

@@ -46,12 +46,12 @@ public class FeeStructureController {
             @RequestParam(required = false) Long academicYearId,
             @RequestParam(required = false) Long classId,
             @RequestParam(required = false) Long sectionId,
-            @RequestParam(required = false) Long feeHeadId,
+            @RequestParam(required = false) Long feeTypeId,
             @RequestParam(defaultValue = "false") boolean activeOnly,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         PagedResponseDTO<FeeStructureResponseDTO> data = feeStructureService.listFeeStructures(
-                academicYearId, classId, sectionId, feeHeadId, activeOnly, page, size);
+                academicYearId, classId, sectionId, feeTypeId, activeOnly, page, size);
         return ResponseEntity.ok(ApiResponse.success(MessageConstants.FEE_STRUCTURES_LISTED_SUCCESS, data));
     }
 

@@ -36,7 +36,7 @@ public class UpdateScholarshipRequestDTO {
 
     private ApplicableTo applicableTo;
 
-    private Long feeHeadId;
+    private Long feeTypeId;
 
     private Long academicYearId;
 

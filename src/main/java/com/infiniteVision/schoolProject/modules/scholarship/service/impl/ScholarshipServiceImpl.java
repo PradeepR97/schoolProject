@@ -9,8 +9,8 @@ import com.infiniteVision.schoolProject.exception.ValidationException;
 import com.infiniteVision.schoolProject.security.AuthenticatedUser;
 import com.infiniteVision.schoolProject.modules.academic.entity.AcademicYear;
 import com.infiniteVision.schoolProject.modules.academic.repository.AcademicYearRepository;
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
-import com.infiniteVision.schoolProject.modules.fees.repository.FeeHeadRepository;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
+import com.infiniteVision.schoolProject.modules.fees.repository.FeeTypeRepository;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.request.CreateScholarshipRequestDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.request.UpdateScholarshipRequestDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.response.ScholarshipResponseDTO;
@@ -38,7 +38,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
 
     private final SchoolSchemeRepository schoolSchemeRepository;
     private final AcademicYearRepository academicYearRepository;
-    private final FeeHeadRepository feeHeadRepository;
+    private final FeeTypeRepository feeTypeRepository;
     private final ScholarshipMapper scholarshipMapper;
     private final ScholarshipValidator scholarshipValidator;
     private final AuditService auditService;
@@ -47,9 +47,9 @@ public class ScholarshipServiceImpl implements ScholarshipService {
     @Transactional
     public ScholarshipResponseDTO createScholarship(CreateScholarshipRequestDTO request) {
         AcademicYear academicYear = findAcademicYearOrThrow(request.getAcademicYearId());
-        FeeHead feeHead = resolveFeeHead(request.getApplicableTo(), request.getFeeHeadId());
+        FeeType feeType = resolveFeeType(request.getApplicableTo(), request.getFeeTypeId());
 
-        scholarshipValidator.validateFeeHeadForApplicableTo(request.getApplicableTo(), request.getFeeHeadId(), feeHead);
+        scholarshipValidator.validateFeeTypeForApplicableTo(request.getApplicableTo(), request.getFeeTypeId(), feeType);
         scholarshipValidator.validateDiscountValue(request.getDiscountType(), request.getDiscountValue());
 
         boolean active = request.getIsActive() != null ? request.getIsActive() : Boolean.TRUE;
@@ -60,7 +60,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
                 .discountType(request.getDiscountType())
                 .discountValue(request.getDiscountValue())
                 .applicableTo(request.getApplicableTo())
-                .feeHead(feeHead)
+                .feeType(feeType)
                 .academicYear(academicYear)
                 .isActive(active)
                 .deleted(Boolean.FALSE)
@@ -126,15 +126,15 @@ public class ScholarshipServiceImpl implements ScholarshipService {
             scheme.setIsActive(request.getIsActive());
         }
 
-        Long feeHeadId = request.getFeeHeadId();
-        if (feeHeadId != null || request.getApplicableTo() != null) {
+        Long feeTypeId = request.getFeeTypeId();
+        if (feeTypeId != null || request.getApplicableTo() != null) {
             if (ApplicableTo.SPECIFIC_HEAD.equals(applicableTo)) {
-                Long resolvedFeeHeadId = feeHeadId != null ? feeHeadId : scheme.getFeeHead() != null ? scheme.getFeeHead().getId() : null;
-                FeeHead feeHead = resolveFeeHead(applicableTo, resolvedFeeHeadId);
-                scholarshipValidator.validateFeeHeadForApplicableTo(applicableTo, resolvedFeeHeadId, feeHead);
-                scheme.setFeeHead(feeHead);
+                Long resolvedFeeTypeId = feeTypeId != null ? feeTypeId : scheme.getFeeType() != null ? scheme.getFeeType().getId() : null;
+                FeeType feeType = resolveFeeType(applicableTo, resolvedFeeTypeId);
+                scholarshipValidator.validateFeeTypeForApplicableTo(applicableTo, resolvedFeeTypeId, feeType);
+                scheme.setFeeType(feeType);
             } else {
-                scheme.setFeeHead(null);
+                scheme.setFeeType(null);
             }
         }
 
@@ -175,7 +175,7 @@ public class ScholarshipServiceImpl implements ScholarshipService {
                 || request.getDiscountType() != null
                 || request.getDiscountValue() != null
                 || request.getApplicableTo() != null
-                || request.getFeeHeadId() != null
+                || request.getFeeTypeId() != null
                 || request.getAcademicYearId() != null
                 || request.getIsActive() != null;
         if (!hasField) {
@@ -190,12 +190,12 @@ public class ScholarshipServiceImpl implements ScholarshipService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.ACADEMIC_YEAR_NOT_FOUND));
     }
 
-    private FeeHead resolveFeeHead(ApplicableTo applicableTo, Long feeHeadId) {
-        if (!ApplicableTo.SPECIFIC_HEAD.equals(applicableTo) || feeHeadId == null) {
+    private FeeType resolveFeeType(ApplicableTo applicableTo, Long feeTypeId) {
+        if (!ApplicableTo.SPECIFIC_HEAD.equals(applicableTo) || feeTypeId == null) {
             return null;
         }
-        return feeHeadRepository
-                .findByIdAndDeletedFalse(feeHeadId)
+        return feeTypeRepository
+                .findByIdAndDeletedFalse(feeTypeId)
                 .orElse(null);
     }
 

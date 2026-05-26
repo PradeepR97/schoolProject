@@ -20,7 +20,7 @@ public class FeeLedgerSummaryResponseDTO {
 
     private Long ledgerId;
     private Long structureId;
-    private String feeHeadName;
+    private String feeTypeName;
     private FeeBillingTerm term;
     private BigDecimal netAmount;
     private BigDecimal paidAmount;

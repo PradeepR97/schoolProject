@@ -19,7 +19,7 @@ public interface FeeStructureService {
      * @param academicYearId optional filter
      * @param classId optional grade filter
      * @param sectionId optional section filter
-     * @param feeHeadId optional filter
+     * @param feeTypeId optional filter
      * @param activeOnly when true, only active rows
      * @param page zero-based page
      * @param size page size
@@ -29,7 +29,7 @@ public interface FeeStructureService {
             Long academicYearId,
             Long classId,
             Long sectionId,
-            Long feeHeadId,
+            Long feeTypeId,
             boolean activeOnly,
             int page,
             int size);

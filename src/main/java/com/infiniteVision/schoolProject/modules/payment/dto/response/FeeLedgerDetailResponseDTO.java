@@ -23,7 +23,7 @@ public class FeeLedgerDetailResponseDTO {
     private Long studentId;
     private Long academicYearId;
     private Long structureId;
-    private String feeHeadName;
+    private String feeTypeName;
     private FeeBillingTerm term;
     private BigDecimal actualAmount;
     private BigDecimal discountAmount;

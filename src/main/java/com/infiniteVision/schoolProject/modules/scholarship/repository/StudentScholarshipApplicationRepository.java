@@ -25,7 +25,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             JOIN FETCH a.student
             JOIN FETCH a.academicYear
             WHERE a.id = :id AND a.deleted = false
@@ -36,7 +36,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             WHERE a.student.id = :studentId
             AND a.academicYear.id = :academicYearId
             AND a.status = :status
@@ -51,7 +51,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             WHERE a.student.id = :studentId
             AND a.academicYear.id = :academicYearId
             AND a.status IN :statuses
@@ -66,7 +66,7 @@ public interface StudentScholarshipApplicationRepository
             value = """
                     SELECT a FROM StudentScholarshipApplication a
                     JOIN FETCH a.scheme s
-                    LEFT JOIN FETCH s.feeHead
+                    LEFT JOIN FETCH s.feeType
                     JOIN FETCH a.student
                     JOIN FETCH a.academicYear ay
                     WHERE a.deleted = false
@@ -91,7 +91,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             JOIN FETCH a.student
             JOIN FETCH a.academicYear
             WHERE a.status = :status AND a.deleted = false
@@ -104,7 +104,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             JOIN FETCH a.student
             JOIN FETCH a.academicYear
             WHERE a.student.id = :studentId AND a.deleted = false
@@ -117,7 +117,7 @@ public interface StudentScholarshipApplicationRepository
             """
             SELECT a FROM StudentScholarshipApplication a
             JOIN FETCH a.scheme s
-            LEFT JOIN FETCH s.feeHead
+            LEFT JOIN FETCH s.feeType
             JOIN FETCH a.student
             JOIN FETCH a.academicYear
             WHERE a.deleted = false

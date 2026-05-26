@@ -28,23 +28,23 @@ public interface StudentFeeLedgerRepository extends JpaRepository<StudentFeeLedg
             """
             SELECT l FROM StudentFeeLedger l
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             WHERE l.student.id = :studentId AND l.deleted = false
             ORDER BY l.dueDate ASC
             """)
-    List<StudentFeeLedger> findAllActiveWithFeeHeadByStudentId(@Param("studentId") Long studentId);
+    List<StudentFeeLedger> findAllActiveWithFeeTypeByStudentId(@Param("studentId") Long studentId);
 
     @Query(
             """
             SELECT l FROM StudentFeeLedger l
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             WHERE l.student.id = :studentId
             AND l.academicYear.id = :academicYearId
             AND l.deleted = false
             ORDER BY l.dueDate ASC
             """)
-    List<StudentFeeLedger> findAllActiveWithFeeHeadByStudentIdAndYear(
+    List<StudentFeeLedger> findAllActiveWithFeeTypeByStudentIdAndYear(
             @Param("studentId") Long studentId, @Param("academicYearId") Long academicYearId);
 
     boolean existsByStudent_IdAndAcademicYear_IdAndTermAndFeeStructure_IdAndDeletedFalse(
@@ -55,7 +55,7 @@ public interface StudentFeeLedgerRepository extends JpaRepository<StudentFeeLedg
             SELECT l FROM StudentFeeLedger l
             JOIN FETCH l.student
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             JOIN FETCH l.academicYear
             WHERE l.id = :id AND l.deleted = false
             """)
@@ -66,7 +66,7 @@ public interface StudentFeeLedgerRepository extends JpaRepository<StudentFeeLedg
             SELECT l FROM StudentFeeLedger l
             JOIN FETCH l.student s
             JOIN FETCH l.feeStructure fs
-            JOIN FETCH fs.feeHead
+            JOIN FETCH fs.feeType
             JOIN FETCH l.academicYear
             WHERE l.deleted = false AND s.deleted = false
             AND l.balanceAmount > :zero

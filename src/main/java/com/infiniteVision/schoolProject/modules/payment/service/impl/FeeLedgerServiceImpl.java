@@ -91,8 +91,8 @@ public class FeeLedgerServiceImpl implements FeeLedgerService {
 
         for (FeeStructure structure : structures) {
             if (!Boolean.TRUE.equals(student.getTransportRequired())
-                    && structure.getFeeHead() != null
-                    && ScholarshipDiscountCalculator.isTransportHead(structure.getFeeHead())) {
+                    && structure.getFeeType() != null
+                    && ScholarshipDiscountCalculator.isTransportType(structure.getFeeType())) {
                 skipped++;
                 continue;
             }
@@ -167,7 +167,7 @@ public class FeeLedgerServiceImpl implements FeeLedgerService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.ACADEMIC_YEAR_NOT_FOUND));
 
         List<StudentFeeLedger> ledgers =
-                studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentIdAndYear(
+                studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentIdAndYear(
                         student.getId(), request.getAcademicYearId());
 
         int updated = 0;

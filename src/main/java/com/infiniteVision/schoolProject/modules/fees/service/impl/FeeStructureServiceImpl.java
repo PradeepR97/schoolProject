@@ -64,7 +64,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
             Long academicYearId,
             Long classId,
             Long sectionId,
-            Long feeHeadId,
+            Long feeTypeId,
             boolean activeOnly,
             int page,
             int size) {
@@ -73,7 +73,7 @@ public class FeeStructureServiceImpl implements FeeStructureService {
 
         Pageable pageable = PageRequest.of(page, effectiveSize, Sort.by("id").descending());
         Page<FeeStructure> structurePage = feeStructureRepository.findAllFiltered(
-                academicYearId, classId, sectionId, feeHeadId, activeOnly, pageable);
+                academicYearId, classId, sectionId, feeTypeId, activeOnly, pageable);
 
         List<FeeStructureResponseDTO> content =
                 structurePage.getContent().stream().map(feeStructureMapper::toResponse).toList();

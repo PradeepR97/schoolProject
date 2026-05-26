@@ -348,8 +348,8 @@ public class PaymentServiceImpl implements PaymentService {
         Long yearId = request.getAcademicYearId() != null ? request.getAcademicYearId() : student.getAcademicYearId();
 
         List<StudentFeeLedger> ledgers = yearId != null
-                ? studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentIdAndYear(studentId, yearId)
-                : studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentId(studentId);
+                ? studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentIdAndYear(studentId, yearId)
+                : studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentId(studentId);
 
         List<PaymentAllocationRequestDTO> allocations = new ArrayList<>();
         for (StudentFeeLedger ledger : ledgers) {
@@ -449,8 +449,8 @@ public class PaymentServiceImpl implements PaymentService {
         Long yearId = academicYearId != null ? academicYearId : student.getAcademicYearId();
 
         List<StudentFeeLedger> ledgers = yearId != null
-                ? studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentIdAndYear(studentId, yearId)
-                : studentFeeLedgerRepository.findAllActiveWithFeeHeadByStudentId(studentId);
+                ? studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentIdAndYear(studentId, yearId)
+                : studentFeeLedgerRepository.findAllActiveWithFeeTypeByStudentId(studentId);
 
         List<StudentFeeDueItemResponseDTO> items = new ArrayList<>();
         BigDecimal totalPendingDiscount = BigDecimal.ZERO;

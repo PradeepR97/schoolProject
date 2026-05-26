@@ -85,17 +85,17 @@ public final class MessageConstants {
     public static final String SCHOLARSHIP_DELETED_SUCCESS = "Scholarship deleted successfully";
     public static final String SCHOLARSHIP_NOT_FOUND = "Scholarship not found";
     public static final String SCHOLARSHIP_UPDATE_EMPTY = "At least one field must be provided to update";
-    public static final String FEE_HEAD_NOT_FOUND = "Fee head not found";
-    public static final String FEE_HEADS_LISTED_SUCCESS = "Fee heads retrieved successfully";
-    public static final String FEE_HEAD_RETRIEVED_SUCCESS = "Fee head retrieved successfully";
-    public static final String FEE_HEAD_CREATED_SUCCESS = "Fee head created successfully";
-    public static final String FEE_HEADS_BULK_CREATED_SUCCESS = "Fee heads created successfully";
-    public static final String FEE_HEAD_UPDATED_SUCCESS = "Fee head updated successfully";
-    public static final String FEE_HEAD_DELETED_SUCCESS = "Fee head deleted successfully";
-    public static final String FEE_HEAD_CODE_ALREADY_EXISTS = "Fee head code already exists";
-    public static final String FEE_HEAD_UPDATE_EMPTY = "At least one field must be provided to update fee head";
-    public static final String FEE_HEAD_REQUIRED_FOR_SPECIFIC_HEAD =
-            "Fee head is required when applicable to is SPECIFIC_HEAD";
+    public static final String FEE_TYPE_NOT_FOUND = "Fee type not found";
+    public static final String FEE_TYPES_LISTED_SUCCESS = "Fee types retrieved successfully";
+    public static final String FEE_TYPE_RETRIEVED_SUCCESS = "Fee type retrieved successfully";
+    public static final String FEE_TYPE_CREATED_SUCCESS = "Fee type created successfully";
+    public static final String FEE_TYPES_BULK_CREATED_SUCCESS = "Fee types created successfully";
+    public static final String FEE_TYPE_UPDATED_SUCCESS = "Fee type updated successfully";
+    public static final String FEE_TYPE_DELETED_SUCCESS = "Fee type deleted successfully";
+    public static final String FEE_TYPE_CODE_ALREADY_EXISTS = "Fee type code already exists";
+    public static final String FEE_TYPE_UPDATE_EMPTY = "At least one field must be provided to update fee type";
+    public static final String FEE_TYPE_REQUIRED_FOR_SPECIFIC_HEAD =
+            "Fee type is required when applicable to is SPECIFIC_HEAD";
     public static final String DISCOUNT_PERCENTAGE_EXCEEDS_100 =
             "Percentage discount cannot exceed 100";
 

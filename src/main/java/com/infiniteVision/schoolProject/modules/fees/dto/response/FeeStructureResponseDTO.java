@@ -24,9 +24,9 @@ public class FeeStructureResponseDTO {
     private String className;
     private Long sectionId;
     private String sectionCode;
-    private Long feeHeadId;
-    private String feeHeadCode;
-    private String feeHeadName;
+    private Long feeTypeId;
+    private String feeTypeCode;
+    private String feeTypeName;
     private TermType termType;
     private BigDecimal amount;
     private LocalDate dueDate;

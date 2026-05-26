@@ -7,7 +7,7 @@ public enum AuditEntityType {
 
     USER,
     STUDENT,
-    FEE_HEAD,
+    FEE_TYPE,
     FEE_STRUCTURE,
     SCHOLARSHIP,
     SCHOLARSHIP_APPLICATION,

@@ -1,6 +1,6 @@
 package com.infiniteVision.schoolProject.modules.scholarship.mapper;
 
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.scholarship.dto.response.ScholarshipResponseDTO;
 import com.infiniteVision.schoolProject.modules.scholarship.entity.SchoolScheme;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class ScholarshipMapper {
      * Converts a persisted scheme to a response DTO (resolves related names when loaded).
      */
     public ScholarshipResponseDTO toResponse(SchoolScheme scheme) {
-        FeeHead feeHead = scheme.getFeeHead();
+        FeeType feeType = scheme.getFeeType();
         return ScholarshipResponseDTO.builder()
                 .schemeId(scheme.getId())
                 .schemeName(scheme.getSchemeName())
@@ -23,8 +23,8 @@ public class ScholarshipMapper {
                 .discountType(scheme.getDiscountType())
                 .discountValue(scheme.getDiscountValue())
                 .applicableTo(scheme.getApplicableTo())
-                .feeHeadId(feeHead != null ? feeHead.getId() : null)
-                .feeHeadName(feeHead != null ? feeHead.getFeeHeadName() : null)
+                .feeTypeId(feeType != null ? feeType.getId() : null)
+                .feeTypeName(feeType != null ? feeType.getFeeTypeName() : null)
                 .academicYearId(scheme.getAcademicYear().getId())
                 .academicYearName(scheme.getAcademicYear().getYearName())
                 .isActive(scheme.getIsActive())

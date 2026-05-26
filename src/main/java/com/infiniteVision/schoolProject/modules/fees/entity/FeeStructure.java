@@ -44,7 +44,7 @@ import org.hibernate.annotations.OnDeleteAction;
                             "academic_year_id",
                             "class_id",
                             "section_id",
-                            "fee_head_id",
+                            "fee_type_id",
                             "term_type"
                         })
         },
@@ -63,7 +63,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "classMaster", "section", "feeHead"})
+@EqualsAndHashCode(callSuper = true, exclude = {"academicYear", "classMaster", "section", "feeType"})
 public class FeeStructure extends BaseEntity {
 
     @NotNull(message = "Academic year is required")
@@ -93,14 +93,14 @@ public class FeeStructure extends BaseEntity {
             foreignKey = @ForeignKey(name = "fk_fee_structure_section"))
     private SectionMaster section;
 
-    @NotNull(message = "Fee head is required")
+    @NotNull(message = "Fee type is required")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.RESTRICT)
     @JoinColumn(
-            name = "fee_head_id",
+            name = "fee_type_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_fee_structure_fee_head"))
-    private FeeHead feeHead;
+            foreignKey = @ForeignKey(name = "fk_fee_structure_fee_type"))
+    private FeeType feeType;
 
     @NotNull(message = "Term type is required")
     @Enumerated(EnumType.STRING)

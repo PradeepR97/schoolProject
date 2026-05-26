@@ -21,8 +21,8 @@ public class BulkCollectPaymentLineResponseDTO {
     private String receiptNo;
     private Long ledgerId;
     private Long invoiceId;
-    private String feeHeadName;
-    private String feeHeadCode;
+    private String feeTypeName;
+    private String feeTypeCode;
     private BigDecimal amountPaid;
     private BigDecimal ledgerBalanceAmount;
     private LedgerStatus ledgerStatus;

@@ -2,7 +2,7 @@ package com.infiniteVision.schoolProject.modules.scholarship.validator;
 
 import com.infiniteVision.schoolProject.constants.MessageConstants;
 import com.infiniteVision.schoolProject.exception.ValidationException;
-import com.infiniteVision.schoolProject.modules.fees.entity.FeeHead;
+import com.infiniteVision.schoolProject.modules.fees.entity.FeeType;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.ApplicableTo;
 import com.infiniteVision.schoolProject.modules.scholarship.enums.DiscountType;
 import java.math.BigDecimal;
@@ -17,18 +17,18 @@ import org.springframework.stereotype.Component;
 public class ScholarshipValidator {
 
     /**
-     * Validates fee head presence rules for the given applicable scope.
+     * Validates fee type presence rules for the given applicable scope.
      */
-    public void validateFeeHeadForApplicableTo(ApplicableTo applicableTo, Long feeHeadId, FeeHead feeHead) {
+    public void validateFeeTypeForApplicableTo(ApplicableTo applicableTo, Long feeTypeId, FeeType feeType) {
         List<String> errors = new ArrayList<>();
         if (ApplicableTo.SPECIFIC_HEAD.equals(applicableTo)) {
-            if (feeHeadId == null) {
-                errors.add(MessageConstants.FEE_HEAD_REQUIRED_FOR_SPECIFIC_HEAD);
-            } else if (feeHead == null) {
-                errors.add(MessageConstants.FEE_HEAD_NOT_FOUND);
+            if (feeTypeId == null) {
+                errors.add(MessageConstants.FEE_TYPE_REQUIRED_FOR_SPECIFIC_HEAD);
+            } else if (feeType == null) {
+                errors.add(MessageConstants.FEE_TYPE_NOT_FOUND);
             }
-        } else if (feeHeadId != null && feeHead == null) {
-            errors.add(MessageConstants.FEE_HEAD_NOT_FOUND);
+        } else if (feeTypeId != null && feeType == null) {
+            errors.add(MessageConstants.FEE_TYPE_NOT_FOUND);
         }
         if (!errors.isEmpty()) {
             throw new ValidationException(MessageConstants.VALIDATION_FAILED, errors);

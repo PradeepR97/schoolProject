@@ -6,21 +6,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Fee head master record for list and detail APIs.
+ * Fee type master record for list and detail APIs.
  */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeeHeadResponseDTO {
+public class FeeTypeResponseDTO {
 
-    private Long feeHeadId;
-    private String feeHeadCode;
-    private String feeHeadName;
-    private String description;
-    private String feeCategory;
-    private Boolean mandatory;
-    private Boolean refundable;
+    private Long feeTypeId;
+    private String feeTypeCode;
+    private String feeTypeName;
     private Boolean active;
     private Integer displayOrder;
 }

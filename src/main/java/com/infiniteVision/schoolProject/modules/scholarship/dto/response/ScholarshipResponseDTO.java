@@ -25,8 +25,8 @@ public class ScholarshipResponseDTO {
     private DiscountType discountType;
     private BigDecimal discountValue;
     private ApplicableTo applicableTo;
-    private Long feeHeadId;
-    private String feeHeadName;
+    private Long feeTypeId;
+    private String feeTypeName;
     private Long academicYearId;
     private String academicYearName;
     private Boolean isActive;

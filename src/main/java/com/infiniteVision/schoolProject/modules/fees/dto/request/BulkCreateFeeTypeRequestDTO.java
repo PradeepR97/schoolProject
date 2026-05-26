@@ -7,17 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
- * Create multiple fee heads in one request (school fee document categories).
+ * Bulk create multiple fee types in one request.
  */
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BulkCreateFeeHeadRequestDTO {
+public class BulkCreateFeeTypeRequestDTO {
 
+    @NotEmpty(message = "At least one fee type is required")
     @Valid
-    @NotEmpty(message = "At least one fee head is required")
-    private List<CreateFeeHeadRequestDTO> feeHeads;
+    private List<CreateFeeTypeRequestDTO> feeTypes;
 }
