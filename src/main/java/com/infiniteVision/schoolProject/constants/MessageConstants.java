@@ -230,4 +230,18 @@ public final class MessageConstants {
     public static final String NOTIFICATION_READ_SUCCESS = "Notification marked as read";
     public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
     public static final String NOTIFICATION_UNREAD_COUNT_SUCCESS = "Unread notification count retrieved successfully";
+
+    public static final String SCHOOL_RETRIEVED_SUCCESS = "School details retrieved successfully";
+    public static final String SCHOOLS_LISTED_SUCCESS = "Schools retrieved successfully";
+    public static final String SCHOOL_CREATED_SUCCESS = "School details created successfully";
+    public static final String SCHOOL_UPDATED_SUCCESS = "School details updated successfully";
+    public static final String SCHOOL_DELETED_SUCCESS = "School details deleted successfully";
+    public static final String SCHOOL_NOT_FOUND = "School details not found";
+    public static final String SCHOOL_UPDATE_EMPTY = "At least one field must be provided to update school details";
+    public static final String SCHOOL_CODE_ALREADY_EXISTS = "School code already exists";
+    public static final String SCHOOL_UDISE_ALREADY_EXISTS = "UDISE code already exists";
+    public static final String SCHOOL_AFFILIATION_ALREADY_EXISTS = "Affiliation number already exists";
+    public static final String SCHOOL_ESTABLISHED_YEAR_INVALID = "Established year is invalid";
+    public static final String SCHOOL_LATE_FEE_CONFIG_REQUIRED =
+            "Late fee amount and late fee type are required when late fee is applicable";
 }

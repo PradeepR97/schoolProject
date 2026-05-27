@@ -1,0 +1,71 @@
+package com.infiniteVision.schoolProject.modules.school.dto.response;
+
+import com.infiniteVision.schoolProject.modules.school.enums.AcademicYearStartMonth;
+import com.infiniteVision.schoolProject.modules.school.enums.AffiliationBoard;
+import com.infiniteVision.schoolProject.modules.school.enums.LateFeeType;
+import com.infiniteVision.schoolProject.modules.school.enums.MediumOfInstruction;
+import com.infiniteVision.schoolProject.modules.school.enums.SchoolCategory;
+import com.infiniteVision.schoolProject.modules.school.enums.SchoolType;
+import java.math.BigDecimal;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+/**
+ * School details API response.
+ */
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SchoolDetailsResponseDTO {
+
+    private Long schoolId;
+    private String schoolName;
+    private String schoolCode;
+    private SchoolType schoolType;
+    private SchoolCategory schoolCategory;
+    private List<MediumOfInstruction> mediumOfInstruction;
+    private Integer establishedYear;
+    private String affiliationNo;
+    private AffiliationBoard affiliationBoard;
+    private String udiseCode;
+    private String trustName;
+    private String trustRegNo;
+    private String phonePrimary;
+    private String phoneSecondary;
+    private String email;
+    private String website;
+    private String fax;
+    private String addressLine1;
+    private String addressLine2;
+    private String city;
+    private String district;
+    private String state;
+    private String pincode;
+    private String country;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private String principalName;
+    private String principalPhone;
+    private String principalEmail;
+    private String logoUrl;
+    private String bannerUrl;
+    private String signatureUrl;
+    private String schoolMotto;
+    private String schoolColorPrimary;
+    private String schoolColorSecondary;
+    private AcademicYearStartMonth academicYearStart;
+    private Integer workingDaysPerWeek;
+    private Integer totalClasses;
+    private String invoicePrefix;
+    private String receiptPrefix;
+    private String currency;
+    private Boolean lateFeeApplicable;
+    private BigDecimal lateFeeAmount;
+    private LateFeeType lateFeeType;
+    private Integer gracePeriodDays;
+    private Boolean active;
+}
